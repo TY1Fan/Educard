@@ -22,11 +22,59 @@ Educard is a 3-tier web forum that provides:
 
 ### Prerequisites
 
-- Node.js 16.x or higher
+**Option 1: Using Docker (Recommended)**
+- Docker Desktop or Docker Engine
+- Docker Compose
+
+**Option 2: Local Development**
+- Node.js 18.x or higher
 - PostgreSQL 12.x or higher
 - npm or yarn package manager
 
 ### Installation
+
+#### Using Docker (Recommended)
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd educard
+```
+
+2. Start the application with Docker Compose:
+```bash
+docker-compose up
+```
+
+That's it! The application and database will start automatically.
+- Application: `http://localhost:3000`
+- Database: `localhost:5432`
+
+**Useful Docker Commands:**
+```bash
+# Start in detached mode (background)
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Rebuild containers (after dependency changes)
+docker-compose up --build
+
+# Run database migrations (once implemented)
+docker-compose exec app npm run migrate
+
+# Access application shell
+docker-compose exec app sh
+
+# Access database shell
+docker-compose exec db psql -U educard -d educard_dev
+```
+
+#### Local Development (Without Docker)
 
 1. Clone the repository:
 ```bash
@@ -42,7 +90,7 @@ npm install
 3. Set up environment variables:
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env: Change DB_HOST from 'db' to 'localhost'
 ```
 
 4. Set up the database:
@@ -92,6 +140,11 @@ Comprehensive project documentation is available in the `specs/` directory:
 - bcrypt for password hashing
 - csurf for CSRF protection
 - express-validator for input validation
+
+**Infrastructure:**
+- Docker & Docker Compose for containerization
+- PostgreSQL 15 Alpine image
+- Node.js 18 Alpine image
 
 **Development Tools:**
 - nodemon for auto-reloading

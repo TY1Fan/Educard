@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Node.js Application
+  app:
+    build: .
+    container_name: educard_app
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount source code for hot-reloading
+      - .:/app
+      # Anonymous volume for node_modules (prevents overwriting)
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=educard_dev
+      - DB_USER=educard
+      - DB_PASSWORD=educard_dev_password
+      - SESSION_SECRET=dev_secret_change_in_production
+      - PORT=3000
+    depends_on:
+      - db
+    networks:
+      - educard_network
+    command: npm run dev
+
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: educard_db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=educard_dev
+      - POSTGRES_USER=educard
+      - POSTGRES_PASSWORD=educard_dev_password
+    volumes:
+      # Persist database data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - educard_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U educard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  educard_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

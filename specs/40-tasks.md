@@ -42,11 +42,12 @@ Tasks are organized by phase, starting with Phase 1 (Setup & Foundation).
 
 ### Task 1.1: Initialize Project Repository
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** None  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Set up Git repository and initialize npm project with basic configuration files.
@@ -61,12 +62,12 @@ Set up Git repository and initialize npm project with basic configuration files.
 7. Make initial commit
 
 **Acceptance Criteria:**
-- [ ] Git repository initialized
-- [ ] `.gitignore` includes `node_modules/`, `.env`, `*.log`
-- [ ] `package.json` exists with project name "educard"
-- [ ] README.md has project title and brief description
-- [ ] `.env.example` file created (empty for now)
-- [ ] Initial commit made to repository
+- [x] Git repository initialized
+- [x] `.gitignore` includes `node_modules/`, `.env`, `*.log`
+- [x] `package.json` exists with project name "educard"
+- [x] README.md has project title and brief description
+- [x] `.env.example` file created (empty for now)
+- [x] Initial commit made to repository
 
 **Files to Create:**
 - `.gitignore`
@@ -77,69 +78,96 @@ Set up Git repository and initialize npm project with basic configuration files.
 **Validation:**
 ```bash
 git status  # Should show clean working tree
-npm --version  # Verify npm is working
+docker --version  # Verify Docker is installed
+docker-compose --version  # Verify Docker Compose is installed
 ```
+
+**Note:** Docker files added to support containerized development. This eliminates the need for local Node.js and PostgreSQL installations.
 
 ---
 
-### Task 1.2: Install Core Dependencies
+### Task 1.2: Start Docker Environment and Install Dependencies
 
 **Status:** 🔴 Not Started  
 **Priority:** High  
-**Estimated Time:** 20 minutes  
+**Estimated Time:** 15 minutes  
 **Dependencies:** Task 1.1  
 **Assigned To:** TBD
 
 **Description:**
-Install all necessary npm packages for the application.
+Start the Docker containers and install all necessary npm packages within the container.
 
 **Steps:**
-1. Install Express framework: `npm install express`
-2. Install template engine: `npm install ejs`
-3. Install session management: `npm install express-session`
-4. Install database packages: `npm install sequelize pg pg-hstore`
-5. Install security packages: `npm install bcrypt csurf`
-6. Install utilities: `npm install dotenv express-validator`
-7. Install dev dependencies: `npm install --save-dev nodemon eslint prettier`
-8. Verify all packages installed correctly
+1. Update `package.json` with all dependencies
+2. Start Docker Compose: `docker-compose up -d`
+3. Wait for containers to start and database to be ready
+4. Verify application container is running
+5. Verify database container is running
+6. Check logs for any errors
 
 **Acceptance Criteria:**
-- [ ] `package.json` lists all production dependencies
-- [ ] `package.json` lists all dev dependencies
-- [ ] `node_modules/` directory created
-- [ ] `package-lock.json` created
-- [ ] No installation errors
-- [ ] All packages at stable versions
+- [ ] Docker containers start successfully
+- [ ] Application container is running
+- [ ] Database container is running and healthy
+- [ ] Dependencies installed in container (via Dockerfile)
+- [ ] No container errors in logs
+- [ ] Can access application at `http://localhost:3000` (will show error until app is built)
 
-**Production Dependencies:**
-```json
-{
-  "express": "^4.18.0",
-  "ejs": "^3.1.0",
-  "express-session": "^1.17.0",
-  "sequelize": "^6.32.0",
-  "pg": "^8.11.0",
-  "pg-hstore": "^2.3.4",
-  "bcrypt": "^5.1.0",
-  "csurf": "^1.11.0",
-  "dotenv": "^16.3.0",
-  "express-validator": "^7.0.0"
-}
+**Required Commands:**
+```bash
+# Start containers
+docker-compose up -d
+
+# Check container status
+docker-compose ps
+
+# View logs
+docker-compose logs -f
+
+# Verify database is ready
+docker-compose exec db pg_isready -U educard
 ```
 
-**Dev Dependencies:**
+**Dependencies to Add to package.json:**
 ```json
 {
-  "nodemon": "^3.0.0",
-  "eslint": "^8.48.0",
-  "prettier": "^3.0.0"
+  "dependencies": {
+    "express": "^4.18.0",
+    "ejs": "^3.1.0",
+    "express-session": "^1.17.0",
+    "sequelize": "^6.32.0",
+    "pg": "^8.11.0",
+    "pg-hstore": "^2.3.4",
+    "bcrypt": "^5.1.0",
+    "csurf": "^1.11.0",
+    "dotenv": "^16.3.0",
+    "express-validator": "^7.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0",
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.0"
+  }
 }
 ```
 
 **Validation:**
 ```bash
-npm list --depth=0  # Should show all packages
+# Check containers are running
+docker-compose ps
+
+# View application logs
+docker-compose logs app
+
+# Check installed packages in container
+docker-compose exec app npm list --depth=0
 ```
+
+**Docker Benefits:**
+- No local Node.js installation required
+- No local PostgreSQL installation required
+- Consistent environment across all developers
+- Easy cleanup: `docker-compose down -v`
 
 ---
 
@@ -479,60 +507,73 @@ npm test  # Shows message (doesn't fail)
 
 ---
 
-### Task 1.8: Install and Configure PostgreSQL
+### Task 1.8: Verify PostgreSQL Container (Docker)
 
 **Status:** 🔴 Not Started  
 **Priority:** High  
-**Estimated Time:** 30 minutes  
-**Dependencies:** Task 1.4  
+**Estimated Time:** 10 minutes  
+**Dependencies:** Task 1.2  
 **Assigned To:** TBD
 
 **Description:**
-Install PostgreSQL database server and create development database.
+Verify PostgreSQL is running in Docker container and database is accessible.
 
 **Steps:**
-1. Install PostgreSQL (if not already installed)
-   - macOS: `brew install postgresql@15`
-   - Or download from postgresql.org
-2. Start PostgreSQL service
-   - macOS: `brew services start postgresql@15`
-3. Access PostgreSQL: `psql postgres`
-4. Create database: `CREATE DATABASE educard_dev;`
-5. Create database user (optional): `CREATE USER educard WITH PASSWORD 'password';`
-6. Grant privileges (if user created): `GRANT ALL PRIVILEGES ON DATABASE educard_dev TO educard;`
-7. Exit psql: `\q`
-8. Test connection with credentials from `.env`
+1. Check database container is running: `docker-compose ps`
+2. Check database health: `docker-compose exec db pg_isready -U educard`
+3. Connect to database: `docker-compose exec db psql -U educard -d educard_dev`
+4. List databases: `\l`
+5. Exit psql: `\q`
+6. Test connection from app container (once app is built)
 
 **Acceptance Criteria:**
-- [ ] PostgreSQL installed and running
-- [ ] `educard_dev` database created
-- [ ] Can connect to database with credentials in `.env`
-- [ ] PostgreSQL service starts automatically (or documented how to start)
+- [ ] PostgreSQL container is running
+- [ ] Database `educard_dev` exists
+- [ ] Can connect with user `educard`
+- [ ] Database is healthy (pg_isready returns success)
+- [ ] Can access database from both host and app container
 
-**Commands for macOS:**
+**Docker Commands:**
 ```bash
-# Install PostgreSQL
-brew install postgresql@15
+# Check container status
+docker-compose ps
 
-# Start service
-brew services start postgresql@15
+# Check database health
+docker-compose exec db pg_isready -U educard
 
-# Create database
-psql postgres -c "CREATE DATABASE educard_dev;"
+# Connect to database
+docker-compose exec db psql -U educard -d educard_dev
 
 # Verify
 psql -l  # List all databases, should see educard_dev
 ```
 
-**For other OS:**
-- Linux: Use package manager (apt, yum, etc.)
-- Windows: Download installer from postgresql.org
+**For Local Development (without Docker):**
+```bash
+# macOS
+brew install postgresql@15
+brew services start postgresql@15
+psql postgres -c "CREATE DATABASE educard_dev;"
+
+# Linux
+sudo apt install postgresql-15
+sudo systemctl start postgresql
+sudo -u postgres createdb educard_dev
+
+# Windows
+# Download installer from postgresql.org
+```
 
 **Validation:**
 ```bash
+# With Docker (recommended)
+docker-compose exec db psql -U educard -d educard_dev -c "SELECT version();"
+
+# Without Docker (local)
 psql -d educard_dev -c "SELECT version();"
-# Should show PostgreSQL version
 ```
+
+**Note:** When using Docker, PostgreSQL is automatically installed and configured. No manual installation needed!
 
 ---
 
