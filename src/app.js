@@ -1,18 +1,18 @@
 // Load environment variables
-require('dotenv').config();
+require("dotenv").config();
 
-const express = require('express');
-const path = require('path');
+const express = require("express");
+const path = require("path");
 
 // Create Express application
 const app = express();
 
 // View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // Static files middleware
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Body parser middleware
 app.use(express.urlencoded({ extended: true }));
@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 });
 
 // Placeholder homepage route
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -69,11 +69,11 @@ app.get('/', (req, res) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   res.status(200).json({
-    status: 'ok',
+    status: "ok",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || "development",
   });
 });
 
@@ -133,14 +133,15 @@ app.use((req, res, next) => {
 // Error handler - must be last
 app.use((err, req, res, next) => {
   // Log error for debugging
-  console.error('Error occurred:');
+  console.error("Error occurred:");
   console.error(err.stack);
 
   // Send error response
   const statusCode = err.statusCode || 500;
-  const message = process.env.NODE_ENV === 'production' 
-    ? 'Something went wrong!' 
-    : err.message;
+  const message =
+    process.env.NODE_ENV === "production"
+      ? "Something went wrong!"
+      : err.message;
 
   res.status(statusCode).send(`
     <!DOCTYPE html>
@@ -190,7 +191,7 @@ app.use((err, req, res, next) => {
         <h1>⚠️ Error</h1>
         <h2>Something went wrong</h2>
         <p>${message}</p>
-        ${process.env.NODE_ENV !== 'production' ? `<pre>${err.stack}</pre>` : ''}
+        ${process.env.NODE_ENV !== "production" ? `<pre>${err.stack}</pre>` : ""}
         <p><a href="/">Go back home</a></p>
       </div>
     </body>
