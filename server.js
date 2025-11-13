@@ -1,11 +1,12 @@
 // Server entry point for Educard Forum
 const app = require('./src/app');
+const { testConnection } = require('./src/config/database');
 
 // Get port from environment or use default
 const PORT = process.env.PORT || 3000;
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
   console.log('=====================================');
   console.log('🎓 Educard Forum Server');
   console.log('=====================================');
@@ -13,6 +14,11 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
   console.log(`URL: http://localhost:${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log('=====================================');
+  
+  // Test database connection
+  await testConnection();
+  
   console.log('=====================================');
   console.log('Press Ctrl+C to stop the server');
   console.log('');

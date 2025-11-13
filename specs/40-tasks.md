@@ -589,7 +589,7 @@ psql -d educard_dev -c "SELECT version();"
 
 ### Task 1.9: Configure Sequelize Database Connection
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Tasks 1.2, 1.8  
