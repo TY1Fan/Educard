@@ -2996,11 +2996,11 @@ module.exports = Category;
 
 ### Task 3.1.2: Create Thread Model
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 3.1.1  
-**Assigned To:** TBD
+**Assigned To:** Developer
 
 **Description:**
 Create the Sequelize Thread model for discussion topics.
@@ -3016,12 +3016,47 @@ Create the Sequelize Thread model for discussion topics.
 5. Export model
 
 **Acceptance Criteria:**
-- [ ] `src/models/Thread.js` file created
-- [ ] All fields defined
-- [ ] Foreign keys defined (categoryId, userId)
-- [ ] Validation rules added
-- [ ] Slug generation handled
-- [ ] Model exports properly
+- [x] `src/models/Thread.js` file created
+- [x] All fields defined
+- [x] Foreign keys defined (categoryId, userId)
+- [x] Validation rules added
+- [x] Slug generation handled
+- [x] Model exports properly
+
+**Implementation Notes:**
+- Created Thread model with Sequelize
+- Fields: id, categoryId, userId, title, slug, isPinned, isLocked
+- Foreign key constraints with CASCADE delete
+- Validation rules with custom error messages
+- Unique constraint on (category_id, slug) combination
+- Multiple indexes for query performance
+- underscored: true for snake_case database columns
+
+**Model Fields:**
+- `id` - Auto-incrementing primary key
+- `categoryId` - Foreign key to categories table, CASCADE delete
+- `userId` - Foreign key to users table, CASCADE delete
+- `title` - String(255), required, validated length
+- `slug` - String(255), lowercase-hyphenated format
+- `isPinned` - Boolean, default false (pinned threads show at top)
+- `isLocked` - Boolean, default false (locked threads no new posts)
+- `createdAt` - Timestamp, auto-managed
+- `updatedAt` - Timestamp, auto-managed
+
+**Indexes:**
+- Unique index on (category_id, slug) - ensures unique slugs per category
+- Index on category_id - fast category filtering
+- Index on user_id - fast user thread lookup
+- Index on updated_at - sorting by recent activity
+- Index on is_pinned - fast pinned thread queries
+
+**Validation:**
+```bash
+✓ Thread model loaded successfully
+✓ Fields: id, categoryId, userId, title, slug, isPinned, isLocked, createdAt, updatedAt
+✓ Model imports without errors
+✓ Foreign key constraints defined
+```
 
 **File:** `src/models/Thread.js`
 
