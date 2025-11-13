@@ -2146,11 +2146,11 @@ router.get('/logout', authController.logout); // Also allow GET for convenience
 
 ### Task 2.9: Add CSRF Protection
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 2.3  
-**Assigned To:** TBD
+**Assigned To:** Developer
 
 **Description:**
 Implement CSRF protection for all forms using csurf middleware.
@@ -2165,12 +2165,29 @@ Implement CSRF protection for all forms using csurf middleware.
 5. Handle CSRF errors
 
 **Acceptance Criteria:**
-- [ ] csurf middleware configured
-- [ ] CSRF tokens generated for all forms
-- [ ] Forms include hidden CSRF token field
-- [ ] Forms submit successfully with valid token
-- [ ] Forms rejected with invalid token
-- [ ] CSRF errors handled gracefully
+- [x] csurf middleware configured (custom session-based implementation)
+- [x] CSRF tokens generated for all forms
+- [x] Forms include hidden CSRF token field
+- [x] Forms submit successfully with valid token
+- [x] Forms rejected with invalid token (403 Forbidden)
+- [x] CSRF errors handled gracefully
+
+**Implementation Notes:**
+- Created custom session-based CSRF middleware (`src/middlewares/csrf.js`)
+- Tokens stored in session for better security
+- CSRF protection applied to all POST/PUT/DELETE/PATCH requests
+- GET/HEAD/OPTIONS methods exempt from validation
+- Custom 403 error page with clear messaging
+- Both registration and login forms updated with CSRF tokens
+
+**Test Results:**
+```bash
+✅ Login with valid CSRF token → HTTP 302, authenticated: true
+✅ Login without CSRF token → HTTP 403 Forbidden
+✅ CSRF tokens present in all forms
+✅ Tokens validated correctly
+✅ Error handling displays user-friendly message
+```
 
 **Update `src/app.js`:**
 
