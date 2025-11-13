@@ -1,208 +1,255 @@
-# Project Constitution
+# Educard Project Constitution
 
-## Project Identity
+## 1. Project Overview
 
-**Project Name:** Educard Web Forum
+### 1.1 Project Name
+**Educard** - An Educational Web Forum
 
-**Version:** 1.0.0
+### 1.2 Project Vision
+To create a simple, intuitive, and accessible web forum platform that facilitates educational discussions, knowledge sharing, and collaborative learning among students, educators, and lifelong learners.
 
-**Created:** November 13, 2025
+### 1.3 Project Mission
+Develop a lightweight, user-friendly forum application with essential CRUD operations and authentication features, focusing on simplicity and educational value rather than feature bloat.
 
-**Purpose:** A simple, modern web forum application for educational and community discussions, built with containerized architecture for easy local development and deployment.
+## 2. Core Principles
 
-## Core Principles
+### 2.1 Simplicity First
+- Prioritize core functionality over advanced features
+- Maintain a clean, intuitive user interface
+- Keep the codebase maintainable and well-documented
+- Avoid unnecessary complexity in both design and implementation
 
-### 1. Spec-Driven Development
+### 2.2 Education-Focused
+- Design with educational use cases in mind
+- Support constructive discussions and knowledge sharing
+- Facilitate teacher-student and peer-to-peer interactions
+- Promote a respectful learning environment
+
+### 2.3 Spec-Driven Development
 - All features must be specified before implementation
-- Specifications are living documents that evolve with the project
-- Code must be traceable back to specifications
-- Changes to specifications require proper review and documentation
+- Specifications must be reviewed and approved
+- Implementation must follow approved specifications
+- Changes to specifications require formal updates
+- Maintain traceability between specs, tasks, and implementation
 
-### 2. Simplicity First
-- Favor simple, maintainable solutions over complex architectures
-- Keep the feature set focused and essential
-- Avoid premature optimization
-- Clear is better than clever
+### 2.4 Quality and Security
+- Implement secure authentication and authorization
+- Follow security best practices for web applications
+- Write clean, testable, and maintainable code
+- Ensure data integrity and user privacy
 
-### 3. Containerization
-- All services must run in Docker containers
-- Development environment must match production as closely as possible
-- Docker Compose for local orchestration
-- No "works on my machine" - reproducible environments for all
+### 2.5 Accessibility and Inclusivity
+- Design for users of varying technical abilities
+- Follow web accessibility standards (WCAG guidelines)
+- Support multiple devices and screen sizes
+- Consider internationalization for future expansion
 
-### 4. Modern Best Practices
-- Security by design
-- Accessibility compliance (WCAG 2.1 Level AA)
-- Responsive design for all devices
-- RESTful API design principles
-- Clean, documented code
+## 3. Development Process
 
-## Project Scope
+### 3.1 Specification Workflow
+1. **Current State Analysis** - Document existing state (if applicable)
+2. **Target Specification** - Define desired features and behavior
+3. **Planning** - Create implementation strategy and architecture
+4. **Task Definition** - Break down work into actionable tasks
+5. **Implementation** - Develop according to specifications
+6. **Validation** - Verify implementation matches specifications
+7. **Traceability** - Maintain links between specs and implementation
 
-### In Scope
-- User authentication and authorization
-- Thread/topic creation and management
-- Post creation, editing, and deletion
-- Basic moderation features
-- Search functionality
-- User profiles
-- Category/tag system
-- Markdown support for posts
-- Email notifications (optional)
-- Basic analytics (view counts, user activity)
+### 3.2 Documentation Requirements
+- All specifications must be written in clear, unambiguous language
+- Use markdown format for all specification documents
+- Include diagrams where helpful (user flows, architecture, etc.)
+- Maintain version history through git commits
+- Update specifications when requirements change
 
-### Out of Scope (v1.0)
-- Real-time chat features
-- Direct messaging between users
-- Advanced gamification (badges, achievements)
-- Multi-language support
-- Payment/subscription features
-- Mobile native applications
-- Video/audio content hosting
-- Advanced AI/ML features
+### 3.3 Code Standards
+- Follow language-specific best practices and style guides
+- Write self-documenting code with clear naming conventions
+- Include comments for complex logic
+- Maintain consistent code formatting
+- Write unit tests for critical functionality
 
-## Technology Stack
+### 3.4 Review Process
+- All specifications require review before implementation begins
+- Code changes should align with approved specifications
+- Security-sensitive changes require additional scrutiny
+- Breaking changes must be clearly documented and justified
 
-### Frontend
-- Modern JavaScript framework (React, Vue, or similar)
-- Responsive CSS framework
-- Markdown editor/renderer
-- State management solution
+## 4. Core Features Scope
 
-### Backend
-- RESTful API (Node.js/Express, Python/FastAPI, or similar)
-- JWT-based authentication
-- ORM for database interaction
-- Input validation and sanitization
+### 4.1 Essential Features (Must Have)
+- **User Authentication**
+  - User registration
+  - User login/logout
+  - Password management (secure storage)
+  
+- **Forum Structure**
+  - Categories/Boards organization
+  - Threads/Topics within categories
+  - Posts/Replies within threads
+  
+- **CRUD Operations**
+  - Create: New threads, posts, replies
+  - Read: View categories, threads, posts
+  - Update: Edit own posts and threads
+  - Delete: Remove own posts and threads
+  
+- **Basic User Profile**
+  - Username and display name
+  - Basic user information
+  - View user's post history
 
-### Database
-- Relational database (PostgreSQL recommended)
-- Redis for caching (optional)
+### 4.2 Excluded Features (Out of Scope for v1.0)
+- Private messaging
+- File uploads and attachments
+- Rich text formatting (beyond basic markdown)
+- User reputation/karma system
+- Advanced moderation tools
+- Real-time notifications
+- Search functionality (beyond basic filtering)
+- Social media integration
+- Analytics and reporting
 
-### Infrastructure
-- Docker containers for all services
-- Docker Compose for orchestration
-- Nginx for reverse proxy
-- Environment-based configuration
+### 4.3 Future Considerations
+Features excluded from v1.0 may be considered for future versions based on:
+- User feedback and demand
+- Resource availability
+- Alignment with core principles
+- Implementation complexity vs. value
 
-### Development Tools
-- Git for version control
-- Automated testing (unit, integration)
-- Linting and code formatting
-- CI/CD pipeline preparation
+## 5. Technical Guidelines
 
-## Development Methodology
+### 5.1 Technology Selection Principles
+- Choose mature, well-supported technologies
+- Prefer simplicity over cutting-edge trends
+- Consider long-term maintainability
+- Ensure adequate documentation and community support
+- Balance performance with development speed
 
-### Specification Workflow
-1. **Define:** Document feature in target specification
-2. **Plan:** Break down into tasks in plan document
-3. **Track:** Maintain task list with status
-4. **Implement:** Build according to specifications
-5. **Verify:** Ensure traceability from code to specs
-6. **Update:** Keep specifications current with changes
+### 5.2 Architecture Principles
+- Separation of concerns (MVC or similar pattern)
+- Modular and loosely coupled components
+- RESTful API design (if applicable)
+- Database normalization and integrity
+- Scalable design (within reason for a simple forum)
 
-### Documentation Requirements
-- All features must have specification documentation
-- Code must include inline comments for complex logic
-- API endpoints must be documented (OpenAPI/Swagger)
-- README files for setup and deployment
-- Architecture decision records (ADRs) for major decisions
-
-### Version Control
-- Main branch is always deployable
-- Feature branches for new development
-- Meaningful commit messages
-- Pull request reviews before merging
-
-## Quality Standards
-
-### Code Quality
-- Consistent code style (enforced by linters)
-- Minimum 70% test coverage
-- No critical security vulnerabilities
-- Code review required for all changes
-
-### Performance
-- Page load time < 3 seconds
-- API response time < 500ms for standard requests
-- Support 100+ concurrent users
-- Efficient database queries (indexed where appropriate)
-
-### Security
-- HTTPS only in production
-- Password hashing (bcrypt or better)
-- SQL injection prevention
-- XSS protection
+### 5.3 Security Requirements
+- Password hashing (bcrypt or similar)
+- Protection against SQL injection
 - CSRF protection
-- Rate limiting on API endpoints
-- Input validation on all user data
+- XSS prevention
+- Input validation and sanitization
+- HTTPS for production deployment
+- Secure session management
 
-### Accessibility
-- Semantic HTML
-- ARIA labels where needed
-- Keyboard navigation support
-- Screen reader compatibility
-- Sufficient color contrast
+### 5.4 Performance Considerations
+- Optimize database queries
+- Implement pagination for long lists
+- Cache static assets appropriately
+- Keep page load times reasonable (<3 seconds)
+- Ensure responsive design for mobile devices
 
-## Project Constraints
+## 6. Project Governance
 
-### Technical Constraints
-- Must run on commodity hardware (8GB RAM minimum)
-- No paid external services for core functionality
-- Open source technologies preferred
-- Cross-browser compatibility (Chrome, Firefox, Safari, Edge)
+### 6.1 Decision Making
+- Major architectural decisions require documented justification
+- Feature additions must align with project vision and principles
+- Security and privacy concerns take highest priority
+- Simplicity principle serves as tiebreaker for design decisions
 
-### Resource Constraints
-- Solo developer or small team
-- Limited budget (free/open source tools only for v1.0)
-- Development timeline: TBD based on planning phase
+### 6.2 Change Management
+- Specification changes must update relevant documents
+- Breaking changes require version updates
+- Maintain backwards compatibility when possible
+- Document migration paths for breaking changes
 
-### Operational Constraints
-- Easy backup and restore procedures
-- Database migrations must be reversible
-- Graceful degradation when services fail
-- Logs for debugging and monitoring
+### 6.3 Quality Gates
+- All code must pass basic testing
+- Security vulnerabilities must be addressed before deployment
+- Documentation must be updated with code changes
+- Specifications must be updated before or with implementation
 
-## Success Criteria
+## 7. Success Criteria
 
-### MVP (Minimum Viable Product)
-- Users can register and log in
-- Users can create and reply to forum threads
-- Basic moderation (delete posts, ban users)
-- Search threads and posts
-- Responsive design works on mobile and desktop
+### 7.1 Functional Success
+- Users can register, login, and manage their accounts
+- Users can create, read, update, and delete forum content
+- Forum structure is logical and easy to navigate
+- Authentication is secure and reliable
 
-### Version 1.0
-- All in-scope features implemented
-- Production-ready deployment documentation
-- Test coverage meets quality standards
-- Security audit completed
-- Performance benchmarks met
+### 7.2 Technical Success
+- Code is maintainable and well-documented
+- Application performs adequately under expected load
+- Security best practices are implemented
+- Tests cover critical functionality
 
-## Governance
+### 7.3 Process Success
+- Specifications accurately reflect implementation
+- Development follows spec-driven process
+- Traceability is maintained throughout project
+- Documentation is complete and up-to-date
 
-### Decision Making
-- Architectural decisions documented in ADRs
-- Specification changes tracked in CHANGELOG
-- Major changes require specification update first
+## 8. Maintenance and Evolution
 
-### Modification Process
-This constitution can be modified when:
-1. Project scope significantly changes
-2. Technology constraints change
-3. New insights require fundamental adjustments
+### 8.1 Long-term Maintenance
+- Plan for security updates and patches
+- Monitor for dependency vulnerabilities
+- Address critical bugs promptly
+- Maintain documentation as code evolves
 
-Modifications must be:
-- Documented in CHANGELOG
-- Reviewed by project stakeholders
-- Dated with version increment
+### 8.2 Version Strategy
+- Use semantic versioning (MAJOR.MINOR.PATCH)
+- Maintain changelog for all releases
+- Tag releases in version control
+- Document upgrade procedures
 
-## Living Document
+### 8.3 Community and Support
+- Provide clear contribution guidelines
+- Maintain issue tracking
+- Document common problems and solutions
+- Be responsive to security reports
 
-This constitution is a living document that guides the project. It should be referenced throughout development and updated when fundamental assumptions or directions change. All other specification documents should align with the principles and scope defined here.
+## 9. Compliance and Ethics
+
+### 9.1 Data Privacy
+- Collect only necessary user information
+- Protect user data from unauthorized access
+- Provide clear privacy policy
+- Comply with relevant data protection regulations (GDPR, etc.)
+
+### 9.2 Content Moderation
+- Establish clear community guidelines
+- Provide mechanism for reporting inappropriate content
+- Balance free expression with safe learning environment
+- Document moderation policies
+
+### 9.3 Licensing
+- Choose appropriate open-source license (if applicable)
+- Respect third-party licenses
+- Clearly document licensing terms
+- Maintain license compatibility
+
+## 10. Document Control
+
+### 10.1 Constitution Authority
+This constitution serves as the foundational document for the Educard project. All other specifications and implementation decisions should align with the principles and guidelines established herein.
+
+### 10.2 Amendment Process
+- Amendments to this constitution require strong justification
+- Major changes should involve stakeholder review
+- All amendments must be documented with rationale
+- Version history maintained through git
+
+### 10.3 Conflict Resolution
+When conflicts arise between specifications or implementation approaches:
+1. Refer to this constitution first
+2. Prioritize core principles (Section 2)
+3. Consider project vision and mission (Section 1)
+4. Choose the simpler solution when in doubt
 
 ---
 
+**Document Version:** 1.0  
 **Last Updated:** November 13, 2025  
-**Document Version:** 1.0.0  
-**Status:** Active
+**Status:** Active  
+**Next Review:** Upon completion of initial implementation or 6 months from creation
