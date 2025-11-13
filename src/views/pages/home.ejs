@@ -1,17 +1,41 @@
 <div class="page-header">
   <h1>Welcome to Educard Forum</h1>
-  <p>An educational discussion platform for learners and educators.</p>
+  <p class="subtitle">An educational discussion platform for learners and educators.</p>
 </div>
 
-<section class="categories">
+<section class="categories-section">
   <h2>Forum Categories</h2>
-  <p>Categories will appear here once the database is set up.</p>
   
-  <!-- Placeholder for future category list -->
-  <div class="category-list">
-    <div class="category-item">
-      <h3>Coming Soon</h3>
-      <p>Forum categories will be available soon.</p>
+  <% if (categories && categories.length > 0) { %>
+    <div class="category-list">
+      <% categories.forEach(category => { %>
+        <div class="category-card">
+          <div class="category-header">
+            <h3>
+              <a href="/category/<%= category.slug %>"><%= category.name %></a>
+            </h3>
+          </div>
+          <div class="category-body">
+            <p class="category-description"><%= category.description %></p>
+          </div>
+          <div class="category-footer">
+            <span class="thread-count">
+              <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M2 2h12v9H4.5L2 13.5V2zm1 1v8.293l1.146-1.147.354-.353H13V3H3z"/>
+              </svg>
+              <%= category.threadCount || 0 %> 
+              <%= (category.threadCount === 1) ? 'thread' : 'threads' %>
+            </span>
+          </div>
+        </div>
+      <% }) %>
     </div>
-  </div>
+  <% } else { %>
+    <div class="empty-state">
+      <p>No categories available yet.</p>
+      <% if (isAuthenticated) { %>
+        <p class="empty-state-hint">Check back soon for new categories!</p>
+      <% } %>
+    </div>
+  <% } %>
 </section>

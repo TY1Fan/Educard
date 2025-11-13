@@ -54,12 +54,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Controllers
+const forumController = require("./controllers/forumController");
+
 // Homepage route
-app.get("/", (req, res) => {
-  res.render("pages/home", {
-    title: "Home - Educard Forum"
-  });
-});
+app.get("/", forumController.showHome);
 
 // Health check endpoint
 app.get("/health", (req, res) => {
