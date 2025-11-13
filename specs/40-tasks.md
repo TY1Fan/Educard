@@ -2368,11 +2368,11 @@ router.get('/login', requireGuest, authController.showLogin);
 
 ### Task 2.11: Update Navigation for Authenticated Users
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** Medium  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Tasks 2.7, 2.8  
-**Assigned To:** TBD
+**Assigned To:** Developer
 
 **Description:**
 Update the site header/navigation to show different options for logged-in vs. guest users.
@@ -2387,12 +2387,39 @@ Update the site header/navigation to show different options for logged-in vs. gu
 5. Test both states
 
 **Acceptance Criteria:**
-- [ ] Navigation shows Login/Register when logged out
-- [ ] Navigation shows username/Profile/Logout when logged in
-- [ ] Logout uses POST method
-- [ ] Navigation styled appropriately
-- [ ] Mobile responsive
-- [ ] No layout shifts between states
+- [x] Navigation shows Login/Register when logged out
+- [x] Navigation shows username/Profile/Logout when logged in
+- [x] Logout uses POST method with CSRF protection
+- [x] Navigation styled appropriately
+- [x] Mobile responsive
+- [x] No layout shifts between states
+
+**Implementation Notes:**
+- Created `src/views/partials/nav.ejs` for reusable navigation
+- Updated `src/views/layouts/main.ejs` to include nav partial
+- Added comprehensive CSS styles for navigation states
+- Logout implemented as POST form with CSRF token (secure)
+- Welcome message displays current username
+- Profile link uses username in URL (`/profile/username`)
+- Mobile responsive with vertical layout on small screens
+
+**Navigation States:**
+1. **Guest (logged out):**
+   - Home | Login | Register
+
+2. **Authenticated (logged in):**
+   - Home | Welcome, **username** | Profile | Logout (button)
+
+**Test Results:**
+```bash
+✅ Guest navigation shows Login/Register links
+✅ Authenticated navigation shows welcome message with username "johndoe"
+✅ Profile link points to /profile/johndoe
+✅ Logout button with CSRF token included
+✅ Logout functionality tested: authenticated true → false
+✅ CSS styles applied with hover effects
+✅ Mobile responsive design with @media queries
+```
 
 **Create `src/views/partials/nav.ejs`:**
 

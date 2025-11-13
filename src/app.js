@@ -92,6 +92,13 @@ app.get("/protected", requireAuth, (req, res) => {
   });
 });
 
+// Test route to view navigation when logged in
+app.get("/test-nav", requireAuth, (req, res) => {
+  res.render("pages/test-nav", {
+    title: "Test Navigation - Educard Forum"
+  });
+});
+
 // 404 handler - must be after all other routes
 app.use((req, res, next) => {
   res.status(404).send(`

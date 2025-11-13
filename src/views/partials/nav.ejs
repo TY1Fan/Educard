@@ -1,0 +1,25 @@
+<nav class="main-nav">
+  <ul class="nav-list">
+    <li><a href="/">Home</a></li>
+    
+    <% if (isAuthenticated) { %>
+      <!-- Logged in navigation -->
+      <li class="nav-user">
+        Welcome, <strong><%= user.username %></strong>
+      </li>
+      <li>
+        <a href="/profile/<%= user.username %>">Profile</a>
+      </li>
+      <li>
+        <form action="/auth/logout" method="POST" class="logout-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn-link">Logout</button>
+        </form>
+      </li>
+    <% } else { %>
+      <!-- Guest navigation -->
+      <li><a href="/auth/login">Login</a></li>
+      <li><a href="/auth/register">Register</a></li>
+    <% } %>
+  </ul>
+</nav>
