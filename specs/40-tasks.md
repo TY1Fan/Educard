@@ -3147,11 +3147,12 @@ module.exports = Thread;
 
 ### Task 3.1.3: Create Post Model
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 3.1.2  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Create the Sequelize Post model for thread replies.
@@ -3167,12 +3168,49 @@ Create the Sequelize Post model for thread replies.
 5. Export model
 
 **Acceptance Criteria:**
-- [ ] `src/models/Post.js` file created
-- [ ] All fields defined
-- [ ] Foreign keys defined (threadId, userId)
-- [ ] Content validation added
-- [ ] Edit tracking with editedAt
-- [ ] Model exports properly
+- [x] `src/models/Post.js` file created
+- [x] All fields defined
+- [x] Foreign keys defined (threadId, userId)
+- [x] Content validation added
+- [x] Edit tracking with editedAt
+- [x] Model exports properly
+
+**Implementation Notes:**
+- Created Post model with Sequelize
+- Fields: id, threadId, userId, content, isFirstPost, editedAt
+- Foreign key constraints with CASCADE delete to threads and users
+- Validation rules with custom error messages
+- Content limited to 10,000 characters (TEXT type)
+- Edit tracking with editedAt timestamp (nullable)
+- isFirstPost flag to identify thread starter post
+- Multiple indexes for query performance
+- underscored: true for snake_case database columns
+
+**Model Fields:**
+- `id` - Auto-incrementing primary key
+- `threadId` - Foreign key to threads table, CASCADE delete
+- `userId` - Foreign key to users table, CASCADE delete
+- `content` - TEXT, required, 1-10,000 characters
+- `isFirstPost` - Boolean, default false (marks thread's first post)
+- `editedAt` - Timestamp, nullable (tracks last edit time)
+- `createdAt` - Timestamp, auto-managed
+- `updatedAt` - Timestamp, auto-managed
+
+**Indexes:**
+- Index on thread_id - fast thread post lookup
+- Index on user_id - fast user post lookup
+- Index on created_at - chronological sorting
+- Composite index on (thread_id, created_at) - optimized thread post listing
+- Index on is_first_post - fast first post queries
+
+**Validation:**
+```bash
+✓ Post model loaded successfully
+✓ Fields: id, threadId, userId, content, isFirstPost, editedAt, createdAt, updatedAt
+✓ Table name: posts
+✓ Model imports without errors
+✓ Foreign key constraints defined
+```
 
 **File:** `src/models/Post.js`
 
