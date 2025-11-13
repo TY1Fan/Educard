@@ -858,6 +858,361 @@ textarea {
 }
 
 /* ================================
+   Breadcrumb Navigation
+   ================================ */
+
+.breadcrumb {
+  margin-bottom: 1.5rem;
+  padding: 0.75rem 0;
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+}
+
+.breadcrumb a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+  color: var(--hover-color);
+  text-decoration: underline;
+}
+
+.breadcrumb span {
+  color: var(--text-color);
+}
+
+/* ================================
+   Category Page Header
+   ================================ */
+
+.category-header-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.category-info {
+  flex: 1;
+}
+
+.category-header-page h1 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  font-size: 2rem;
+}
+
+.category-header-page .category-description {
+  margin: 0;
+  color: var(--secondary-color);
+  line-height: 1.6;
+}
+
+.category-header-page .btn {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ================================
+   Thread List Styles
+   ================================ */
+
+.thread-list-section {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.thread-list {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.thread-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.thread-item:last-child {
+  border-bottom: none;
+}
+
+.thread-item:hover {
+  background-color: var(--bg-light);
+}
+
+.thread-item.pinned {
+  background-color: #fffbeb;
+  border-left: 3px solid var(--warning-color);
+}
+
+.thread-item.pinned:hover {
+  background-color: #fef3c7;
+}
+
+.thread-item.locked {
+  opacity: 0.7;
+}
+
+.thread-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-light);
+  border-radius: 50%;
+  color: var(--secondary-color);
+}
+
+.thread-item.pinned .thread-icon {
+  background: #fef3c7;
+  color: var(--warning-color);
+}
+
+.thread-item.locked .thread-icon {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.thread-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.thread-title {
+  margin: 0 0 0.375rem 0;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.thread-title a {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.thread-title a:hover {
+  color: var(--primary-color);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badge-pinned {
+  background: var(--warning-color);
+  color: white;
+}
+
+.badge-locked {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.thread-meta {
+  font-size: 0.875rem;
+  color: var(--secondary-color);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.thread-meta .author-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.thread-meta .author-link:hover {
+  text-decoration: underline;
+}
+
+.thread-meta .separator {
+  color: var(--border-color);
+}
+
+.thread-stats {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  text-align: right;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--secondary-color);
+}
+
+.stat .icon {
+  opacity: 0.6;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.stat-label {
+  color: var(--secondary-color);
+}
+
+/* ================================
+   Pagination Styles
+   ================================ */
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination .btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.page-info {
+  color: var(--secondary-color);
+  font-size: 0.9375rem;
+}
+
+.page-info strong {
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+/* ================================
+   Empty State Improvements
+   ================================ */
+
+.empty-icon {
+  opacity: 0.2;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+  font-size: 1.25rem;
+}
+
+.empty-state a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.empty-state a:hover {
+  text-decoration: underline;
+}
+
+/* ================================
+   Responsive Thread List
+   ================================ */
+
+@media (max-width: 768px) {
+  .category-header-page {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .category-header-page .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .thread-item {
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+  
+  .thread-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .thread-stats {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-color);
+  }
+  
+  .pagination {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .pagination .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .page-info {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-header-page h1 {
+    font-size: 1.5rem;
+  }
+  
+  .thread-title {
+    font-size: 1rem;
+  }
+  
+  .thread-meta {
+    font-size: 0.8125rem;
+  }
+  
+  .breadcrumb {
+    font-size: 0.8125rem;
+  }
+}
+
+/* ================================
    Print Styles
    ================================ */
 

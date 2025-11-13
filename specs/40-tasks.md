@@ -3984,11 +3984,12 @@ app.get('/', forumController.showHome);
 
 ### Task 3.2.1: Create Thread Listing Page
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 1.5 hours  
 **Dependencies:** Task 3.1.7  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Create the page that lists all threads within a category.
@@ -4005,14 +4006,167 @@ Create the page that lists all threads within a category.
 9. Style thread listing
 
 **Acceptance Criteria:**
-- [ ] Category page displays correctly
-- [ ] Threads listed with title, author, date
-- [ ] Post count displayed per thread
-- [ ] Pagination works (20 threads per page)
-- [ ] Sorted by last activity
-- [ ] "New Thread" button visible (if logged in)
-- [ ] Breadcrumb navigation
-- [ ] 404 if category not found
+- [x] Category page displays correctly
+- [x] Threads listed with title, author, date
+- [x] Post count displayed per thread
+- [x] Pagination works (20 threads per page)
+- [x] Sorted by last activity
+- [x] "New Thread" button visible (if logged in)
+- [x] Breadcrumb navigation
+- [x] 404 if category not found
+
+**Implementation Notes:**
+- Created showCategoryThreads controller method
+- Created forum routes file and mounted in app.js
+- Created category.ejs view with full thread listing
+- Added comprehensive CSS styles for threads and pagination
+- Created 404.ejs and 500.ejs error pages
+- Implemented breadcrumb navigation
+- Added pinned and locked thread indicators
+
+**Files Created/Modified:**
+
+1. **src/controllers/forumController.js** (MODIFIED)
+   - Added showCategoryThreads() method
+   - Imports User and Post models for associations
+   - Fetches category by slug with 404 handling
+   - Queries threads with pagination (20 per page)
+   - Includes post count via COUNT aggregation
+   - Sorts by isPinned DESC, then updatedAt DESC
+   - Converts postCount from string to number
+
+2. **src/routes/forum.js** (NEW)
+   - Created forum routes module
+   - Route: GET /category/:slug → showCategoryThreads
+   - Ready for additional forum routes
+
+3. **src/app.js** (MODIFIED)
+   - Imported and mounted forum routes
+   - Routes mounted at root level (/)
+
+4. **src/views/pages/category.ejs** (NEW - 145 lines)
+   - Breadcrumb navigation (Home → Category)
+   - Category header with name, description
+   - "New Thread" button (visible if authenticated)
+   - Thread list with icons for normal/pinned/locked
+   - Thread metadata: author, date, post count
+   - Badges for pinned and locked threads
+   - Pagination controls with Previous/Next
+   - Empty state with helpful CTAs
+   - SVG icons throughout
+
+5. **src/views/errors/404.ejs** (NEW)
+   - Clean 404 error page
+   - Go to Homepage and Go Back buttons
+   - Responsive design
+
+6. **src/views/errors/500.ejs** (NEW)
+   - Server error page
+   - User-friendly error message
+   - Navigation options
+
+7. **public/css/style.css** (MODIFIED - Added ~350 lines)
+   - Breadcrumb navigation styles
+   - Category page header layout
+   - Thread list and thread item styles
+   - Pinned thread highlighting (yellow background)
+   - Locked thread styling (reduced opacity)
+   - Thread icons (circular backgrounds)
+   - Badges for pinned/locked status
+   - Pagination controls
+   - Empty state improvements
+   - Responsive breakpoints (768px, 480px)
+   - Print-friendly styles
+
+**Features Implemented:**
+
+✅ **Category Page Layout:**
+- Breadcrumb: Home → Category Name
+- Category header with description
+- New Thread button (auth-gated)
+- Clean, card-based design
+
+✅ **Thread Display:**
+- Thread icon (changes for pinned/locked)
+- Thread title with link
+- Author name with link
+- Creation date formatted
+- Post count with icon
+- Badges for special states
+
+✅ **Thread States:**
+- Normal threads: chat bubble icon
+- Pinned threads: pin icon, yellow bg, "PINNED" badge
+- Locked threads: lock icon, reduced opacity, "LOCKED" badge
+
+✅ **Sorting:**
+- Pinned threads appear first
+- Then sorted by updatedAt DESC (last activity)
+
+✅ **Pagination:**
+- 20 threads per page
+- Previous/Next buttons
+- Page X of Y indicator
+- Disabled state when no more pages
+- Query string: ?page=N
+
+✅ **Empty State:**
+- Large icon
+- "No threads yet" message
+- Different CTAs for auth/non-auth users
+- "Create First Thread" button if logged in
+
+✅ **Error Handling:**
+- 404 page for non-existent categories
+- 500 page for server errors
+- Graceful error messages
+
+✅ **Responsive Design:**
+- Desktop: Thread stats on right
+- Tablet: Adjusted spacing
+- Mobile: Stats move below, full width button
+
+**Testing Results:**
+```bash
+✓ Category page loads: HTTP 200
+✓ Category name displayed correctly
+✓ Thread list section rendered
+✓ Empty state shows (no threads yet)
+✓ 404 works for non-existent categories
+✓ Breadcrumb navigation present
+✓ New Thread button visible
+```
+
+**SQL Query Generated:**
+```sql
+SELECT 
+  "Thread"."id", 
+  "Thread"."title", 
+  "Thread"."slug", 
+  "Thread"."isPinned", 
+  "Thread"."isLocked", 
+  "Thread"."createdAt", 
+  "Thread"."updatedAt",
+  "author"."id", 
+  "author"."username", 
+  "author"."displayName",
+  COUNT("posts"."id") AS "postCount"
+FROM "threads" AS "Thread"
+LEFT OUTER JOIN "users" AS "author" ON "Thread"."user_id" = "author"."id"
+LEFT OUTER JOIN "posts" AS "posts" ON "Thread"."id" = "posts"."thread_id"
+WHERE "Thread"."category_id" = ?
+GROUP BY "Thread"."id", "author"."id"
+ORDER BY "isPinned" DESC, "updatedAt" DESC
+LIMIT 20 OFFSET 0;
+```
+
+**Visual Features:**
+- Professional thread list design
+- Hover effects on thread items
+- Visual distinction for pinned threads
+- Subtle indicators for locked threads
+- SVG icons for better scalability
+- Consistent spacing and typography
 
 **Add to `src/controllers/forumController.js`:**
 

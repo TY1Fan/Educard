@@ -85,9 +85,12 @@ app.get("/test-session", (req, res) => {
   });
 });
 
-// Mount auth routes
+// Mount routes
 const authRoutes = require("./routes/auth");
+const forumRoutes = require("./routes/forum");
+
 app.use("/auth", authRoutes);
+app.use("/", forumRoutes);
 
 // Test route for authentication middleware
 const { requireAuth } = require("./middlewares/auth");
