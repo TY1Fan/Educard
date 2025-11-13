@@ -83,6 +83,15 @@ app.get("/test-session", (req, res) => {
 const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);
 
+// Test route for authentication middleware
+const { requireAuth } = require("./middlewares/auth");
+app.get("/protected", requireAuth, (req, res) => {
+  res.json({
+    message: "You are authenticated!",
+    user: req.session.user
+  });
+});
+
 // 404 handler - must be after all other routes
 app.use((req, res, next) => {
   res.status(404).send(`

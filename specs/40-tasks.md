@@ -2253,11 +2253,11 @@ app.use((err, req, res, next) => {
 
 ### Task 2.10: Create Authentication Middleware
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Task 2.7  
-**Assigned To:** TBD
+**Assigned To:** Developer
 
 **Description:**
 Create middleware to protect routes that require authentication.
@@ -2275,12 +2275,39 @@ Create middleware to protect routes that require authentication.
 5. Test with protected routes
 
 **Acceptance Criteria:**
-- [ ] `src/middlewares/auth.js` file created
-- [ ] `requireAuth` middleware works
-- [ ] Redirects to login with return URL
-- [ ] Allows access when authenticated
-- [ ] `requireGuest` prevents authenticated access (optional)
-- [ ] Middleware exports properly
+- [x] `src/middlewares/auth.js` file created
+- [x] `requireAuth` middleware works
+- [x] Redirects to login with return URL
+- [x] Allows access when authenticated
+- [x] `requireGuest` prevents authenticated access
+- [x] Middleware exports properly
+
+**Implementation Notes:**
+- Created `src/middlewares/auth.js` with four middleware functions:
+  - `requireAuth` - Protects routes requiring authentication
+  - `requireGuest` - Prevents authenticated users from accessing guest-only pages
+  - `checkOwnership` - Verifies user owns a resource
+  - `requireRole` - Checks user role (for future use)
+- Updated login controller to handle `returnTo` redirect
+- Applied middleware to auth routes:
+  - Login/Register routes use `requireGuest`
+  - Logout routes use `requireAuth`
+- Created test route `/protected` for validation
+
+**Test Results:**
+```bash
+✅ Test 1: Access /protected without login → Redirects to /auth/login
+✅ Test 2: Access /protected after login → Returns user data
+✅ Test 3: Access /auth/login while logged in → Redirects to home (302)
+✅ Test 4: ReturnTo functionality → After login, redirects back to /protected
+```
+
+**Security Features:**
+- Session-based authentication check
+- Automatic return URL storage and redirect
+- Prevents duplicate logins (requireGuest)
+- Resource ownership validation
+- Role-based access control (ready for future use)
 
 **File:** `src/middlewares/auth.js`
 

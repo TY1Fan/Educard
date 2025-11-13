@@ -152,8 +152,10 @@ exports.login = async (req, res) => {
       email: user.email
     };
 
-    // Redirect to homepage
-    res.redirect('/');
+    // Redirect to original URL or homepage
+    const returnTo = req.session.returnTo || '/';
+    delete req.session.returnTo; // Clear the stored URL
+    res.redirect(returnTo);
   } catch (error) {
     console.error('Login error:', error);
     res.render('pages/login', {
