@@ -163,3 +163,14 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+// Logout
+exports.logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.redirect('/');
+    }
+    res.redirect('/');
+  });
+};

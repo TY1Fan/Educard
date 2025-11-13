@@ -10,4 +10,8 @@ router.post('/register', authController.registerValidation, authController.regis
 router.get('/login', authController.showLogin);
 router.post('/login', authController.login);
 
+// Logout routes
+router.post('/logout', authController.logout);
+router.get('/logout', authController.logout); // Also allow GET for convenience
+
 module.exports = router;
