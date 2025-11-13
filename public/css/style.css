@@ -531,6 +531,114 @@ textarea {
 }
 
 /* ================================
+   Authentication Forms
+   ================================ */
+
+.auth-container {
+  max-width: 500px;
+  margin: var(--spacing-xl) auto;
+  padding: 0 var(--spacing-md);
+}
+
+.auth-card {
+  background: var(--bg-color);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.auth-card h1 {
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+  color: var(--primary-color);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--secondary-color);
+  margin-bottom: var(--spacing-lg);
+}
+
+.auth-form {
+  margin-top: var(--spacing-lg);
+}
+
+.auth-form .form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.auth-form .form-group:last-of-type {
+  margin-bottom: var(--spacing-xl);
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.auth-form input:invalid:not(:placeholder-shown) {
+  border-color: var(--error-color);
+}
+
+.auth-form small {
+  display: block;
+  margin-top: var(--spacing-xs);
+  color: var(--secondary-color);
+  font-size: 0.875rem;
+}
+
+.auth-form .btn {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  color: var(--secondary-color);
+}
+
+.auth-footer a {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.alert ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.alert li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.alert li:last-child {
+  margin-bottom: 0;
+}
+
+/* ================================
    Print Styles
    ================================ */
 

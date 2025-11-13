@@ -1468,7 +1468,7 @@ app.use((req, res, next) => {
 
 ### Task 2.4: Create Registration Form View
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 2.3  
