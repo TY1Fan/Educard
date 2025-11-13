@@ -34,15 +34,18 @@ const User = sequelize.define('User', {
   },
   displayName: {
     type: DataTypes.STRING(100),
-    allowNull: true
+    allowNull: true,
+    field: 'display_name'
   },
   isActive: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true
+    defaultValue: true,
+    field: 'is_active'
   }
 }, {
   tableName: 'users',
   timestamps: true,
+  underscored: true,
   defaultScope: {
     attributes: { exclude: ['password'] }
   },

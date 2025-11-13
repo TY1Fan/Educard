@@ -74,14 +74,9 @@ app.get("/test-session", (req, res) => {
   });
 });
 
-// Registration form route (temporary - will move to auth routes)
-app.get("/register", (req, res) => {
-  res.render("pages/register", {
-    title: "Register - Educard Forum",
-    errors: [],
-    formData: {}
-  });
-});
+// Mount auth routes
+const authRoutes = require("./routes/auth");
+app.use("/auth", authRoutes);
 
 // 404 handler - must be after all other routes
 app.use((req, res, next) => {
