@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const express = require("express");
 const path = require("path");
+const expressLayouts = require("express-ejs-layouts");
 
 // Create Express application
 const app = express();
@@ -10,6 +11,12 @@ const app = express();
 // View engine setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+
+// Layout configuration
+app.use(expressLayouts);
+app.set("layout", "layouts/main");
+app.set("layout extractScripts", true);
+app.set("layout extractStyles", true);
 
 // Static files middleware
 app.use(express.static(path.join(__dirname, "../public")));
@@ -24,48 +31,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Placeholder homepage route
+// Homepage route
 app.get("/", (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Educard Forum</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-        }
-        .container {
-          text-align: center;
-        }
-        h1 {
-          font-size: 3rem;
-          margin-bottom: 1rem;
-        }
-        p {
-          font-size: 1.2rem;
-          opacity: 0.9;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>🎓 Educard Forum</h1>
-        <p>Educational discussion platform coming soon...</p>
-        <p><small>Server is running on port ${process.env.PORT || 3000}</small></p>
-      </div>
-    </body>
-    </html>
-  `);
+  res.render("pages/home", {
+    title: "Home - Educard Forum"
+  });
 });
 
 // Health check endpoint
