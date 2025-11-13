@@ -109,10 +109,55 @@ npm run dev
 
 6. Open your browser to `http://localhost:3000`
 
+## 🎯 Available npm Scripts
+
+```bash
+# Development mode with auto-reload
+npm run dev
+
+# Production mode
+npm start
+
+# Run tests (once tests are implemented)
+npm test
+
+# Lint code with ESLint
+npm run lint
+
+# Format code with Prettier
+npm run format
+```
+
+**Docker Commands:**
+```bash
+# Run npm scripts in Docker container
+docker-compose exec app npm run dev
+docker-compose exec app npm test
+docker-compose exec app npm run lint
+```
+
+## 🌐 Accessing the Application
+
+Once the application is running:
+
+- **Homepage:** http://localhost:3000
+- **Health Check:** http://localhost:3000/health
+
+The application will automatically reload when you make changes to the code (thanks to nodemon).
+
+**Database Access:**
+- **Host:** localhost
+- **Port:** 5432
+- **Database:** educard_dev
+- **User:** educard
+- **Password:** (see .env file)
+
 ## 📋 Project Status
 
 **Current Phase:** Phase 1 - Setup & Foundation  
-**Status:** 🟡 In Development
+**Status:** � Phase 1 Complete
+
+Phase 1 is now complete with all foundational components in place. Ready to move to Phase 2 (Authentication System).
 
 See [specs/40-tasks.md](./specs/40-tasks.md) for detailed task breakdown and progress.
 
@@ -127,7 +172,45 @@ Comprehensive project documentation is available in the `specs/` directory:
 - [Task Breakdown](./specs/40-tasks.md) - Detailed task list with acceptance criteria
 - [Traceability Matrix](./specs/50-traceability.md) - Requirements to tasks mapping
 
-## 🛠️ Technology Stack
+## � Project Structure
+
+```
+educard/
+├── src/
+│   ├── app.js                 # Express application configuration
+│   ├── config/
+│   │   └── database.js        # Sequelize database configuration
+│   ├── models/                # Sequelize models (to be added)
+│   ├── controllers/           # Route controllers (to be added)
+│   ├── routes/                # Route definitions (to be added)
+│   ├── middlewares/           # Custom middleware (to be added)
+│   ├── utils/                 # Utility functions (to be added)
+│   └── views/                 # EJS templates
+│       ├── layouts/
+│       │   └── main.ejs       # Main layout template
+│       ├── pages/
+│       │   └── home.ejs       # Homepage view
+│       ├── partials/          # Reusable components (to be added)
+│       └── errors/            # Error pages (to be added)
+├── public/
+│   ├── css/
+│   │   └── style.css          # Main stylesheet
+│   ├── js/
+│   │   └── main.js            # Client-side JavaScript
+│   └── images/                # Static images
+├── tests/                     # Test files (to be added)
+├── specs/                     # Project documentation
+├── server.js                  # Application entry point
+├── package.json               # Dependencies and scripts
+├── Dockerfile                 # Docker configuration
+├── docker-compose.yml         # Multi-container setup
+├── .env                       # Environment variables (not committed)
+├── .env.example               # Environment template
+├── .gitignore                 # Git ignore rules
+└── README.md                  # This file
+```
+
+## �🛠️ Technology Stack
 
 **Backend:**
 - Node.js with Express.js framework
@@ -153,10 +236,13 @@ Comprehensive project documentation is available in the `specs/` directory:
 
 ## 🎨 Features
 
-### Phase 1 (Current)
+### Phase 1 ✅ Completed
 - [x] Project setup and configuration
-- [ ] Database connection
-- [ ] Basic templates and styling
+- [x] Docker containerization (app + database)
+- [x] Database connection (PostgreSQL + Sequelize)
+- [x] Basic templates and styling (EJS layouts)
+- [x] Responsive CSS framework
+- [x] Development environment with hot-reload
 
 ### Phase 2 (Planned)
 - [ ] User registration
