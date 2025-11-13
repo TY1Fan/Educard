@@ -323,11 +323,12 @@ DB_PASSWORD=
 
 ### Task 1.5: Create Express Application Setup
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Tasks 1.2, 1.3, 1.4  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Create the main Express application file with basic middleware configuration.
@@ -348,15 +349,16 @@ Create the main Express application file with basic middleware configuration.
 13. Export app
 
 **Acceptance Criteria:**
-- [ ] `src/app.js` file created
-- [ ] Environment variables loaded
-- [ ] EJS configured as view engine
-- [ ] Static files served from `public/`
-- [ ] Body parser middleware configured
-- [ ] Homepage route returns "Hello World" or similar
-- [ ] 404 handler in place
-- [ ] Error handler in place
-- [ ] App exports properly
+- [x] `src/app.js` file created
+- [x] Environment variables loaded
+- [x] EJS configured as view engine
+- [x] Static files served from `public/`
+- [x] Body parser middleware configured
+- [x] Homepage route returns styled landing page
+- [x] Health check endpoint at `/health`
+- [x] 404 handler in place with styled page
+- [x] Error handler in place with environment-aware output
+- [x] App exports properly
 
 **File:** `src/app.js`
 
@@ -407,11 +409,12 @@ module.exports = app;
 
 ### Task 1.6: Create Server Entry Point
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 15 minutes  
 **Dependencies:** Task 1.5  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Create the server file that starts the Express application.
@@ -425,12 +428,14 @@ Create the server file that starts the Express application.
 6. Add error handling for server startup
 
 **Acceptance Criteria:**
-- [ ] `server.js` file created
-- [ ] Imports app correctly
-- [ ] Reads PORT from environment
-- [ ] Starts server on correct port
-- [ ] Logs startup message with URL
-- [ ] Handles port-in-use errors
+- [x] `server.js` file created
+- [x] Imports app correctly
+- [x] Reads PORT from environment
+- [x] Starts server on correct port
+- [x] Logs startup message with URL and health check
+- [x] Handles port-in-use errors
+- [x] Graceful shutdown on SIGTERM/SIGINT
+- [x] Server running successfully in Docker
 
 **File:** `server.js`
 
