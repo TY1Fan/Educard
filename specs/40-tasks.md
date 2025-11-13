@@ -247,11 +247,12 @@ tree -L 3  # View directory structure
 
 ### Task 1.4: Set Up Environment Configuration
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 20 minutes  
 **Dependencies:** Task 1.2  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Configure environment variables for development environment.
@@ -265,19 +266,21 @@ Configure environment variables for development environment.
 3. Add session configuration:
    - `SESSION_SECRET=` (generate random string)
 4. Add database configuration:
-   - `DB_HOST=localhost`
+   - `DB_HOST=db` (Docker service name)
    - `DB_PORT=5432`
    - `DB_NAME=educard_dev`
-   - `DB_USER=postgres`
-   - `DB_PASSWORD=` (your password)
-5. Update `.env.example` with variable names (no values)
-6. Ensure `.env` is in `.gitignore`
+   - `DB_USER=educard`
+   - `DB_PASSWORD=educard_dev_password`
+5. Update `.env.example` with variable names (already done in Task 1.1)
+6. Ensure `.env` is in `.gitignore` (already configured)
 
 **Acceptance Criteria:**
-- [ ] `.env` file exists with all variables
-- [ ] `SESSION_SECRET` is random and secure (32+ characters)
-- [ ] `.env.example` has all variable names (no sensitive values)
-- [ ] `.env` is listed in `.gitignore`
+- [x] `.env` file exists with all variables
+- [x] `SESSION_SECRET` is random and secure (64 hex characters)
+- [x] `.env.example` has all variable names (no sensitive values)
+- [x] `.env` is listed in `.gitignore`
+- [x] Database credentials are correct for Docker setup
+- [x] Environment variables verified in Docker container
 - [ ] Database credentials are correct for local setup
 
 **Example `.env`:**
