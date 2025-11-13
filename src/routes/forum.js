@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const forumController = require('../controllers/forumController');
+const { requireAuth } = require('../middlewares/auth');
 
 /**
  * Forum Routes
@@ -9,5 +10,11 @@ const forumController = require('../controllers/forumController');
 
 // Category thread listing
 router.get('/category/:slug', forumController.showCategoryThreads);
+
+// New thread form (requires authentication)
+router.get('/category/:slug/new-thread', requireAuth, forumController.showNewThread);
+
+// Create new thread (requires authentication)
+router.post('/category/:slug/new-thread', requireAuth, forumController.createThread);
 
 module.exports = router;

@@ -129,3 +129,134 @@ exports.showCategoryThreads = async (req, res) => {
     });
   }
 };
+
+/**
+ * Show New Thread Form
+ * Displays the form to create a new thread (requires authentication)
+ */
+exports.showNewThread = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    // Find category by slug
+    const category = await Category.findOne({ where: { slug } });
+    
+    if (!category) {
+      return res.status(404).render('errors/404', {
+        title: 'Category Not Found',
+        message: 'The requested category does not exist.'
+      });
+    }
+
+    res.render('pages/new-thread', {
+      title: `New Thread - ${category.name}`,
+      category: category.toJSON(),
+      errors: null,
+      formData: {}
+    });
+  } catch (error) {
+    console.error('Error showing new thread form:', error);
+    res.status(500).render('errors/500', {
+      title: 'Server Error',
+      message: 'Failed to load the form. Please try again later.'
+    });
+  }
+};
+
+/**
+ * Create New Thread
+ * Handles the submission of a new thread (requires authentication)
+ */
+exports.createThread = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { title, content } = req.body;
+    const userId = req.session.user.id;
+    
+    // Find category by slug
+    const category = await Category.findOne({ where: { slug } });
+    
+    if (!category) {
+      return res.status(404).render('errors/404', {
+        title: 'Category Not Found',
+        message: 'The requested category does not exist.'
+      });
+    }
+
+    // Validation
+    const errors = [];
+    
+    if (!title || title.trim().length === 0) {
+      errors.push({ msg: 'Thread title is required' });
+    } else if (title.length > 255) {
+      errors.push({ msg: 'Thread title must be 255 characters or less' });
+    }
+    
+    if (!content || content.trim().length === 0) {
+      errors.push({ msg: 'Thread content is required' });
+    } else if (content.trim().length < 10) {
+      errors.push({ msg: 'Thread content must be at least 10 characters' });
+    } else if (content.length > 10000) {
+      errors.push({ msg: 'Thread content must be 10,000 characters or less' });
+    }
+    
+    if (errors.length > 0) {
+      return res.status(400).render('pages/new-thread', {
+        title: `New Thread - ${category.name}`,
+        category: category.toJSON(),
+        errors,
+        formData: { title, content }
+      });
+    }
+
+    // Generate unique slug for the thread
+    const { uniqueSlugFromDB } = require('../utils/slugify');
+    const threadSlug = await uniqueSlugFromDB(title, Thread, { categoryId: category.id });
+
+    // Create thread and first post in a transaction
+    const result = await sequelize.transaction(async (t) => {
+      // Create the thread
+      const thread = await Thread.create({
+        categoryId: category.id,
+        userId: userId,
+        title: title.trim(),
+        slug: threadSlug,
+        isPinned: false,
+        isLocked: false
+      }, { transaction: t });
+
+      // Create the first post
+      await Post.create({
+        threadId: thread.id,
+        userId: userId,
+        content: content.trim(),
+        isFirstPost: true
+      }, { transaction: t });
+
+      return thread;
+    });
+
+    // Success - redirect to the new thread
+    req.flash('success', 'Thread created successfully!');
+    res.redirect(`/thread/${result.slug}`);
+    
+  } catch (error) {
+    console.error('Error creating thread:', error);
+    
+    // If it's a validation error from Sequelize
+    if (error.name === 'SequelizeValidationError') {
+      const errors = error.errors.map(err => ({ msg: err.message }));
+      return res.status(400).render('pages/new-thread', {
+        title: `New Thread - ${req.params.slug}`,
+        category: await Category.findOne({ where: { slug: req.params.slug } }),
+        errors,
+        formData: req.body
+      });
+    }
+    
+    res.status(500).render('errors/500', {
+      title: 'Server Error',
+      message: 'Failed to create thread. Please try again later.'
+    });
+  }
+};

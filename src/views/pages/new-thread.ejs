@@ -1,0 +1,219 @@
+<nav class="breadcrumb">
+  <a href="/">Home</a> &raquo; 
+  <a href="/category/<%= category.slug %>"><%= category.name %></a> &raquo;
+  <span>New Thread</span>
+</nav>
+
+<div class="page-header">
+  <h1>Create New Thread</h1>
+  <p class="subtitle">in <%= category.name %></p>
+</div>
+
+<% if (locals.errorMessage && errorMessage.length > 0) { %>
+  <div class="alert alert-error">
+    <ul>
+      <% errorMessage.forEach(msg => { %>
+        <li><%= msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<% if (errors && errors.length > 0) { %>
+  <div class="alert alert-error">
+    <ul>
+      <% errors.forEach(error => { %>
+        <li><%= error.msg %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form action="/category/<%= category.slug %>/new-thread" method="POST" class="thread-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  
+  <div class="form-group">
+    <label for="title">Thread Title <span class="required">*</span></label>
+    <input 
+      type="text" 
+      id="title" 
+      name="title" 
+      class="form-control"
+      value="<%= locals.formData?.title || '' %>"
+      required 
+      maxlength="255"
+      placeholder="What's your thread about?"
+      autofocus>
+    <small class="form-text">Be clear and descriptive (max 255 characters)</small>
+  </div>
+
+  <div class="form-group">
+    <label for="content">First Post <span class="required">*</span></label>
+    <textarea 
+      id="content" 
+      name="content" 
+      class="form-control"
+      rows="12"
+      required
+      minlength="10"
+      maxlength="10000"
+      placeholder="Start the discussion...
+
+Tip: Be clear and provide context for your discussion. The more details you provide, the better responses you'll get!"><%= locals.formData?.content || '' %></textarea>
+    <small class="form-text">Minimum 10 characters, maximum 10,000 characters</small>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">
+      <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2z"/>
+      </svg>
+      Create Thread
+    </button>
+    <a href="/category/<%= category.slug %>" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<div class="posting-guidelines">
+  <h3>Posting Guidelines</h3>
+  <ul>
+    <li>Be respectful and constructive in your discussions</li>
+    <li>Search for existing threads before creating a new one</li>
+    <li>Choose an appropriate category for your thread</li>
+    <li>Use a clear, descriptive title</li>
+    <li>Format your post for easy reading</li>
+  </ul>
+</div>
+
+<style>
+.thread-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.required {
+  color: var(--error-color);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+textarea.form-control {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.form-text {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--secondary-color);
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.form-actions .btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #475569;
+}
+
+.posting-guidelines {
+  background: var(--bg-light);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.posting-guidelines h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  color: var(--text-color);
+}
+
+.posting-guidelines ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.posting-guidelines li {
+  margin-bottom: 0.5rem;
+  color: var(--secondary-color);
+  line-height: 1.6;
+}
+
+.posting-guidelines li:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .thread-form {
+    padding: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .thread-form {
+    padding: 1rem;
+  }
+  
+  .form-group label {
+    font-size: 0.9375rem;
+  }
+  
+  .form-control {
+    font-size: 0.9375rem;
+  }
+}
+</style>
