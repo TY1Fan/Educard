@@ -3556,11 +3556,12 @@ psql -d educard_dev -c "\dt"  # Should see all tables
 
 ### Task 3.1.6: Create Category Seed Data
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** Medium  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Task 3.1.5  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Create seed data for initial forum categories.
@@ -3577,11 +3578,70 @@ Create seed data for initial forum categories.
 4. Verify categories in database
 
 **Acceptance Criteria:**
-- [ ] Seeder file created
-- [ ] Initial categories defined
-- [ ] Seeder runs successfully
-- [ ] Categories visible in database
-- [ ] Slugs are URL-friendly
+- [x] Seeder file created
+- [x] Initial categories defined
+- [x] Seeder runs successfully
+- [x] Categories visible in database
+- [x] Slugs are URL-friendly
+
+**Implementation Notes:**
+- Created seeder file: 20251113142453-demo-categories.js
+- Added 6 initial forum categories with descriptions
+- Categories sorted by display_order (0-5)
+- All slugs are URL-friendly (lowercase with hyphens)
+- Seeder executed successfully in 0.004s
+- All categories verified in database
+
+**Categories Created:**
+1. **Announcements** (display_order: 0)
+   - Slug: `announcements`
+   - Description: Important announcements and updates from the Educard team
+   
+2. **General Discussion** (display_order: 1)
+   - Slug: `general-discussion`
+   - Description: General topics and conversations about education and learning
+   
+3. **Questions & Answers** (display_order: 2)
+   - Slug: `questions-answers`
+   - Description: Ask questions and get help from the community
+   
+4. **Study Groups** (display_order: 3)
+   - Slug: `study-groups`
+   - Description: Find and organize study groups with other learners
+   
+5. **Resources** (display_order: 4)
+   - Slug: `resources`
+   - Description: Share and discover educational resources and materials
+   
+6. **Off-Topic** (display_order: 5)
+   - Slug: `off-topic`
+   - Description: Casual conversations and topics unrelated to education
+
+**Database Verification:**
+```sql
+SELECT id, name, slug, display_order FROM categories ORDER BY display_order;
+
+ id |        name         |        slug        | display_order 
+----+---------------------+--------------------+---------------
+  1 | Announcements       | announcements      |             0
+  2 | General Discussion  | general-discussion |             1
+  3 | Questions & Answers | questions-answers  |             2
+  4 | Study Groups        | study-groups       |             3
+  5 | Resources           | resources          |             4
+  6 | Off-Topic           | off-topic          |             5
+```
+
+**Seeder Commands:**
+```bash
+# Generate seeder
+npx sequelize-cli seed:generate --name demo-categories
+
+# Run all seeders
+npx sequelize-cli db:seed:all
+
+# Undo all seeders (if needed)
+npx sequelize-cli db:seed:undo:all
+```
 
 **Command:**
 ```bash
