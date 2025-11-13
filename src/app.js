@@ -25,6 +25,17 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Session middleware
+const sessionMiddleware = require("./config/session");
+app.use(sessionMiddleware);
+
+// Make session user available in all views
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  res.locals.isAuthenticated = !!req.session.user;
+  next();
+});
+
 // Request logging middleware (simple for now)
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
@@ -44,6 +55,22 @@ app.get("/health", (req, res) => {
     status: "ok",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
+  });
+});
+
+// Session test endpoint (temporary - for testing)
+app.get("/test-session", (req, res) => {
+  if (req.session.views) {
+    req.session.views++;
+  } else {
+    req.session.views = 1;
+  }
+  
+  res.json({
+    message: "Session working",
+    views: req.session.views,
+    sessionID: req.sessionID,
+    authenticated: res.locals.isAuthenticated
   });
 });
 
