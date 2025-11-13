@@ -3290,11 +3290,12 @@ module.exports = Post;
 
 ### Task 3.1.4: Define Model Associations
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Tasks 3.1.1, 3.1.2, 3.1.3  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 13, 2025
 
 **Description:**
 Define relationships between all models (User, Category, Thread, Post).
@@ -3315,11 +3316,64 @@ Define relationships between all models (User, Category, Thread, Post).
 5. Update app.js to sync models
 
 **Acceptance Criteria:**
-- [ ] `src/models/index.js` file created/updated
-- [ ] All models imported
-- [ ] All associations defined
-- [ ] Models export properly
-- [ ] No circular dependency errors
+- [x] `src/models/index.js` file created/updated
+- [x] All models imported
+- [x] All associations defined
+- [x] Models export properly
+- [x] No circular dependency errors
+
+**Implementation Notes:**
+- Created centralized models/index.js file
+- Imported all 4 models: User, Category, Thread, Post
+- Defined all 8 associations between models
+- CASCADE delete configured for proper data cleanup
+- Meaningful aliases for relationships (e.g., 'author' for user)
+- All models export properly from single entry point
+
+**Associations Defined:**
+
+1. **User Associations:**
+   - User → hasMany → Threads (as 'threads')
+   - User → hasMany → Posts (as 'posts')
+
+2. **Category Associations:**
+   - Category → hasMany → Threads (as 'threads')
+
+3. **Thread Associations:**
+   - Thread → belongsTo → Category (as 'category')
+   - Thread → belongsTo → User (as 'author')
+   - Thread → hasMany → Posts (as 'posts')
+
+4. **Post Associations:**
+   - Post → belongsTo → Thread (as 'thread')
+   - Post → belongsTo → User (as 'author')
+
+**Validation:**
+```bash
+✓ All models loaded successfully
+✓ User associations: [ 'threads', 'posts' ]
+✓ Category associations: [ 'threads' ]
+✓ Thread associations: [ 'category', 'author', 'posts' ]
+✓ Post associations: [ 'thread', 'author' ]
+✓ No circular dependency errors
+✓ All foreign keys properly linked
+```
+
+**Usage Example:**
+Now you can query with includes to fetch related data:
+```javascript
+// Get thread with category and author
+const thread = await Thread.findOne({
+  where: { id: 1 },
+  include: ['category', 'author', 'posts']
+});
+
+// Get user with all their threads and posts
+const user = await User.findOne({
+  where: { id: 1 },
+  include: ['threads', 'posts']
+});
+```
 
 **File:** `src/models/index.js`
 
