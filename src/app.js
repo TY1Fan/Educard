@@ -29,15 +29,22 @@ app.use(express.json());
 const sessionMiddleware = require("./config/session");
 app.use(sessionMiddleware);
 
+// Flash messages (after session middleware)
+const flash = require("connect-flash");
+app.use(flash());
+
 // CSRF protection (session-based)
 const { csrfToken, csrfProtection } = require("./middlewares/csrf");
 app.use(csrfToken); // Generate token for all requests
 app.use(csrfProtection); // Validate token on state-changing requests
 
-// Make session user available in all views (csrfToken is already set by csrf middleware)
+// Make session user and flash messages available in all views
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.isAuthenticated = !!req.session.user;
+  res.locals.successMessage = req.flash("success");
+  res.locals.errorMessage = req.flash("error");
+  res.locals.infoMessage = req.flash("info");
   next();
 });
 

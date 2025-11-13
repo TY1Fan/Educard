@@ -78,6 +78,9 @@ exports.register = async (req, res) => {
       email: user.email
     };
 
+    // Flash success message
+    req.flash('success', 'Welcome to Educard! Your account has been created successfully.');
+
     // Redirect to homepage
     res.redirect('/');
   } catch (error) {
@@ -152,6 +155,9 @@ exports.login = async (req, res) => {
       email: user.email
     };
 
+    // Flash success message
+    req.flash('success', 'Welcome back! You have successfully logged in.');
+
     // Redirect to original URL or homepage
     const returnTo = req.session.returnTo || '/';
     delete req.session.returnTo; // Clear the stored URL
@@ -173,6 +179,8 @@ exports.logout = (req, res) => {
       console.error('Logout error:', err);
       return res.redirect('/');
     }
+    // Clear the session cookie
+    res.clearCookie('educard.sid');
     res.redirect('/');
   });
 };

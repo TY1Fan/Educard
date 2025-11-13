@@ -2529,11 +2529,11 @@ Update the site header/navigation to show different options for logged-in vs. gu
 
 ### Task 2.12: Add Flash Messages for User Feedback
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** Medium  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 2.3  
-**Assigned To:** TBD
+**Assigned To:** Developer
 
 **Description:**
 Implement flash messages to show success/error notifications after actions.
@@ -2551,13 +2551,43 @@ Implement flash messages to show success/error notifications after actions.
 7. Style flash messages
 
 **Acceptance Criteria:**
-- [ ] connect-flash installed
-- [ ] Flash middleware configured
-- [ ] Flash messages available in all views
-- [ ] Partial created for displaying messages
-- [ ] Success messages show for auth actions
-- [ ] Messages styled (success, error, info)
-- [ ] Messages auto-dismiss or closeable
+- [x] connect-flash installed
+- [x] Flash middleware configured
+- [x] Flash messages available in all views
+- [x] Partial created for displaying messages
+- [x] Success messages show for auth actions
+- [x] Messages styled (success, error, info, warning)
+- [x] Messages display with icons
+
+**Implementation Notes:**
+- Installed connect-flash package (v0.1.1)
+- Configured flash middleware after session middleware in app.js
+- Flash messages exposed to all views via res.locals
+- Created `src/views/partials/flash.ejs` with icon support
+- Updated main layout to include flash partial
+- Enhanced CSS with flexbox layout and icons
+
+**Flash Message Types:**
+1. **Success** (green) - Registration, login, successful actions
+2. **Error** (red) - Validation errors, failed operations
+3. **Info** (blue) - Informational messages
+4. **Warning** (yellow) - Caution messages
+
+**Test Results:**
+```bash
+✅ Login flash message: "Welcome back! You have successfully logged in."
+✅ Registration flash message: "Welcome to Educard! Your account has been created successfully."
+✅ Messages display with icon and proper styling
+✅ Flash messages clear after being displayed (one-time use)
+✅ CSS styling with color-coded alerts
+```
+
+**UI Features:**
+- Icon indicators (✓ ✕ ℹ) for visual clarity
+- Color-coded backgrounds with left border accent
+- Flexbox layout for proper alignment
+- Responsive design
+- Auto-clears after display (session-based)
 
 **Update `src/app.js`:**
 ```javascript

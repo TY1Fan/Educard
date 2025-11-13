@@ -443,6 +443,19 @@ textarea {
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-md);
   border-left: 4px solid;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.alert-icon {
+  font-size: 1.25rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.alert-message {
+  flex: 1;
 }
 
 .alert-success {
