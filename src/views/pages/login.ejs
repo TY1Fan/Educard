@@ -1,0 +1,41 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Login</h1>
+    <p class="subtitle">Welcome back to Educard</p>
+
+    <% if (locals.error) { %>
+      <div class="alert alert-error">
+        <%= locals.error %>
+      </div>
+    <% } %>
+
+    <form action="/auth/login" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="usernameOrEmail">Username or Email</label>
+        <input 
+          type="text" 
+          id="usernameOrEmail" 
+          name="usernameOrEmail" 
+          value="<%= locals.usernameOrEmail || '' %>"
+          required
+          placeholder="Enter your username or email">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          required
+          placeholder="Enter your password">
+      </div>
+
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
+    <p class="auth-footer">
+      Don't have an account? <a href="/auth/register">Register here</a>
+    </p>
+  </div>
+</div>

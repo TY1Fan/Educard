@@ -89,3 +89,77 @@ exports.register = async (req, res) => {
     });
   }
 };
+
+// Show login form
+exports.showLogin = (req, res) => {
+  res.render('pages/login', {
+    title: 'Login - Educard Forum',
+    error: null,
+    usernameOrEmail: ''
+  });
+};
+
+// Process login
+exports.login = async (req, res) => {
+  const { usernameOrEmail, password } = req.body;
+
+  try {
+    const { Op } = require('sequelize');
+    
+    // Find user by username or email
+    const user = await User.scope('withPassword').findOne({
+      where: {
+        [Op.or]: [
+          { username: usernameOrEmail },
+          { email: usernameOrEmail }
+        ]
+      }
+    });
+
+    // Generic error message (don't reveal if user exists)
+    if (!user) {
+      return res.render('pages/login', {
+        title: 'Login - Educard Forum',
+        error: 'Invalid credentials',
+        usernameOrEmail
+      });
+    }
+
+    // Verify password
+    const isValidPassword = await user.comparePassword(password);
+    
+    if (!isValidPassword) {
+      return res.render('pages/login', {
+        title: 'Login - Educard Forum',
+        error: 'Invalid credentials',
+        usernameOrEmail
+      });
+    }
+
+    // Check if account is active
+    if (!user.isActive) {
+      return res.render('pages/login', {
+        title: 'Login - Educard Forum',
+        error: 'Account is deactivated',
+        usernameOrEmail
+      });
+    }
+
+    // Log user in
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email
+    };
+
+    // Redirect to homepage
+    res.redirect('/');
+  } catch (error) {
+    console.error('Login error:', error);
+    res.render('pages/login', {
+      title: 'Login - Educard Forum',
+      error: 'An error occurred during login. Please try again.',
+      usernameOrEmail
+    });
+  }
+};

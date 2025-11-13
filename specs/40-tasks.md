@@ -1830,11 +1830,11 @@ app.use('/auth', authRoutes);
 
 ### Task 2.6: Create Login Form View
 
-**Status:** 🔴 Not Started  
+**Status:** � Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Task 2.4  
-**Assigned To:** TBD
+**Assigned To:** Developer
 
 **Description:**
 Create the login form page.
@@ -1851,13 +1851,20 @@ Create the login form page.
 7. Style consistently with registration form
 
 **Acceptance Criteria:**
-- [ ] `src/views/pages/login.ejs` file created
-- [ ] Form has username/email and password fields
-- [ ] Form uses POST method
-- [ ] Error display area included
-- [ ] Link to registration page included
-- [ ] Styled consistently
-- [ ] Mobile responsive
+- [x] `src/views/pages/login.ejs` file created
+- [x] Form has username/email and password fields
+- [x] Form uses POST method
+- [x] Error display area included
+- [x] Link to registration page included
+- [x] Styled consistently
+- [x] Mobile responsive
+
+**Implementation Notes:**
+- Login controller uses `Op.or` for username/email lookup
+- Password verification via `comparePassword` method
+- Session stores user data (id, username, email)
+- Generic error message prevents username enumeration
+- Tested successfully with both username and email login
 
 **File:** `src/views/pages/login.ejs`
 
