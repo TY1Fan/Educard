@@ -14,7 +14,11 @@ router.get('/category/:slug', forumController.showCategoryThreads);
 // New thread form (requires authentication)
 router.get('/category/:slug/new-thread', requireAuth, forumController.showNewThread);
 
-// Create new thread (requires authentication)
-router.post('/category/:slug/new-thread', requireAuth, forumController.createThread);
+// Create new thread (requires authentication and validation)
+router.post('/category/:slug/new-thread', 
+  requireAuth, 
+  forumController.createThreadValidation,
+  forumController.createThread
+);
 
 module.exports = router;

@@ -1,5 +1,7 @@
 const { sequelize } = require('../config/database');
 const { Category, Thread, Post, User } = require('../models');
+const { body, validationResult } = require('express-validator');
+const { uniqueSlugFromDB } = require('../utils/slugify');
 
 /**
  * Forum Controller
@@ -131,6 +133,25 @@ exports.showCategoryThreads = async (req, res) => {
 };
 
 /**
+ * Thread Creation Validation Rules
+ * Validates title and content for new threads
+ */
+exports.createThreadValidation = [
+  body('title')
+    .trim()
+    .notEmpty()
+    .withMessage('Thread title is required')
+    .isLength({ min: 1, max: 255 })
+    .withMessage('Title must be between 1 and 255 characters'),
+  body('content')
+    .trim()
+    .notEmpty()
+    .withMessage('Thread content is required')
+    .isLength({ min: 10, max: 10000 })
+    .withMessage('Content must be between 10 and 10,000 characters')
+];
+
+/**
  * Show New Thread Form
  * Displays the form to create a new thread (requires authentication)
  */
@@ -170,7 +191,6 @@ exports.showNewThread = async (req, res) => {
 exports.createThread = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { title, content } = req.body;
     const userId = req.session.user.id;
     
     // Find category by slug
@@ -183,34 +203,21 @@ exports.createThread = async (req, res) => {
       });
     }
 
-    // Validation
-    const errors = [];
+    // Check for validation errors from express-validator
+    const errors = validationResult(req);
     
-    if (!title || title.trim().length === 0) {
-      errors.push({ msg: 'Thread title is required' });
-    } else if (title.length > 255) {
-      errors.push({ msg: 'Thread title must be 255 characters or less' });
-    }
-    
-    if (!content || content.trim().length === 0) {
-      errors.push({ msg: 'Thread content is required' });
-    } else if (content.trim().length < 10) {
-      errors.push({ msg: 'Thread content must be at least 10 characters' });
-    } else if (content.length > 10000) {
-      errors.push({ msg: 'Thread content must be 10,000 characters or less' });
-    }
-    
-    if (errors.length > 0) {
+    if (!errors.isEmpty()) {
       return res.status(400).render('pages/new-thread', {
         title: `New Thread - ${category.name}`,
         category: category.toJSON(),
-        errors,
-        formData: { title, content }
+        errors: errors.array(),
+        formData: req.body
       });
     }
 
+    const { title, content } = req.body;
+
     // Generate unique slug for the thread
-    const { uniqueSlugFromDB } = require('../utils/slugify');
     const threadSlug = await uniqueSlugFromDB(title, Thread, { categoryId: category.id });
 
     // Create thread and first post in a transaction
@@ -243,20 +250,35 @@ exports.createThread = async (req, res) => {
   } catch (error) {
     console.error('Error creating thread:', error);
     
+    // Try to get category for error page
+    let category;
+    try {
+      category = await Category.findOne({ where: { slug: req.params.slug } });
+    } catch (err) {
+      // If we can't get category, render 500 error
+      return res.status(500).render('errors/500', {
+        title: 'Server Error',
+        message: 'Failed to create thread. Please try again later.'
+      });
+    }
+    
     // If it's a validation error from Sequelize
     if (error.name === 'SequelizeValidationError') {
       const errors = error.errors.map(err => ({ msg: err.message }));
       return res.status(400).render('pages/new-thread', {
-        title: `New Thread - ${req.params.slug}`,
-        category: await Category.findOne({ where: { slug: req.params.slug } }),
+        title: `New Thread - ${category.name}`,
+        category: category.toJSON(),
         errors,
         formData: req.body
       });
     }
     
-    res.status(500).render('errors/500', {
-      title: 'Server Error',
-      message: 'Failed to create thread. Please try again later.'
+    // Generic error
+    res.status(500).render('pages/new-thread', {
+      title: `New Thread - ${category.name}`,
+      category: category.toJSON(),
+      errors: [{ msg: 'Failed to create thread. Please try again.' }],
+      formData: req.body
     });
   }
 };

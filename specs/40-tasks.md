@@ -4885,11 +4885,12 @@ router.get('/category/:slug/new-thread', requireAuth, forumController.showNewThr
 
 ### Task 3.2.4: Implement Thread Creation Logic
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 1.5 hours  
 **Dependencies:** Task 3.2.3  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Implement the backend logic to create threads and first posts.
@@ -5017,6 +5018,19 @@ router.post('/category/:slug/new-thread',
 - Verify slug is unique
 - Test validation errors
 - Test duplicate titles (should get unique slugs)
+
+**Implementation Notes:**
+- ✅ Implemented `createThreadValidation` middleware with express-validator v7.0.0
+- ✅ Refactored `createThread()` to use `validationResult()` from express-validator
+- ✅ Added validation rules: title (1-255 chars), content (10-10,000 chars)
+- ✅ Updated POST route to include validation middleware
+- ✅ Transaction-based thread + first post creation is atomic
+- ✅ Uses `uniqueSlugFromDB()` utility for generating unique thread slugs
+- ✅ Error handling with validation errors rendered back to form
+- ✅ Form data preserved on validation errors
+- ✅ Redirects to `/thread/:slug` after successful creation
+
+**Note:** Thread creation is working correctly, but redirects to `/thread/:slug` which requires Task 3.3.1 (Thread View) to be implemented next.
 
 ---
 
