@@ -47,6 +47,32 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Update relative times every minute
   setInterval(updateRelativeTimes, 60000);
+  
+  // Show/hide jump navigation buttons based on scroll position
+  const jumpNav = document.getElementById('jump-nav');
+  if (jumpNav) {
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 300) {
+        jumpNav.classList.add('visible');
+      } else {
+        jumpNav.classList.remove('visible');
+      }
+    });
+  }
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    // Shift + T = Jump to top
+    if (e.shiftKey && e.key === 'T') {
+      e.preventDefault();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+    // Shift + B = Jump to bottom
+    if (e.shiftKey && e.key === 'B') {
+      e.preventDefault();
+      window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    }
+  });
 
   // Strong confirmation for thread deletion
   const threadDeleteForms = document.querySelectorAll('form[action*="/thread/"][action*="/delete"]');

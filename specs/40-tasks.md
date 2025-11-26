@@ -7170,34 +7170,50 @@ Display "last post" information on category and homepage to show forum activity.
 
 ### Task 4.1.4: Add Breadcrumb Enhancement & Jump Navigation
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Complete  
 **Priority:** Low  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Phase 3 complete  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Enhance navigation with improved breadcrumbs and "jump to" features.
 
 **Steps:**
-1. Add "Jump to Top" and "Jump to Bottom" buttons on long threads
-2. Add "Jump to Page" dropdown on paginated views
-3. Improve breadcrumb styling and microdata (schema.org)
-4. Add keyboard shortcut hints (optional)
-5. Smooth scroll behavior for anchor links
+1. ✅ Add "Jump to Top" and "Jump to Bottom" buttons on long threads
+2. ✅ Add "Jump to Page" dropdown on paginated views
+3. ✅ Improve breadcrumb styling and microdata (schema.org)
+4. ✅ Add keyboard shortcut hints (Shift+T for top, Shift+B for bottom)
+5. ✅ Smooth scroll behavior for anchor links
 
 **Acceptance Criteria:**
-- [ ] Jump to top/bottom buttons visible on long pages
-- [ ] Jump to page dropdown on pagination
-- [ ] Breadcrumbs use proper semantic HTML
-- [ ] Smooth scrolling for jumps
-- [ ] Mobile-friendly button placement
+- [x] Jump to top/bottom buttons visible on long pages
+- [x] Jump to page dropdown on pagination
+- [x] Breadcrumbs use proper semantic HTML
+- [x] Smooth scrolling for jumps
+- [x] Mobile-friendly button placement
 
-**Files to Modify:**
-- `src/views/partials/breadcrumb.ejs`
-- `src/views/pages/thread.ejs`
-- `public/js/main.js`
-- `public/css/main.css`
+**Files Modified:**
+- `src/views/pages/category.ejs` - Added Schema.org microdata, jump to page dropdown
+- `src/views/pages/thread.ejs` - Added Schema.org microdata, jump navigation buttons, page dropdown
+- `src/views/pages/new-thread.ejs` - Added Schema.org microdata
+- `src/views/pages/edit-post.ejs` - Added Schema.org microdata
+- `public/js/main.js` - Added keyboard shortcuts (Shift+T, Shift+B), scroll visibility
+- `public/css/style.css` - Added jump nav styles, page selector styles, mobile responsive
+
+**Implementation Details:**
+- **Schema.org Microdata**: All breadcrumbs use BreadcrumbList structured data for SEO
+- **Jump Navigation**: Fixed position buttons (bottom-right) appear after scrolling 300px
+- **Keyboard Shortcuts**: 
+  - Shift+T: Jump to top
+  - Shift+B: Jump to bottom
+- **Jump to Page**: Dropdown appears on pagination when totalPages > 2
+- **Smooth Scrolling**: CSS `scroll-behavior: smooth` + JavaScript smooth scroll
+- **Mobile Responsive**: 
+  - Jump buttons hide labels on mobile (icon only)
+  - Page selector stacks vertically on small screens
+  - Smaller positioning for touch targets
 
 ---
 

@@ -114,11 +114,32 @@
 </style>
 
 <div class="container">
-  <nav class="breadcrumb">
-    <a href="/">Home</a> &raquo; 
-    <a href="/category/<%= post.thread.category.slug %>"><%= post.thread.category.name %></a> &raquo;
-    <a href="/thread/<%= post.thread.slug %>"><%= post.thread.title %></a> &raquo;
-    <span>Edit Post</span>
+  <nav class="breadcrumb" aria-label="Breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/" itemprop="item">
+        <span itemprop="name">Home</span>
+      </a>
+      <meta itemprop="position" content="1" />
+    </span>
+    <span class="separator" aria-hidden="true">&raquo;</span>
+    <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/category/<%= post.thread.category.slug %>" itemprop="item">
+        <span itemprop="name"><%= post.thread.category.name %></span>
+      </a>
+      <meta itemprop="position" content="2" />
+    </span>
+    <span class="separator" aria-hidden="true">&raquo;</span>
+    <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a href="/thread/<%= post.thread.slug %>" itemprop="item">
+        <span itemprop="name"><%= post.thread.title %></span>
+      </a>
+      <meta itemprop="position" content="3" />
+    </span>
+    <span class="separator" aria-hidden="true">&raquo;</span>
+    <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span itemprop="name">Edit Post</span>
+      <meta itemprop="position" content="4" />
+    </span>
   </nav>
 
   <div class="page-header">

@@ -1,6 +1,15 @@
-<nav class="breadcrumb">
-  <a href="/">Home</a> &raquo; 
-  <span><%= category.name %></span>
+<nav class="breadcrumb" aria-label="Breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+  <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <a href="/" itemprop="item">
+      <span itemprop="name">Home</span>
+    </a>
+    <meta itemprop="position" content="1" />
+  </span>
+  <span class="separator" aria-hidden="true">&raquo;</span>
+  <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <span itemprop="name"><%= category.name %></span>
+    <meta itemprop="position" content="2" />
+  </span>
 </nav>
 
 <div class="category-header-page">
@@ -108,9 +117,19 @@
           <span></span>
         <% } %>
         
-        <span class="page-info">
-          Page <strong><%= currentPage %></strong> of <strong><%= totalPages %></strong>
-        </span>
+        <div class="page-selector">
+          <span class="page-info">
+            Page <strong><%= currentPage %></strong> of <strong><%= totalPages %></strong>
+          </span>
+          <% if (totalPages > 2) { %>
+            <select class="jump-to-page" aria-label="Jump to page" onchange="if(this.value) window.location.href='?page='+this.value">
+              <option value="">Jump to...</option>
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <option value="<%= i %>" <%= i === currentPage ? 'selected' : '' %>>Page <%= i %></option>
+              <% } %>
+            </select>
+          <% } %>
+        </div>
         
         <% if (hasNextPage) { %>
           <a href="?page=<%= currentPage + 1 %>" class="btn btn-secondary">

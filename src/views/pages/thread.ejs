@@ -262,10 +262,25 @@
   </style>
 
   <div class="container">
-    <nav class="breadcrumb">
-      <a href="/">Home</a> &raquo; 
-      <a href="/category/<%= thread.category.slug %>"><%= thread.category.name %></a> &raquo;
-      <span><%= thread.title %></span>
+    <nav class="breadcrumb" aria-label="Breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+      <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a href="/" itemprop="item">
+          <span itemprop="name">Home</span>
+        </a>
+        <meta itemprop="position" content="1" />
+      </span>
+      <span class="separator" aria-hidden="true">&raquo;</span>
+      <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a href="/category/<%= thread.category.slug %>" itemprop="item">
+          <span itemprop="name"><%= thread.category.name %></span>
+        </a>
+        <meta itemprop="position" content="2" />
+      </span>
+      <span class="separator" aria-hidden="true">&raquo;</span>
+      <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <span itemprop="name"><%= thread.title %></span>
+        <meta itemprop="position" content="3" />
+      </span>
     </nav>
 
     <div class="thread-header">
@@ -351,6 +366,22 @@
       <% }) %>
     </section>
 
+    <!-- Jump Navigation Buttons -->
+    <div class="jump-nav" id="jump-nav">
+      <button class="jump-btn jump-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Jump to top (Shift + T)" aria-label="Jump to top">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"/>
+        </svg>
+        <span class="jump-label">Top</span>
+      </button>
+      <button class="jump-btn jump-bottom" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" title="Jump to bottom (Shift + B)" aria-label="Jump to bottom">
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+        </svg>
+        <span class="jump-label">Bottom</span>
+      </button>
+    </div>
+
     <% if (totalPages > 1) { %>
       <nav class="pagination">
         <% if (hasPrevPage) { %>
@@ -359,7 +390,17 @@
           <span></span>
         <% } %>
         
-        <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+        <div class="page-selector">
+          <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+          <% if (totalPages > 2) { %>
+            <select class="jump-to-page" aria-label="Jump to page" onchange="if(this.value) window.location.href='?page='+this.value">
+              <option value="">Jump to...</option>
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <option value="<%= i %>" <%= i === currentPage ? 'selected' : '' %>>Page <%= i %></option>
+              <% } %>
+            </select>
+          <% } %>
+        </div>
         
         <% if (hasNextPage) { %>
           <a href="?page=<%= currentPage + 1 %>" class="btn btn-secondary">Next &raquo;</a>

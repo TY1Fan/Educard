@@ -1,7 +1,22 @@
-<nav class="breadcrumb">
-  <a href="/">Home</a> &raquo; 
-  <a href="/category/<%= category.slug %>"><%= category.name %></a> &raquo;
-  <span>New Thread</span>
+<nav class="breadcrumb" aria-label="Breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+  <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <a href="/" itemprop="item">
+      <span itemprop="name">Home</span>
+    </a>
+    <meta itemprop="position" content="1" />
+  </span>
+  <span class="separator" aria-hidden="true">&raquo;</span>
+  <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <a href="/category/<%= category.slug %>" itemprop="item">
+      <span itemprop="name"><%= category.name %></span>
+    </a>
+    <meta itemprop="position" content="2" />
+  </span>
+  <span class="separator" aria-hidden="true">&raquo;</span>
+  <span itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+    <span itemprop="name">New Thread</span>
+    <meta itemprop="position" content="3" />
+  </span>
 </nav>
 
 <div class="page-header">
