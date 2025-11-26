@@ -6487,11 +6487,12 @@ app.use('/', userRoutes);
 
 ### Task 3.5.2: Create Edit Profile Page
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** Medium  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 3.5.1  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Create page for users to edit their profile information.
@@ -6614,6 +6615,32 @@ router.get('/profile/edit', requireAuth, userController.showEditProfile);
 - Click "Edit Profile" button
 - Form displays with current data
 - Username field is disabled
+
+**Implementation Notes:**
+- ✅ Added `showEditProfile()` function to userController.js
+- ✅ Fetches authenticated user by session ID
+- ✅ Retrieves username, email, displayName attributes
+- ✅ Renders edit-profile view with user data
+- ✅ Error handling with try-catch
+- ✅ Created `src/views/pages/edit-profile.ejs` view (3.8KB)
+- ✅ Page header with "Edit Profile" title
+- ✅ Error display support for validation messages
+- ✅ Form with CSRF token protection
+- ✅ Username field (disabled, cannot be changed)
+- ✅ Display Name field (optional, maxlength 100)
+- ✅ Email field (required, must be unique)
+- ✅ Helper text for each field
+- ✅ Save Changes and Cancel buttons
+- ✅ Change Password section (placeholder for future)
+- ✅ Embedded CSS for form styling
+- ✅ Responsive design for mobile
+- ✅ Added GET route: /profile/edit with requireAuth middleware
+- ✅ Route positioned before /profile/:username to avoid conflicts
+- ✅ Imported requireAuth middleware in users.js
+- ✅ Tested: Route requires authentication (302 redirect)
+- ✅ Form action: POST /profile/edit (ready for Task 3.5.3)
+
+**Note:** Users can now access the edit profile form to update their information!
 
 ---
 

@@ -81,3 +81,29 @@ exports.showProfile = async (req, res) => {
     });
   }
 };
+
+/**
+ * Show Edit Profile Form
+ * Displays form for user to edit their own profile
+ */
+exports.showEditProfile = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+
+    const user = await User.findByPk(userId, {
+      attributes: ['id', 'username', 'email', 'displayName']
+    });
+
+    res.render('pages/edit-profile', {
+      title: 'Edit Profile',
+      profileUser: user,
+      errors: null
+    });
+  } catch (error) {
+    console.error('Error showing edit profile:', error);
+    res.status(500).render('errors/500', {
+      title: 'Error',
+      message: 'Failed to load edit form'
+    });
+  }
+};
