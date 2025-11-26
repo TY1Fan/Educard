@@ -37,6 +37,12 @@ const User = sequelize.define('User', {
     allowNull: true,
     field: 'display_name'
   },
+  role: {
+    type: DataTypes.ENUM('user', 'moderator', 'admin'),
+    defaultValue: 'user',
+    allowNull: false,
+    comment: 'User role: user (default), moderator, or admin'
+  },
   isActive: {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
@@ -74,6 +80,26 @@ const User = sequelize.define('User', {
 // Instance method to compare passwords
 User.prototype.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Instance methods for role checking
+User.prototype.isAdmin = function() {
+  return this.role === 'admin';
+};
+
+User.prototype.isModerator = function() {
+  return this.role === 'moderator' || this.role === 'admin';
+};
+
+User.prototype.isUser = function() {
+  return this.role === 'user';
+};
+
+User.prototype.hasRole = function(role) {
+  if (Array.isArray(role)) {
+    return role.includes(this.role);
+  }
+  return this.role === role;
 };
 
 module.exports = User;

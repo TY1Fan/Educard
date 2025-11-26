@@ -165,7 +165,14 @@
     </div>
     <div class="profile-main">
       <div class="profile-info">
-        <h1><%= profileUser.displayName || profileUser.username %></h1>
+        <h1>
+          <%= profileUser.displayName || profileUser.username %>
+          <% if (profileUser.role === 'admin') { %>
+            <span class="role-badge admin-badge" title="Administrator">ADMIN</span>
+          <% } else if (profileUser.role === 'moderator') { %>
+            <span class="role-badge moderator-badge" title="Moderator">MODERATOR</span>
+          <% } %>
+        </h1>
         <p class="username">@<%= profileUser.username %></p>
       <p class="member-since">
         Member since <%= new Date(profileUser.createdAt).toLocaleDateString() %>

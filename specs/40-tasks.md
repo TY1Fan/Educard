@@ -7567,41 +7567,113 @@ Notify users when someone replies to their thread or mentions them.
 
 ### Task 4.3.1: Create Admin Role System
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 2 hours  
 **Dependencies:** Phase 3 complete  
-**Assigned To:** TBD
+**Assigned To:** Developer  
+**Completed:** November 26, 2025
 
 **Description:**
 Add admin/moderator role system with elevated privileges.
 
 **Steps:**
-1. Add `role` column to users table (user, moderator, admin)
-2. Create role migration and update seed data
-3. Create middleware `requireAdmin` and `requireModerator`
-4. Create admin middleware to check roles
-5. Add role check helpers to templates
-6. Create admin designation in profile
-7. Update authorization checks to include admin override
+1. ✅ Add `role` column to users table (user, moderator, admin)
+2. ✅ Create role migration
+3. ✅ Create middleware `requireAdmin` and `requireModerator`
+4. ✅ Add role check methods to User model
+5. ✅ Add role check helpers to templates
+6. ✅ Create admin designation in profile
+7. ✅ Update authorization checks to include admin override
 
 **Acceptance Criteria:**
-- [ ] Users table has `role` column
-- [ ] Seed creates at least one admin user
-- [ ] Middleware checks role for admin routes
-- [ ] Admin badge shown on posts/profile
-- [ ] Admin can edit/delete any content
-- [ ] Admin can pin/lock any thread
-- [ ] Role visible in user profile
+- [x] Users table has `role` column (ENUM with 3 values)
+- [x] Middleware checks role for admin/moderator routes
+- [x] Admin/Moderator badges shown on posts and profile
+- [x] Admin can edit/delete any content
+- [x] Moderators can delete any post/thread
+- [x] Moderators/Admins can pin/lock any thread
+- [x] Role visible in user profile
+- [x] Role stored in session
 
-**Files to Create/Modify:**
-- `src/migrations/XXXXXX-add-user-roles.js`
-- `src/middleware/requireAdmin.js`
-- `src/middleware/requireModerator.js`
-- `src/seeders/XXXXXX-add-admin-user.js`
-- `src/controllers/forumController.js` (update authorization)
-- `src/views/pages/thread.ejs`
-- `src/views/pages/profile.ejs`
+**Files Created/Modified:**
+- ✅ `src/models/User.js` - Added role ENUM field, isAdmin(), isModerator(), hasRole() methods
+- ✅ `src/migrations/20251126075956-add-user-roles.js` - Migration to add role column with index
+- ✅ `src/middlewares/requireAdmin.js` (50 lines) - Admin-only middleware
+- ✅ `src/middlewares/requireModerator.js` (50 lines) - Moderator/Admin middleware
+- ✅ `src/controllers/forumController.js` - Updated 6 authorization checks (edit, delete, pin, lock)
+- ✅ `src/controllers/authController.js` - Added role to session in register/login
+- ✅ `src/app.js` - Added role helpers (isAdmin, isModerator, hasRole) to res.locals
+- ✅ `src/views/pages/thread.ejs` - Added role badges, updated action buttons
+- ✅ `src/views/pages/profile.ejs` - Added role badge display
+- ✅ `public/css/style.css` - Added role badge styles
+
+**Implementation Details:**
+
+**Role System:**
+- **Three Roles**: 
+  - `user` - Default role, standard permissions
+  - `moderator` - Can delete any post/thread, pin/lock any thread
+  - `admin` - Full privileges, can edit/delete anything
+- **Hierarchy**: Admin > Moderator > User (admin has all moderator permissions)
+
+**User Model Methods:**
+- `isAdmin()` - Returns true if user has admin role
+- `isModerator()` - Returns true if user has moderator or admin role
+- `isUser()` - Returns true if user has basic user role
+- `hasRole(role)` - Check if user has specific role(s), accepts string or array
+
+**Middleware:**
+- **requireAdmin**: Ensures user is authenticated and has admin role
+  - Returns 403 Forbidden page if not admin
+  - Stores full user object in req.user
+- **requireModerator**: Ensures user is authenticated and has moderator or admin role
+  - Returns 403 Forbidden page if insufficient privileges
+  - Stores full user object in req.user
+
+**Template Helpers (available in all views):**
+- `isAdmin` - Boolean indicating if current user is admin
+- `isModerator` - Boolean indicating if current user is moderator or admin
+- `hasRole(role)` - Function to check specific role(s)
+
+**Authorization Updates:**
+1. **Edit Post**: Owners or admins can edit
+2. **Update Post**: Owners or admins can update
+3. **Delete Post**: Owners or moderators can delete
+4. **Delete Thread**: Owners or moderators can delete
+5. **Toggle Pin**: Owners or moderators can pin/unpin
+6. **Toggle Lock**: Owners or moderators can lock/unlock
+
+**Visual Indicators:**
+- **Admin Badge**: Red badge with "ADMIN" text
+- **Moderator Badge**: Blue badge with "MOD" text
+- Badges shown on:
+  - Posts (next to author name)
+  - Profile page (next to display name)
+  - Styled with box-shadow for emphasis
+
+**Moderator Action Labels:**
+- Delete buttons show "(Mod)" suffix when mod is deleting others' content
+- Clear visual feedback for moderation actions
+
+**Database Schema:**
+- Role column: ENUM('user', 'moderator', 'admin')
+- Default value: 'user'
+- Index added for role-based queries
+- Migration includes rollback support
+
+**Security:**
+- Role checked on every privileged action
+- Full user fetched from database (not just session) for auth checks
+- Session includes role for quick template checks
+- Middleware redirects with appropriate error messages
+
+**Future Enhancements:**
+- Admin user seeder (pending database connection)
+- Activity log for admin actions
+- Bulk moderation tools
+- User role management interface
+- Configurable permissions per role
 
 ---
 

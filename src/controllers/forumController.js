@@ -578,8 +578,11 @@ exports.showEditPost = async (req, res) => {
       });
     }
 
-    // Check ownership
-    if (post.userId !== userId) {
+    // Check ownership (allow admins to edit any post)
+    const currentUser = await User.findByPk(userId);
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    
+    if (post.userId !== userId && !isAdmin) {
       return res.status(403).render('errors/403', {
         title: 'Forbidden',
         message: 'You can only edit your own posts.'
@@ -636,8 +639,11 @@ exports.updatePost = async (req, res) => {
       });
     }
 
-    // Check ownership
-    if (post.userId !== userId) {
+    // Check ownership (allow admins to edit any post)
+    const currentUser = await User.findByPk(userId);
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    
+    if (post.userId !== userId && !isAdmin) {
       return res.status(403).render('errors/403', {
         title: 'Forbidden',
         message: 'You can only edit your own posts.'
@@ -696,8 +702,11 @@ exports.deletePost = async (req, res) => {
       });
     }
 
-    // Check ownership
-    if (post.userId !== userId) {
+    // Check ownership (allow admins/moderators to delete any post)
+    const currentUser = await User.findByPk(userId);
+    const isModerator = currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator');
+    
+    if (post.userId !== userId && !isModerator) {
       return res.status(403).render('errors/403', {
         title: 'Forbidden',
         message: 'You can only delete your own posts.'
@@ -766,8 +775,11 @@ exports.deleteThread = async (req, res) => {
       });
     }
 
-    // Check ownership
-    if (thread.userId !== userId) {
+    // Check ownership (allow admins/moderators to delete any thread)
+    const currentUser = await User.findByPk(userId);
+    const isModerator = currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator');
+    
+    if (thread.userId !== userId && !isModerator) {
       return res.status(403).render('errors/403', {
         title: 'Forbidden',
         message: 'You can only delete your own threads.'
@@ -803,9 +815,12 @@ exports.togglePin = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Thread not found' });
     }
 
-    // Check ownership
-    if (thread.userId !== userId) {
-      return res.status(403).json({ success: false, message: 'You can only pin your own threads' });
+    // Check ownership (allow moderators/admins to pin any thread)
+    const currentUser = await User.findByPk(userId);
+    const isModerator = currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator');
+    
+    if (thread.userId !== userId && !isModerator) {
+      return res.status(403).json({ success: false, message: 'Only thread authors and moderators can pin threads' });
     }
 
     // Toggle pin status
@@ -836,9 +851,12 @@ exports.toggleLock = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Thread not found' });
     }
 
-    // Check ownership
-    if (thread.userId !== userId) {
-      return res.status(403).json({ success: false, message: 'You can only lock your own threads' });
+    // Check ownership (allow moderators/admins to lock any thread)
+    const currentUser = await User.findByPk(userId);
+    const isModerator = currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator');
+    
+    if (thread.userId !== userId && !isModerator) {
+      return res.status(403).json({ success: false, message: 'Only thread authors and moderators can lock threads' });
     }
 
     // Toggle lock status

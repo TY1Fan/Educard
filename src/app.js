@@ -45,6 +45,18 @@ app.use((req, res, next) => {
   res.locals.successMessage = req.flash("success");
   res.locals.errorMessage = req.flash("error");
   res.locals.infoMessage = req.flash("info");
+  
+  // Add role helper functions for templates
+  res.locals.isAdmin = req.session.user && req.session.user.role === 'admin';
+  res.locals.isModerator = req.session.user && (req.session.user.role === 'moderator' || req.session.user.role === 'admin');
+  res.locals.hasRole = function(role) {
+    if (!req.session.user) return false;
+    if (Array.isArray(role)) {
+      return role.includes(req.session.user.role);
+    }
+    return req.session.user.role === role;
+  };
+  
   next();
 });
 

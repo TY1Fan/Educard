@@ -75,7 +75,8 @@ exports.register = async (req, res) => {
     req.session.user = {
       id: user.id,
       username: user.username,
-      email: user.email
+      email: user.email,
+      role: user.role || 'user'
     };
 
     // Flash success message
@@ -152,7 +153,8 @@ exports.login = async (req, res) => {
     req.session.user = {
       id: user.id,
       username: user.username,
-      email: user.email
+      email: user.email,
+      role: user.role || 'user'
     };
 
     // Flash success message

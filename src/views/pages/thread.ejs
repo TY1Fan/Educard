@@ -299,7 +299,7 @@
           <% } %>
           <%= thread.title %>
         </h1>
-        <% if (isAuthenticated && user.id === thread.userId) { %>
+        <% if (isAuthenticated && (user.id === thread.userId || isModerator)) { %>
           <div class="thread-controls">
             <form action="/thread/<%= thread.slug %>/pin" method="POST" style="display: inline;">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -317,10 +317,12 @@
         <% } %>
       </div>
       <div class="thread-actions">
-        <% if (isAuthenticated && user.id === thread.userId) { %>
+        <% if (isAuthenticated && (user.id === thread.userId || isModerator)) { %>
           <form action="/thread/<%= thread.slug %>/delete" method="POST" style="display: inline;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button type="submit" class="btn btn-danger delete-btn" onclick="return confirm('Are you sure you want to delete this thread? This action cannot be undone.');">Delete Thread</button>
+            <button type="submit" class="btn btn-danger delete-btn" onclick="return confirm('Are you sure you want to delete this thread? This action cannot be undone.');">
+              Delete Thread<% if (user.id !== thread.userId) { %> (Mod)<% } %>
+            </button>
           </form>
         <% } %>
       </div>
@@ -332,7 +334,14 @@
           <aside class="post-author">
             <%- include('../partials/user-avatar', { user: post.author, size: 'large', linkToProfile: true }) %>
             <div class="author-info">
-              <strong><a href="/profile/<%= post.author.username %>"><%= post.author.displayName || post.author.username %></a></strong>
+              <strong>
+                <a href="/profile/<%= post.author.username %>"><%= post.author.displayName || post.author.username %></a>
+                <% if (post.author.role === 'admin') { %>
+                  <span class="role-badge admin-badge" title="Administrator">ADMIN</span>
+                <% } else if (post.author.role === 'moderator') { %>
+                  <span class="role-badge moderator-badge" title="Moderator">MOD</span>
+                <% } %>
+              </strong>
               <small>Member since <%= new Date(post.author.createdAt).toLocaleDateString() %></small>
             </div>
           </aside>
@@ -377,13 +386,17 @@
                 </div>
               </div>
               
-              <% if (isAuthenticated && user.id === post.userId) { %>
+              <% if (isAuthenticated && (user.id === post.userId || isAdmin || isModerator)) { %>
                 <div class="post-actions">
-                  <a href="/post/<%= post.id %>/edit" class="btn btn-sm">Edit</a>
-                  <% if (!post.isFirstPost) { %>
+                  <% if (user.id === post.userId || isAdmin) { %>
+                    <a href="/post/<%= post.id %>/edit" class="btn btn-sm">Edit</a>
+                  <% } %>
+                  <% if (!post.isFirstPost || isModerator) { %>
                     <form action="/post/<%= post.id %>/delete" method="POST" style="display: inline;">
                       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                      <button type="submit" class="btn btn-sm btn-danger delete-btn" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
+                      <button type="submit" class="btn btn-sm btn-danger delete-btn" onclick="return confirm('Are you sure you want to delete this post?');">
+                        Delete<% if (user.id !== post.userId) { %> (Mod)<% } %>
+                      </button>
                     </form>
                   <% } %>
                 </div>
