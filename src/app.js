@@ -88,9 +88,11 @@ app.get("/test-session", (req, res) => {
 // Mount routes
 const authRoutes = require("./routes/auth");
 const forumRoutes = require("./routes/forum");
+const userRoutes = require("./routes/users");
 
 app.use("/auth", authRoutes);
 app.use("/", forumRoutes);
+app.use("/", userRoutes);
 
 // Test route for authentication middleware
 const { requireAuth } = require("./middlewares/auth");

@@ -6138,11 +6138,12 @@ Are you absolutely sure?
 
 ### Task 3.5.1: Create User Profile Page
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** Medium  
 **Estimated Time:** 1.5 hours  
 **Dependencies:** Task 3.4.4  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Create user profile pages showing user info and activity.
@@ -6453,6 +6454,34 @@ app.use('/', userRoutes);
 - Stats are accurate
 - Recent activity shows
 - Edit button appears for own profile
+
+**Implementation Notes:**
+- ✅ Created `src/controllers/userController.js` controller
+- ✅ Added `showProfile()` function to fetch user and activity
+- ✅ Fetches user by username with specific attributes
+- ✅ Returns 404 if user not found
+- ✅ Calculates thread count and post count
+- ✅ Fetches recent threads (5 most recent) with category info
+- ✅ Fetches recent posts (5 most recent, excluding first posts) with thread info
+- ✅ Detects if viewing own profile (isOwnProfile flag)
+- ✅ Created `src/views/pages/profile.ejs` view
+- ✅ Profile header with username, display name, join date
+- ✅ "Edit Profile" button for own profile (placeholder link)
+- ✅ Stats cards showing thread and post counts
+- ✅ Recent Threads section with links to threads and categories
+- ✅ Recent Posts section with excerpt and thread link
+- ✅ Empty state messages when no activity
+- ✅ Embedded CSS for profile-specific styling
+- ✅ Responsive design for mobile devices
+- ✅ Created `src/routes/users.js` routes file
+- ✅ Route: GET /profile/:username
+- ✅ Mounted user routes in app.js
+- ✅ Tested: Profile displays correctly with stats
+- ✅ Tested: 404 for non-existent users
+- ✅ Tested: Recent threads display correctly
+- ✅ Tested: Post counts accurate
+
+**Note:** Users now have profile pages showing their forum activity and statistics!
 
 ---
 

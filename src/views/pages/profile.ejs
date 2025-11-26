@@ -1,0 +1,215 @@
+<style>
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .profile-info h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+  }
+
+  .username {
+    color: var(--secondary-color);
+    margin: 0.25rem 0;
+    font-size: 1.1rem;
+  }
+
+  .member-since {
+    color: var(--secondary-color);
+    font-size: 0.875rem;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+  }
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+
+  .stat-label {
+    color: var(--secondary-color);
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .profile-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .profile-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--text-color);
+  }
+
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .activity-item {
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    transition: border-color 0.2s;
+  }
+
+  .activity-item:hover {
+    border-color: var(--primary-color);
+  }
+
+  .activity-item h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+
+  .activity-item h3 a {
+    color: var(--text-color);
+    text-decoration: none;
+  }
+
+  .activity-item h3 a:hover {
+    color: var(--primary-color);
+  }
+
+  .activity-meta {
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+    margin: 0;
+  }
+
+  .activity-meta a {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  .activity-meta a:hover {
+    text-decoration: underline;
+  }
+
+  .post-excerpt {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+    line-height: 1.5;
+  }
+
+  .empty-state {
+    color: var(--secondary-color);
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .profile-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .profile-actions {
+      width: 100%;
+    }
+
+    .profile-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="container">
+  <div class="profile-header">
+    <div class="profile-info">
+      <h1><%= profileUser.displayName || profileUser.username %></h1>
+      <p class="username">@<%= profileUser.username %></p>
+      <p class="member-since">
+        Member since <%= new Date(profileUser.createdAt).toLocaleDateString() %>
+      </p>
+    </div>
+    
+    <% if (isOwnProfile) { %>
+      <div class="profile-actions">
+        <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
+      </div>
+    <% } %>
+  </div>
+
+  <div class="profile-stats">
+    <div class="stat-card">
+      <div class="stat-number"><%= threadCount %></div>
+      <div class="stat-label">Threads</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number"><%= postCount %></div>
+      <div class="stat-label">Posts</div>
+    </div>
+  </div>
+
+  <section class="profile-section">
+    <h2>Recent Threads</h2>
+    <% if (recentThreads && recentThreads.length > 0) { %>
+      <div class="activity-list">
+        <% recentThreads.forEach(thread => { %>
+          <div class="activity-item">
+            <h3>
+              <a href="/thread/<%= thread.slug %>"><%= thread.title %></a>
+            </h3>
+            <p class="activity-meta">
+              in <a href="/category/<%= thread.category.slug %>"><%= thread.category.name %></a>
+              • <%= new Date(thread.createdAt).toLocaleDateString() %>
+            </p>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="empty-state">No threads yet.</p>
+    <% } %>
+  </section>
+
+  <section class="profile-section">
+    <h2>Recent Posts</h2>
+    <% if (recentPosts && recentPosts.length > 0) { %>
+      <div class="activity-list">
+        <% recentPosts.forEach(post => { %>
+          <div class="activity-item">
+            <p class="post-excerpt"><%= post.content.length > 150 ? post.content.substring(0, 150) + '...' : post.content %></p>
+            <p class="activity-meta">
+              in <a href="/thread/<%= post.thread.slug %>"><%= post.thread.title %></a>
+              • <%= new Date(post.createdAt).toLocaleDateString() %>
+            </p>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="empty-state">No posts yet.</p>
+    <% } %>
+  </section>
+</div>
