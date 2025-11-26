@@ -5865,11 +5865,12 @@ router.post('/post/:id/edit',
 
 ### Task 3.4.3: Implement Post Deletion
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 3.4.2  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Implement post deletion with ownership verification.
@@ -5973,6 +5974,31 @@ router.post('/post/:id/delete', requireAuth, forumController.deletePost);
 - Verify deleted from database
 - Try deleting first post with replies (should fail)
 - Delete confirmation works (JavaScript)
+
+**Implementation Notes:**
+- ✅ Added Op import from sequelize for query operators
+- ✅ Added `deletePost()` controller function to forumController.js
+- ✅ Fetches post by ID with thread and category associations
+- ✅ Returns 404 if post not found
+- ✅ Ownership verification: checks post.userId === session.user.id
+- ✅ Returns 403 Forbidden if user doesn't own the post
+- ✅ Special handling for first posts:
+  - Counts other posts in the thread using Op.ne (not equal)
+  - Prevents deletion if replies exist
+  - Shows error message: "Cannot delete the first post while replies exist. Delete the entire thread instead."
+- ✅ Deletes post using post.destroy()
+- ✅ Checks if thread still exists after deletion
+- ✅ Redirects to thread if it still exists
+- ✅ Redirects to category if thread was deleted (first post with no replies)
+- ✅ Flash success message: "Post deleted successfully!"
+- ✅ Flash error messages for failures
+- ✅ Error handling with try-catch
+- ✅ Added POST route: /post/:id/delete with requireAuth middleware
+- ✅ Tested: Regular posts can be deleted
+- ✅ Tested: First post deletion blocked when replies exist
+- ✅ Client-side confirmation via onclick in thread.ejs view
+
+**Note:** Posts can now be deleted with proper ownership and first-post protection!
 
 ---
 

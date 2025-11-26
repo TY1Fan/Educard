@@ -41,4 +41,7 @@ router.post('/post/:id/edit',
   forumController.updatePost
 );
 
+// Delete post (requires authentication)
+router.post('/post/:id/delete', requireAuth, forumController.deletePost);
+
 module.exports = router;

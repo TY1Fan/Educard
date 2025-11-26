@@ -1,4 +1,5 @@
 const { sequelize } = require('../config/database');
+const { Op } = require('sequelize');
 const { Category, Thread, Post, User } = require('../models');
 const { body, validationResult } = require('express-validator');
 const { uniqueSlugFromDB } = require('../utils/slugify');
@@ -523,6 +524,79 @@ exports.updatePost = async (req, res) => {
   } catch (error) {
     console.error('Error updating post:', error);
     req.flash('error', 'Failed to update post.');
+    res.redirect('back');
+  }
+};
+
+/**
+ * Delete Post
+ * Handles deleting an existing post with ownership verification
+ */
+exports.deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+
+    const post = await Post.findByPk(id, {
+      include: [{
+        model: Thread,
+        as: 'thread',
+        include: [{
+          model: Category,
+          as: 'category'
+        }]
+      }]
+    });
+
+    if (!post) {
+      return res.status(404).render('errors/404', {
+        title: 'Post Not Found',
+        message: 'The requested post does not exist.'
+      });
+    }
+
+    // Check ownership
+    if (post.userId !== userId) {
+      return res.status(403).render('errors/403', {
+        title: 'Forbidden',
+        message: 'You can only delete your own posts.'
+      });
+    }
+
+    // If it's the first post, check if there are other posts
+    if (post.isFirstPost) {
+      const otherPosts = await Post.count({
+        where: {
+          threadId: post.threadId,
+          id: { [Op.ne]: post.id }
+        }
+      });
+
+      if (otherPosts > 0) {
+        req.flash('error', 'Cannot delete the first post while replies exist. Delete the entire thread instead.');
+        return res.redirect(`/thread/${post.thread.slug}`);
+      }
+    }
+
+    const threadSlug = post.thread.slug;
+    const categorySlug = post.thread.category.slug;
+
+    // Delete post
+    await post.destroy();
+
+    // If it was the first post (and no replies), the thread is gone too
+    req.flash('success', 'Post deleted successfully!');
+    
+    // Try to redirect to thread, if it exists
+    const threadStillExists = await Thread.findByPk(post.threadId);
+    if (threadStillExists) {
+      res.redirect(`/thread/${threadSlug}`);
+    } else {
+      res.redirect(`/category/${categorySlug}`);
+    }
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    req.flash('error', 'Failed to delete post.');
     res.redirect('back');
   }
 };
