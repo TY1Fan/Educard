@@ -332,8 +332,8 @@
           </aside>
           
           <div class="post-content">
-            <div class="post-body">
-              <%= post.content %>
+            <div class="post-body markdown-content">
+              <%- post.renderedContent || post.content %>
             </div>
             
             <footer class="post-footer">

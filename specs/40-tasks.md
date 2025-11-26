@@ -7223,46 +7223,65 @@ Enhance navigation with improved breadcrumbs and "jump to" features.
 
 ### Task 4.2.1: Add Markdown Support for Posts
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Complete  
 **Priority:** High  
 **Estimated Time:** 2 hours  
 **Dependencies:** Phase 3 complete  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Allow users to format posts using Markdown syntax for better readability.
 
 **Steps:**
-1. Install markdown parser (marked.js or similar)
-2. Add markdown processing to post content before display
-3. Sanitize HTML output to prevent XSS
-4. Add markdown toolbar to post/reply forms
-5. Add "Preview" tab for posts
-6. Display markdown cheat sheet (collapsible)
-7. Add code syntax highlighting (highlight.js)
+1. ✅ Install markdown parser (marked.js or similar)
+2. ✅ Add markdown processing to post content before display
+3. ✅ Sanitize HTML output to prevent XSS
+4. ✅ Add markdown toolbar to post/reply forms
+5. ✅ Add "Preview" tab for posts
+6. ✅ Display markdown cheat sheet (collapsible)
+7. ✅ Add code syntax highlighting (highlight.js)
 
 **Acceptance Criteria:**
-- [ ] Posts render markdown (bold, italic, lists, links)
-- [ ] Code blocks with syntax highlighting
-- [ ] Preview shows formatted output
-- [ ] XSS protection (sanitize HTML)
-- [ ] Markdown toolbar with common formatting
-- [ ] Help link/popup with markdown syntax
-- [ ] Works for thread creation and replies
+- [x] Posts render markdown (bold, italic, lists, links)
+- [x] Code blocks with syntax highlighting
+- [x] Preview shows formatted output
+- [x] XSS protection (sanitize HTML)
+- [x] Markdown toolbar with common formatting
+- [x] Help link/popup with markdown syntax
+- [x] Works for thread creation and replies
 
-**Files to Create/Modify:**
-- `package.json` (add marked, DOMPurify, highlight.js)
-- `src/utils/markdown.js` (markdown processing helper)
-- `src/views/pages/thread.ejs`
-- `src/views/pages/new-thread.ejs`
-- `src/views/partials/reply-form.ejs`
-- `public/js/markdown-editor.js`
-- `public/css/markdown.css`
+**Files Created/Modified:**
+- `package.json` - Added marked, DOMPurify, highlight.js, jsdom dependencies
+- `src/utils/markdown.js` - Markdown processing with sanitization (NEW)
+- `src/controllers/forumController.js` - Process markdown before rendering
+- `src/views/layouts/main.ejs` - Added markdown CSS and CDN scripts
+- `src/views/pages/thread.ejs` - Render markdown content
+- `public/js/markdown-editor.js` - Full-featured markdown editor (NEW)
+- `public/css/markdown.css` - Complete markdown styling (NEW)
 
-**Validation:**
-- Test bold, italic, links, lists, code blocks
-- Test XSS prevention with malicious HTML
-- Preview matches final output
+**Implementation Details:**
+- **Parser**: marked.js for GitHub Flavored Markdown
+- **Sanitization**: DOMPurify with strict allowlist (prevents XSS)
+- **Syntax Highlighting**: highlight.js with Monokai theme for code blocks
+- **Editor Features**:
+  - Toolbar with buttons: Bold, Italic, Strikethrough, Heading, Link, Code, Code Block, Lists, Quote
+  - Write/Preview tabs with live markdown rendering
+  - Keyboard shortcuts: Ctrl+B (bold), Ctrl+I (italic), Ctrl+K (link)
+  - Help modal with complete markdown syntax guide
+- **Security**: 
+  - Sanitizes HTML to prevent script injection
+  - Whitelist-only approach for allowed tags/attributes
+  - External links auto-add target="_blank" rel="noopener noreferrer"
+- **Supported Markdown**:
+  - Text formatting: **bold**, *italic*, ~~strikethrough~~
+  - Headers: # H1 through ###### H6
+  - Links: [text](url)
+  - Images: ![alt](url)
+  - Lists: unordered (-) and ordered (1.)
+  - Code: `inline` and ```block```
+  - Blockquotes: > quote
+  - Tables, horizontal rules
 
 ---
 

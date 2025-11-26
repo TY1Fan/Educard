@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { Category, Thread, Post, User } = require('../models');
 const { body, validationResult } = require('express-validator');
 const { uniqueSlugFromDB } = require('../utils/slugify');
+const { processMarkdown } = require('../utils/markdown');
 
 /**
  * Forum Controller
@@ -401,12 +402,19 @@ exports.showThread = async (req, res) => {
       offset
     });
 
+    // Process markdown for all posts
+    const postsWithMarkdown = posts.map(post => {
+      const postData = post.toJSON();
+      postData.renderedContent = processMarkdown(postData.content);
+      return postData;
+    });
+
     const totalPages = Math.ceil(count / limit);
 
     res.render('pages/thread', {
       title: `${thread.title} - Educard Forum`,
       thread,
-      posts,
+      posts: postsWithMarkdown,
       currentPage: page,
       totalPages,
       hasNextPage: page < totalPages,
