@@ -1,0 +1,264 @@
+<style>
+  /* Notifications page styles */
+  .notifications-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .notifications-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--text-color);
+  }
+
+  .notification-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .notification-item {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    gap: 1rem;
+    transition: all 0.2s;
+  }
+
+  .notification-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .notification-item.unread {
+    background: #eff6ff;
+    border-left: 3px solid var(--primary-color);
+  }
+
+  .notification-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+  }
+
+  .notification-icon.reply {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .notification-icon.thread_reply {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .notification-icon.like {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .notification-icon.mention {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .notification-content {
+    flex: 1;
+  }
+
+  .notification-message {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+    font-size: 0.95rem;
+  }
+
+  .notification-actor {
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+
+  .notification-time {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+  }
+
+  .notification-actions-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .btn-notification {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--secondary-color);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-notification:hover {
+    background: var(--bg-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--secondary-color);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h2 {
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding: 1rem 0;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-color);
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .pagination-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+
+  .pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination-info {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+  }
+</style>
+
+<div class="notifications-container">
+  <div class="notifications-header">
+    <h1>Notifications</h1>
+    <div class="notification-actions">
+      <% if (totalNotifications > 0) { %>
+        <form action="/notifications/mark-all-read" method="POST" style="display: inline;">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-sm">Mark All as Read</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (notifications && notifications.length > 0) { %>
+    <ul class="notification-list">
+      <% notifications.forEach(notification => { %>
+        <li class="notification-item <%= notification.isRead ? '' : 'unread' %>">
+          <div class="notification-icon <%= notification.type %>">
+            <% if (notification.type === 'reply' || notification.type === 'thread_reply') { %>
+              💬
+            <% } else if (notification.type === 'like') { %>
+              ❤️
+            <% } else if (notification.type === 'mention') { %>
+              @
+            <% } %>
+          </div>
+          
+          <div class="notification-content">
+            <p class="notification-message">
+              <% if (notification.actor) { %>
+                <span class="notification-actor"><%= notification.actor.displayName || notification.actor.username %></span>
+              <% } %>
+              <%= notification.content.replace(notification.actor ? notification.actor.username : '', '') %>
+            </p>
+            <div class="notification-time">
+              <%= new Date(notification.createdAt).toLocaleString() %>
+            </div>
+          </div>
+
+          <div class="notification-actions-item">
+            <% if (notification.actionUrl) { %>
+              <a href="<%= notification.actionUrl %>" class="btn-notification">View</a>
+            <% } %>
+            <% if (!notification.isRead) { %>
+              <form action="/notifications/<%= notification.id %>/read" method="POST" style="display: inline;">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn-notification" title="Mark as read">✓</button>
+              </form>
+            <% } %>
+            <form action="/notifications/<%= notification.id %>/delete" method="POST" style="display: inline;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btn-notification" title="Delete" onclick="return confirm('Delete this notification?');">×</button>
+            </form>
+          </div>
+        </li>
+      <% }); %>
+    </ul>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (currentPage > 1) { %>
+          <a href="/notifications?page=<%= currentPage - 1 %>" class="pagination-btn">← Previous</a>
+        <% } else { %>
+          <button class="pagination-btn" disabled>← Previous</button>
+        <% } %>
+        
+        <span class="pagination-info">Page <%= currentPage %> of <%= totalPages %></span>
+        
+        <% if (currentPage < totalPages) { %>
+          <a href="/notifications?page=<%= currentPage + 1 %>" class="pagination-btn">Next →</a>
+        <% } else { %>
+          <button class="pagination-btn" disabled>Next →</button>
+        <% } %>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div class="empty-state">
+      <div class="empty-state-icon">🔔</div>
+      <h2>No Notifications</h2>
+      <p>You're all caught up! Check back later for new notifications.</p>
+    </div>
+  <% } %>
+</div>

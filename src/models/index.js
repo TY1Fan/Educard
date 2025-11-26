@@ -4,6 +4,7 @@ const Category = require('./Category');
 const Thread = require('./Thread');
 const Post = require('./Post');
 const PostReaction = require('./PostReaction');
+const Notification = require('./Notification');
 
 /**
  * Define Model Associations
@@ -98,6 +99,26 @@ PostReaction.belongsTo(User, {
   as: 'user'
 });
 
+// Notification associations
+// A user can have many notifications
+User.hasMany(Notification, {
+  foreignKey: 'userId',
+  as: 'notifications',
+  onDelete: 'CASCADE'
+});
+
+// A notification belongs to one user (recipient)
+Notification.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'recipient'
+});
+
+// A notification can have an actor (user who triggered it)
+Notification.belongsTo(User, {
+  foreignKey: 'actorId',
+  as: 'actor'
+});
+
 /**
  * Export all models and sequelize instance
  */
@@ -107,5 +128,6 @@ module.exports = {
   Category,
   Thread,
   Post,
-  PostReaction
+  PostReaction,
+  Notification
 };

@@ -180,6 +180,58 @@ a:hover {
   color: white;
 }
 
+/* Notification bell icon */
+.nav-notifications {
+  position: relative;
+}
+
+.notification-bell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.notification-bell:hover {
+  background-color: var(--hover-color);
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.notification-badge[data-count="0"] {
+  display: none;
+}
+
+/* Notification badge animation */
+@keyframes notification-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.notification-pulse {
+  animation: notification-pulse 0.3s ease-out;
+}
+
 /* Navigation user welcome message */
 .nav-user {
   color: white;

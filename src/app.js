@@ -90,9 +90,11 @@ const authRoutes = require("./routes/auth");
 const forumRoutes = require("./routes/forum");
 const userRoutes = require("./routes/users");
 const searchRoutes = require("./routes/search");
+const notificationRoutes = require("./routes/notifications");
 
 app.use("/auth", authRoutes);
 app.use("/search", searchRoutes);
+app.use("/notifications", notificationRoutes);
 app.use("/", forumRoutes);
 app.use("/", userRoutes);
 

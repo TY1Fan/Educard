@@ -4,6 +4,7 @@ const { Category, Thread, Post, User, PostReaction } = require('../models');
 const { body, validationResult } = require('express-validator');
 const { uniqueSlugFromDB } = require('../utils/slugify');
 const { processMarkdown } = require('../utils/markdown');
+const NotificationService = require('../services/notificationService');
 
 /**
  * Forum Controller
@@ -521,7 +522,7 @@ exports.createReply = async (req, res) => {
     const userId = req.session.user.id;
 
     // Create post
-    await Post.create({
+    const newPost = await Post.create({
       threadId: thread.id,
       userId,
       content,
@@ -530,6 +531,19 @@ exports.createReply = async (req, res) => {
 
     // Update thread's updatedAt to bump it to top
     await thread.update({ updatedAt: new Date() });
+
+    // Create notification for thread author
+    try {
+      const author = await User.findByPk(userId);
+      if (author) {
+        await NotificationService.notifyThreadReply(thread, newPost, author);
+        // Check for @mentions in content
+        await NotificationService.notifyMentions(content, newPost, author);
+      }
+    } catch (notifError) {
+      console.error('Error creating notification:', notifError);
+      // Don't fail the reply if notification fails
+    }
 
     req.flash('success', 'Reply posted successfully!');
     res.redirect(`/thread/${slug}`);
@@ -893,6 +907,19 @@ exports.toggleReaction = async (req, res) => {
       const reactionCount = await PostReaction.count({
         where: { postId: id, reactionType }
       });
+
+      // Create notification for post author (only for likes)
+      if (reactionType === 'like') {
+        try {
+          const liker = await User.findByPk(userId);
+          if (liker) {
+            await NotificationService.notifyPostLike(post, liker);
+          }
+        } catch (notifError) {
+          console.error('Error creating like notification:', notifError);
+          // Don't fail the like if notification fails
+        }
+      }
 
       return res.json({
         success: true,
