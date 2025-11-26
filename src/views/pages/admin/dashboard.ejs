@@ -1,0 +1,212 @@
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-container">
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <h1>🛠️ Admin Dashboard</h1>
+    <nav class="admin-nav">
+      <a href="/admin" class="active">Dashboard</a>
+      <a href="/admin/users">Users</a>
+      <a href="/admin/threads">Threads</a>
+      <a href="/">← Back to Forum</a>
+    </nav>
+  </header>
+
+  <!-- Statistics Grid -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalUsers %></div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-change">
+          <span class="change-badge <%= stats.newUsersThisWeek > 0 ? 'positive' : '' %>">
+            +<%= stats.newUsersThisWeek %> this week
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💬</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalThreads %></div>
+        <div class="stat-label">Total Threads</div>
+        <div class="stat-change">
+          <span class="change-badge <%= stats.newThreadsThisWeek > 0 ? 'positive' : '' %>">
+            +<%= stats.newThreadsThisWeek %> this week
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalPosts %></div>
+        <div class="stat-label">Total Posts</div>
+        <div class="stat-change">
+          <span class="change-badge <%= stats.newPostsThisWeek > 0 ? 'positive' : '' %>">
+            +<%= stats.newPostsThisWeek %> this week
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📁</div>
+      <div class="stat-content">
+        <div class="stat-number"><%= stats.totalCategories %></div>
+        <div class="stat-label">Categories</div>
+        <div class="stat-subtitle">Active</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Grid -->
+  <div class="admin-grid">
+    <!-- Recent Users -->
+    <section class="admin-panel">
+      <div class="panel-header">
+        <h2>👤 Recent Users</h2>
+        <a href="/admin/users" class="btn-link">View All →</a>
+      </div>
+      <div class="panel-content">
+        <% if (recentUsers && recentUsers.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentUsers.forEach(user => { %>
+                <tr>
+                  <td>
+                    <a href="/profile/<%= user.username %>"><%= user.displayName || user.username %></a>
+                  </td>
+                  <td><%= user.email %></td>
+                  <td>
+                    <% if (user.role === 'admin') { %>
+                      <span class="role-badge admin-badge">ADMIN</span>
+                    <% } else if (user.role === 'moderator') { %>
+                      <span class="role-badge moderator-badge">MOD</span>
+                    <% } else { %>
+                      <span class="role-badge user-badge">USER</span>
+                    <% } %>
+                  </td>
+                  <td><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <p class="empty-state">No recent users</p>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- Recent Threads -->
+    <section class="admin-panel">
+      <div class="panel-header">
+        <h2>💬 Recent Threads</h2>
+        <a href="/admin/threads" class="btn-link">View All →</a>
+      </div>
+      <div class="panel-content">
+        <% if (recentThreads && recentThreads.length > 0) { %>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% recentThreads.forEach(thread => { %>
+                <tr>
+                  <td>
+                    <a href="/thread/<%= thread.slug %>"><%= thread.title %></a>
+                    <% if (thread.isPinned) { %>
+                      <span title="Pinned">📌</span>
+                    <% } %>
+                    <% if (thread.isLocked) { %>
+                      <span title="Locked">🔒</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <a href="/profile/<%= thread.author.username %>"><%= thread.author.displayName || thread.author.username %></a>
+                  </td>
+                  <td>
+                    <a href="/category/<%= thread.category.slug %>"><%= thread.category.name %></a>
+                  </td>
+                  <td><%= new Date(thread.createdAt).toLocaleDateString() %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <p class="empty-state">No recent threads</p>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- Recent Posts -->
+    <section class="admin-panel">
+      <div class="panel-header">
+        <h2>📝 Recent Posts</h2>
+      </div>
+      <div class="panel-content">
+        <% if (recentPosts && recentPosts.length > 0) { %>
+          <div class="activity-list">
+            <% recentPosts.forEach(post => { %>
+              <div class="activity-item">
+                <div class="activity-icon">💬</div>
+                <div class="activity-content">
+                  <strong><a href="/profile/<%= post.author.username %>"><%= post.author.displayName || post.author.username %></a></strong>
+                  posted in
+                  <a href="/thread/<%= post.thread.slug %>"><%= post.thread.title %></a>
+                  <div class="activity-time"><%= new Date(post.createdAt).toLocaleString() %></div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="empty-state">No recent posts</p>
+        <% } %>
+      </div>
+    </section>
+
+    <!-- Category Statistics -->
+    <section class="admin-panel">
+      <div class="panel-header">
+        <h2>📊 Most Active Categories</h2>
+      </div>
+      <div class="panel-content">
+        <% if (categoryStats && categoryStats.length > 0) { %>
+          <div class="category-stats">
+            <% categoryStats.forEach(category => { %>
+              <div class="category-stat-item">
+                <div class="category-stat-name">
+                  <a href="/category/<%= category.slug %>"><%= category.name %></a>
+                </div>
+                <div class="category-stat-bar">
+                  <div class="stat-bar-fill" style="width: <%= Math.min((category.dataValues.threadCount / categoryStats[0].dataValues.threadCount) * 100, 100) %>%"></div>
+                </div>
+                <div class="category-stat-count">
+                  <%= category.dataValues.threadCount %> threads
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <p class="empty-state">No category data</p>
+        <% } %>
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,119 @@
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-container">
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <h1>📝 Thread Management</h1>
+    <nav class="admin-nav">
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/users">Users</a>
+      <a href="/admin/threads" class="active">Threads</a>
+      <a href="/">← Back to Forum</a>
+    </nav>
+  </header>
+
+  <!-- Threads Table -->
+  <section class="admin-panel">
+    <div class="panel-content">
+      <% if (threads && threads.length > 0) { %>
+        <table class="admin-table full-width">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% threads.forEach(thread => { %>
+              <tr>
+                <td>#<%= thread.id %></td>
+                <td>
+                  <a href="/thread/<%= thread.id %>" class="thread-link">
+                    <%= thread.title %>
+                  </a>
+                  <div class="thread-meta">
+                    <% if (thread.isPinned) { %>
+                      <span class="status-badge pinned">📌 Pinned</span>
+                    <% } %>
+                    <% if (thread.isLocked) { %>
+                      <span class="status-badge locked">🔒 Locked</span>
+                    <% } %>
+                  </div>
+                </td>
+                <td>
+                  <a href="/profile/<%= thread.User.username %>">
+                    <%= thread.User.displayName || thread.User.username %>
+                  </a>
+                </td>
+                <td>
+                  <a href="/category/<%= thread.Category.slug %>" class="category-link">
+                    <%= thread.Category.name %>
+                  </a>
+                </td>
+                <td>
+                  <% if (thread.isLocked) { %>
+                    <span class="status-badge locked">Locked</span>
+                  <% } else if (thread.isPinned) { %>
+                    <span class="status-badge pinned">Pinned</span>
+                  <% } else { %>
+                    <span class="status-badge active">Active</span>
+                  <% } %>
+                </td>
+                <td><%= new Date(thread.createdAt).toLocaleDateString() %></td>
+                <td class="action-buttons">
+                  <a href="/thread/<%= thread.id %>" class="btn-icon" title="View Thread">
+                    👁️
+                  </a>
+                  <form action="/thread/<%= thread.id %>/toggle-pin" method="POST" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn-icon" title="<%= thread.isPinned ? 'Unpin' : 'Pin' %>">
+                      <%= thread.isPinned ? '📍' : '📌' %>
+                    </button>
+                  </form>
+                  <form action="/thread/<%= thread.id %>/toggle-lock" method="POST" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn-icon" title="<%= thread.isLocked ? 'Unlock' : 'Lock' %>">
+                      <%= thread.isLocked ? '🔓' : '🔒' %>
+                    </button>
+                  </form>
+                  <form action="/thread/<%= thread.id %>/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this thread? This action cannot be undone.');">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn-icon danger" title="Delete Thread">
+                      🗑️
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div class="admin-pagination">
+            <% if (currentPage > 1) { %>
+              <a href="?page=<%= currentPage - 1 %>" class="pagination-btn">← Previous</a>
+            <% } else { %>
+              <span class="pagination-btn disabled">← Previous</span>
+            <% } %>
+            
+            <span class="pagination-info">Page <%= currentPage %> of <%= totalPages %></span>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="?page=<%= currentPage + 1 %>" class="pagination-btn">Next →</a>
+            <% } else { %>
+              <span class="pagination-btn disabled">Next →</span>
+            <% } %>
+          </div>
+        <% } %>
+      <% } else { %>
+        <p class="empty-state">No threads found</p>
+      <% } %>
+    </div>
+  </section>
+</div>

@@ -7679,11 +7679,12 @@ Add admin/moderator role system with elevated privileges.
 
 ### Task 4.3.2: Build Admin Dashboard
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Completed  
 **Priority:** Medium  
 **Estimated Time:** 2 hours  
 **Dependencies:** Task 4.3.1  
-**Assigned To:** TBD
+**Assigned To:** GitHub Copilot  
+**Completed:** November 26, 2025
 
 **Description:**
 Create admin dashboard for site management and statistics.
@@ -7713,9 +7714,76 @@ Create admin dashboard for site management and statistics.
 - `src/controllers/adminController.js`
 - `src/routes/admin.js`
 - `src/views/pages/admin/dashboard.ejs`
-- `src/views/layouts/admin-layout.ejs` (optional)
+- `src/views/pages/admin/users.ejs`
+- `src/views/pages/admin/threads.ejs`
 - `src/app.js` (mount admin routes)
 - `public/css/admin.css`
+
+**Implementation Notes:**
+
+**Admin Controller (`src/controllers/adminController.js`):**
+- `showDashboard()`: Aggregates site statistics using Promise.all for parallel queries
+  - Total counts: users, threads, posts, categories
+  - Weekly growth metrics (last 7 days)
+  - Recent activity: last 10 users, threads, posts
+  - Category statistics with thread counts (top 5)
+- `showUsers()`: Paginated user list (50 per page) with role filtering
+- `showThreads()`: Paginated thread list with author and category data
+- `updateUserRole()`: Change user role with self-protection
+- `toggleUserActive()`: Activate/deactivate accounts with self-protection
+- `deleteUser()`: Permanent deletion with self-protection, cascades to content
+
+**Admin Routes (`src/routes/admin.js`):**
+- All routes protected by `requireAdmin` middleware using `router.use()`
+- GET `/admin` and `/admin/dashboard` → Dashboard
+- GET `/admin/users` → User management (with pagination and role filtering)
+- POST `/admin/users/:id/role` → Change user role
+- POST `/admin/users/:id/toggle-active` → Activate/deactivate account
+- POST `/admin/users/:id/delete` → Delete user permanently
+- GET `/admin/threads` → Thread management (with pagination)
+
+**Dashboard View (`src/views/pages/admin/dashboard.ejs`):**
+- Statistics grid: 4 cards showing totals and weekly growth badges
+- Recent users table: 10 latest with role badges
+- Recent threads table: 10 latest with pin/lock indicators
+- Recent posts list: 10 latest with author and thread links
+- Category statistics: Top 5 with progress bars
+- Empty states for all sections
+
+**Users Management (`src/views/pages/admin/users.ejs`):**
+- Filter tabs: All Users, Users, Moderators, Admins
+- User table with role dropdown (auto-submit on change)
+- Action buttons: Activate/Deactivate, Delete
+- Pagination controls
+- Inactive users shown with dimmed styling
+
+**Threads Management (`src/views/pages/admin/threads.ejs`):**
+- Thread table with title, author, category, status
+- Status badges: Pinned, Locked, Active
+- Action buttons: View, Pin/Unpin, Lock/Unlock, Delete
+- Pagination controls
+- Delete confirmation prompts
+
+**Admin CSS (`public/css/admin.css`):**
+- Gradient purple header with navigation
+- Stats cards with hover effects
+- Data tables with responsive design
+- Status badges (active, inactive, pinned, locked)
+- Role badges (admin, moderator, user)
+- Progress bars for category stats
+- Pagination controls
+- Mobile responsive breakpoints
+
+**Security Features:**
+- Self-protection: Admins cannot modify their own role/status/deletion
+- All routes require admin role authentication
+- CSRF protection on all POST actions
+- Confirmation dialogs for destructive actions
+
+**Performance Optimizations:**
+- Parallel statistics queries using Promise.all
+- Pagination to limit data fetching (50 items per page)
+- Efficient SQL queries with proper joins and counts
 
 ---
 
