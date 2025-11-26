@@ -7078,39 +7078,49 @@ Create search functionality for finding threads and posts across the forum.
 
 ### Task 4.1.2: Add Thread Pinning & Locking
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Complete  
 **Priority:** Medium  
 **Estimated Time:** 1.5 hours  
+**Actual Time:** 1.5 hours  
 **Dependencies:** Phase 3 complete  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Allow thread creators to pin important threads to the top and lock threads to prevent new replies.
 
 **Steps:**
-1. Add UI controls for pin/lock on thread page (owner only)
-2. Create POST routes for `/thread/:slug/pin` and `/thread/:slug/lock`
-3. Add controller actions for toggling pin/lock status
-4. Update thread listing to show pinned threads first
-5. Prevent replies to locked threads
-6. Add visual indicators (📌 for pinned, 🔒 for locked)
-7. Add flash messages for actions
+1. ✅ Add UI controls for pin/lock on thread page (owner only)
+2. ✅ Create POST routes for `/thread/:slug/pin` and `/thread/:slug/lock`
+3. ✅ Add controller actions for toggling pin/lock status
+4. ✅ Update thread listing to show pinned threads first
+5. ✅ Prevent replies to locked threads
+6. ✅ Add visual indicators (📌 for pinned, 🔒 for locked)
+7. ✅ Add flash messages for actions
 
 **Acceptance Criteria:**
-- [ ] Pin/lock buttons visible to thread creator
-- [ ] Pinned threads appear at top of category
-- [ ] Locked threads show lock icon
-- [ ] Reply form disabled on locked threads
-- [ ] Toggling works (pin/unpin, lock/unlock)
-- [ ] Flash messages confirm actions
-- [ ] Authorization checks prevent non-owners
+- [x] Pin/lock buttons visible to thread creator
+- [x] Pinned threads appear at top of category
+- [x] Locked threads show lock icon
+- [x] Reply form disabled on locked threads
+- [x] Toggling works (pin/unpin, lock/unlock)
+- [x] Flash messages confirm actions
+- [x] Authorization checks prevent non-owners
 
-**Files to Modify:**
-- `src/controllers/forumController.js`
-- `src/views/pages/thread.ejs`
-- `src/views/pages/category.ejs`
-- `src/routes/forum.js`
-- `public/css/main.css`
+**Files Modified:**
+- `src/controllers/forumController.js` - Added `togglePin()` and `toggleLock()` functions, added lock checking to `createReply()`
+- `src/views/pages/thread.ejs` - Added pin/lock badges, owner controls, locked notice, conditional reply form
+- `src/views/pages/category.ejs` - Already had pin/lock badges in thread listing
+- `src/routes/forum.js` - Added POST routes for pin/lock with authentication
+- `public/css/style.css` - Already had badge styling (badge-pinned, badge-locked)
+
+**Implementation Notes:**
+- Thread creators can toggle pin/lock status via POST forms with CSRF protection
+- Category listing already orders by `isPinned DESC` to show pinned threads first
+- Locked threads show notice and hide reply form
+- Server-side lock enforcement in `createReply()` prevents bypassing UI
+- Visual indicators: 📌 emoji for pinned, 🔒 emoji for locked threads
+- Flash messages: "Thread pinned/unpinned successfully" and "Thread locked/unlocked"
 
 ---
 

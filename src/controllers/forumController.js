@@ -390,6 +390,12 @@ exports.createReply = async (req, res) => {
       return res.redirect(`/thread/${slug}`);
     }
 
+    // Check if thread is locked
+    if (thread.isLocked) {
+      req.flash('error', 'This thread is locked. No new replies are allowed.');
+      return res.redirect(`/thread/${slug}`);
+    }
+
     const { content } = req.body;
     const userId = req.session.user.id;
 
@@ -643,6 +649,72 @@ exports.deleteThread = async (req, res) => {
   } catch (error) {
     console.error('Error deleting thread:', error);
     req.flash('error', 'Failed to delete thread.');
+    res.redirect('back');
+  }
+};
+
+/**
+ * Toggle Thread Pin
+ * Pin or unpin a thread (thread creator only)
+ */
+exports.togglePin = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const userId = req.session.user.id;
+
+    const thread = await Thread.findOne({ where: { slug } });
+
+    if (!thread) {
+      return res.status(404).json({ success: false, message: 'Thread not found' });
+    }
+
+    // Check ownership
+    if (thread.userId !== userId) {
+      return res.status(403).json({ success: false, message: 'You can only pin your own threads' });
+    }
+
+    // Toggle pin status
+    thread.isPinned = !thread.isPinned;
+    await thread.save();
+
+    req.flash('success', thread.isPinned ? 'Thread pinned successfully.' : 'Thread unpinned successfully.');
+    res.redirect(`/thread/${slug}`);
+  } catch (error) {
+    console.error('Error toggling pin:', error);
+    req.flash('error', 'Failed to update thread pin status.');
+    res.redirect('back');
+  }
+};
+
+/**
+ * Toggle Thread Lock
+ * Lock or unlock a thread (thread creator only)
+ */
+exports.toggleLock = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const userId = req.session.user.id;
+
+    const thread = await Thread.findOne({ where: { slug } });
+
+    if (!thread) {
+      return res.status(404).json({ success: false, message: 'Thread not found' });
+    }
+
+    // Check ownership
+    if (thread.userId !== userId) {
+      return res.status(403).json({ success: false, message: 'You can only lock your own threads' });
+    }
+
+    // Toggle lock status
+    thread.isLocked = !thread.isLocked;
+    await thread.save();
+
+    req.flash('success', thread.isLocked ? 'Thread locked. No new replies allowed.' : 'Thread unlocked.');
+    res.redirect(`/thread/${slug}`);
+  } catch (error) {
+    console.error('Error toggling lock:', error);
+    req.flash('error', 'Failed to update thread lock status.');
     res.redirect('back');
   }
 };

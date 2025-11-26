@@ -34,10 +34,60 @@
       margin: 0;
       font-size: 1.75rem;
       color: var(--text-color);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .thread-badge {
+      font-size: 1.2rem;
     }
 
     .thread-actions {
       display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .thread-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .btn-secondary {
+      background: var(--secondary-color);
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 0.9rem;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .btn-warning {
+      background: var(--warning-color);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      background: #d97706;
+    }
+
+    .locked-notice {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
       gap: 0.5rem;
     }
 
@@ -219,7 +269,33 @@
     </nav>
 
     <div class="thread-header">
-      <h1><%= thread.title %></h1>
+      <div>
+        <h1>
+          <% if (thread.isPinned) { %>
+            <span class="thread-badge" title="Pinned">📌</span>
+          <% } %>
+          <% if (thread.isLocked) { %>
+            <span class="thread-badge" title="Locked">🔒</span>
+          <% } %>
+          <%= thread.title %>
+        </h1>
+        <% if (isAuthenticated && user.id === thread.userId) { %>
+          <div class="thread-controls">
+            <form action="/thread/<%= thread.slug %>/pin" method="POST" style="display: inline;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btn btn-secondary">
+                <%= thread.isPinned ? '📌 Unpin' : '📌 Pin' %>
+              </button>
+            </form>
+            <form action="/thread/<%= thread.slug %>/lock" method="POST" style="display: inline;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btn btn-warning">
+                <%= thread.isLocked ? '🔓 Unlock' : '🔒 Lock' %>
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
       <div class="thread-actions">
         <% if (isAuthenticated && user.id === thread.userId) { %>
           <form action="/thread/<%= thread.slug %>/delete" method="POST" style="display: inline;">
@@ -293,7 +369,14 @@
       </nav>
     <% } %>
 
-    <% if (isAuthenticated) { %>
+    <% if (thread.isLocked) { %>
+      <div class="locked-notice">
+        <span>🔒</span>
+        <strong>This thread is locked.</strong> No new replies are allowed.
+      </div>
+    <% } %>
+
+    <% if (isAuthenticated && !thread.isLocked) { %>
       <section class="reply-section">
         <h3>Reply to Thread</h3>
         <%- include('../partials/reply-form', { 
@@ -302,7 +385,7 @@
           formData: typeof formData !== 'undefined' ? formData : {}
         }) %>
       </section>
-    <% } else { %>
+    <% } else if (!isAuthenticated && !thread.isLocked) { %>
       <div class="guest-message">
         <p><a href="/auth/login">Login</a> or <a href="/auth/register">Register</a> to reply to this thread.</p>
       </div>

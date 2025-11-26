@@ -47,4 +47,10 @@ router.post('/post/:id/delete', requireAuth, forumController.deletePost);
 // Delete thread (requires authentication)
 router.post('/thread/:slug/delete', requireAuth, forumController.deleteThread);
 
+// Pin/unpin thread (requires authentication)
+router.post('/thread/:slug/pin', requireAuth, forumController.togglePin);
+
+// Lock/unlock thread (requires authentication)
+router.post('/thread/:slug/lock', requireAuth, forumController.toggleLock);
+
 module.exports = router;
