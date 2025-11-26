@@ -149,6 +149,15 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check if user is banned
+    if (user.isBanned) {
+      return res.render('pages/login', {
+        title: 'Login - Educard Forum',
+        error: `Your account has been banned. ${user.banReason ? 'Reason: ' + user.banReason : 'Please contact support.'}`,
+        usernameOrEmail
+      });
+    }
+
     // Log user in
     req.session.user = {
       id: user.id,

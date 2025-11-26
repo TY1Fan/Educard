@@ -47,6 +47,31 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: true,
     field: 'is_active'
+  },
+  isBanned: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    field: 'is_banned',
+    comment: 'Whether the user is banned from the platform'
+  },
+  bannedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'banned_at',
+    comment: 'Timestamp when user was banned'
+  },
+  bannedBy: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'banned_by',
+    comment: 'Admin user ID who banned this user'
+  },
+  banReason: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'ban_reason',
+    comment: 'Reason for banning the user'
   }
 }, {
   tableName: 'users',

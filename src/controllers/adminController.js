@@ -153,10 +153,20 @@ exports.showUsers = async (req, res) => {
     const limit = 50;
     const offset = (page - 1) * limit;
     const role = req.query.role || null;
+    const search = req.query.search || '';
 
     const where = {};
     if (role && ['user', 'moderator', 'admin'].includes(role)) {
       where.role = role;
+    }
+
+    // Add search filter for username or email
+    if (search) {
+      where[Op.or] = [
+        { username: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+        { displayName: { [Op.iLike]: `%${search}%` } }
+      ];
     }
 
     const { count, rows: users } = await User.findAndCountAll({
@@ -164,7 +174,7 @@ exports.showUsers = async (req, res) => {
       order: [['createdAt', 'DESC']],
       limit,
       offset,
-      attributes: ['id', 'username', 'displayName', 'email', 'role', 'isActive', 'createdAt']
+      attributes: ['id', 'username', 'displayName', 'email', 'role', 'isActive', 'isBanned', 'bannedAt', 'banReason', 'createdAt']
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -178,7 +188,8 @@ exports.showUsers = async (req, res) => {
       currentPage: page,
       totalPages,
       totalUsers: count,
-      currentRole: role
+      currentRole: role,
+      searchQuery: search
     });
   } catch (error) {
     console.error('Error loading users:', error);
@@ -296,6 +307,182 @@ exports.toggleUserActive = async (req, res) => {
   } catch (error) {
     console.error('Error toggling user active status:', error);
     req.flash('error', 'Failed to update user status');
+    res.redirect('back');
+  }
+};
+
+/**
+ * Ban User
+ * Bans a user from accessing the platform
+ */
+exports.banUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('back');
+    }
+
+    // Prevent self-ban
+    if (user.id === req.session.user.id) {
+      req.flash('error', 'You cannot ban yourself');
+      return res.redirect('back');
+    }
+
+    // Prevent banning other admins (optional protection)
+    if (user.role === 'admin' && req.user.role === 'admin') {
+      req.flash('error', 'You cannot ban other administrators');
+      return res.redirect('back');
+    }
+
+    await user.update({
+      isBanned: true,
+      bannedAt: new Date(),
+      bannedBy: req.session.user.id,
+      banReason: reason || 'No reason provided'
+    });
+
+    req.flash('success', `User ${user.username} has been banned`);
+    res.redirect('back');
+  } catch (error) {
+    console.error('Error banning user:', error);
+    req.flash('error', 'Failed to ban user');
+    res.redirect('back');
+  }
+};
+
+/**
+ * Unban User
+ * Removes ban from a user account
+ */
+exports.unbanUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('back');
+    }
+
+    await user.update({
+      isBanned: false,
+      bannedAt: null,
+      bannedBy: null,
+      banReason: null
+    });
+
+    req.flash('success', `User ${user.username} has been unbanned`);
+    res.redirect('back');
+  } catch (error) {
+    console.error('Error unbanning user:', error);
+    req.flash('error', 'Failed to unban user');
+    res.redirect('back');
+  }
+};
+
+/**
+ * Show Edit User Page
+ * Display form to edit user details
+ */
+exports.showEditUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.scope('withPassword').findByPk(id, {
+      attributes: ['id', 'username', 'displayName', 'email', 'role', 'isActive', 'isBanned', 'bannedAt', 'bannedBy', 'banReason', 'createdAt', 'updatedAt']
+    });
+
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/admin/users');
+    }
+
+    // Get banner info if user is banned
+    let bannerInfo = null;
+    if (user.isBanned && user.bannedBy) {
+      bannerInfo = await User.findByPk(user.bannedBy, {
+        attributes: ['id', 'username', 'displayName']
+      });
+    }
+
+    res.render('pages/admin/edit-user', {
+      title: `Edit User: ${user.username}`,
+      isAuthenticated: true,
+      user: req.session.user,
+      csrfToken: req.csrfToken(),
+      editUser: user,
+      bannerInfo
+    });
+  } catch (error) {
+    console.error('Error loading user for edit:', error);
+    req.flash('error', 'Failed to load user');
+    res.redirect('/admin/users');
+  }
+};
+
+/**
+ * Update User
+ * Update user details from edit form
+ */
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, displayName, email, role, isActive } = req.body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/admin/users');
+    }
+
+    // Prevent self-demotion
+    if (user.id === req.session.user.id && role !== 'admin') {
+      req.flash('error', 'You cannot change your own role');
+      return res.redirect('back');
+    }
+
+    // Check if username is already taken by another user
+    if (username !== user.username) {
+      const existingUser = await User.findOne({ where: { username } });
+      if (existingUser) {
+        req.flash('error', 'Username already taken');
+        return res.redirect('back');
+      }
+    }
+
+    // Check if email is already taken by another user
+    if (email !== user.email) {
+      const existingEmail = await User.findOne({ where: { email } });
+      if (existingEmail) {
+        req.flash('error', 'Email already in use');
+        return res.redirect('back');
+      }
+    }
+
+    await user.update({
+      username,
+      displayName: displayName || username,
+      email,
+      role,
+      isActive: isActive === 'true' || isActive === true
+    });
+
+    // Update session if admin edited themselves
+    if (user.id === req.session.user.id) {
+      req.session.user.username = username;
+      req.session.user.displayName = displayName || username;
+      req.session.user.email = email;
+    }
+
+    req.flash('success', 'User updated successfully');
+    res.redirect('/admin/users');
+  } catch (error) {
+    console.error('Error updating user:', error);
+    req.flash('error', 'Failed to update user');
     res.redirect('back');
   }
 };

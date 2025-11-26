@@ -7,13 +7,29 @@
  * Require user to be authenticated
  * Redirects to login page if not authenticated
  * Stores the original URL to redirect back after login
+ * Also checks if user is banned
  */
-exports.requireAuth = (req, res, next) => {
+exports.requireAuth = async (req, res, next) => {
   if (!req.session.user) {
     // Store the original URL to redirect back after login
     req.session.returnTo = req.originalUrl;
     return res.redirect('/auth/login');
   }
+
+  // Check if user is banned
+  const User = require('../models/User');
+  const user = await User.findByPk(req.session.user.id);
+  
+  if (user && user.isBanned) {
+    // Destroy session for banned users
+    req.session.destroy();
+    return res.status(403).render('errors/403', {
+      layout: false,
+      title: 'Account Banned',
+      message: `Your account has been banned. ${user.banReason ? 'Reason: ' + user.banReason : ''}`
+    });
+  }
+
   next();
 };
 

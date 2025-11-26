@@ -7789,11 +7789,12 @@ Create admin dashboard for site management and statistics.
 
 ### Task 4.3.3: Implement User Management
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Completed  
 **Priority:** Medium  
 **Estimated Time:** 1.5 hours  
 **Dependencies:** Task 4.3.1  
-**Assigned To:** TBD
+**Assigned To:** GitHub Copilot  
+**Completed:** November 26, 2025
 
 **Description:**
 Allow admins to manage users (ban, delete, change roles).
@@ -7821,7 +7822,140 @@ Allow admins to manage users (ban, delete, change roles).
 - `src/views/pages/admin/users.ejs`
 - `src/views/pages/admin/edit-user.ejs`
 - `src/routes/admin.js`
-- `src/middleware/auth.js` (check ban status on login)
+- `src/middlewares/auth.js`
+- `src/controllers/authController.js`
+- `src/models/User.js`
+- `src/migrations/20251126081358-add-user-ban-status.js`
+- `public/css/admin.css`
+
+**Implementation Notes:**
+
+**Database Migration (`20251126081358-add-user-ban-status.js`):**
+- Added `isBanned` BOOLEAN column (default: false)
+- Added `bannedAt` DATE column (timestamp of ban)
+- Added `bannedBy` INTEGER column (admin user ID who banned)
+- Added `banReason` TEXT column (reason for ban)
+- Added index on `isBanned` for efficient queries
+- Full rollback support
+
+**User Model Updates (`src/models/User.js`):**
+- Added ban-related fields to model definition
+- All fields properly mapped with underscored column names
+- Fields documented with comments
+
+**Admin Controller Enhancements (`src/controllers/adminController.js`):**
+- **showUsers()**: Enhanced with search functionality
+  - Search by username, email, or displayName using `Op.iLike`
+  - Returns ban status and reason in user attributes
+  - Pagination preserves search and role filters
+- **banUser()**: Ban user with reason
+  - Self-protection: cannot ban yourself
+  - Admin protection: cannot ban other admins
+  - Records bannedAt, bannedBy, and banReason
+- **unbanUser()**: Remove ban from user
+  - Clears all ban-related fields
+- **showEditUser()**: Display edit form
+  - Loads user with ban information
+  - Fetches banner info if user is banned
+- **updateUser()**: Update user details
+  - Username and email uniqueness validation
+  - Self-demotion protection
+  - Session update if admin edits themselves
+
+**Admin Routes (`src/routes/admin.js`):**
+- GET `/admin/users/:id/edit` → Show edit form
+- POST `/admin/users/:id/edit` → Update user
+- POST `/admin/users/:id/ban` → Ban user (with reason)
+- POST `/admin/users/:id/unban` → Unban user
+
+**Users Management View (`src/views/pages/admin/users.ejs`):**
+- Search bar with live search input
+  - Preserves role filter when searching
+  - Clear button when search is active
+- Enhanced status badges:
+  - 🚫 Banned (red, shows ban reason on hover)
+  - ✅ Active (green)
+  - 💤 Inactive (gray)
+- New action buttons:
+  - ✏️ Edit User
+  - 🔨 Ban User (with prompt for reason)
+  - 🔓 Unban User
+  - 💤/✅ Toggle Active
+  - 🗑️ Delete User
+- Pagination preserves both search and role filters
+
+**Edit User Page (`src/views/pages/admin/edit-user.ejs`):**
+- Comprehensive edit form with sections:
+  - User Information (username, displayName, email)
+  - Role & Status (role dropdown, active toggle)
+  - Ban Information (if banned, shows details with unban button)
+  - Account Metadata (ID, created, updated, profile link)
+- Form validation:
+  - Username: 3-50 alphanumeric characters
+  - Email: valid email format
+  - Display name: max 100 characters
+- Action buttons:
+  - Save Changes (primary)
+  - Cancel (returns to user list)
+  - Ban User (danger, inline prompt for reason)
+- Visual ban warning box when user is banned
+
+**Authentication Middleware (`src/middlewares/auth.js`):**
+- Updated `requireAuth()` to check ban status
+- Fetches fresh user data from database
+- If user is banned:
+  - Destroys session immediately
+  - Shows 403 page with ban reason
+  - Prevents access to any authenticated routes
+
+**Login Controller (`src/controllers/authController.js`):**
+- Added ban check during login process
+- Prevents login if user is banned
+- Displays ban reason on login page
+- Check occurs after password validation
+
+**Admin CSS Enhancements (`public/css/admin.css`):**
+- Search form styles:
+  - Flexible layout with gap spacing
+  - Search input with focus states
+  - Primary search button
+  - Secondary clear button
+- Edit form styles:
+  - Section-based layout with borders
+  - Form inputs with focus states
+  - Info boxes for warnings (ban information)
+  - Metadata grid for account details
+- New badge styles:
+  - `.status-badge.banned` (red with ban icon)
+- Button variants:
+  - `.btn-primary` (save actions)
+  - `.btn-secondary` (cancel actions)
+  - `.btn-danger` (destructive actions)
+  - `.btn-warning` (unban actions)
+- Back link styling
+- Ban info section with highlighted background
+- Responsive form layouts
+
+**Security Features:**
+- **Self-Protection**: Admins cannot ban, deactivate, or delete themselves
+- **Admin Protection**: Admins cannot ban other admins
+- **Username/Email Uniqueness**: Validates before updating
+- **Session Management**: Banned users immediately logged out
+- **Confirmation Prompts**: Ban reason required, delete confirmation
+- **CSRF Protection**: All POST actions protected
+
+**User Experience:**
+- **Search Persistence**: Search query preserved across pagination and filters
+- **Inline Ban Reason**: Prompt appears before ban action
+- **Ban Reason Display**: Shown in status badge tooltip and edit page
+- **Visual Feedback**: Flash messages for all actions
+- **Breadcrumb Navigation**: Back links and nav menu
+- **Metadata Display**: Shows user ID, join date, last update
+
+**Database Queries:**
+- Search uses case-insensitive `ILIKE` operator (PostgreSQL)
+- Ban fields included in user queries where needed
+- Efficient indexing on `isBanned` column
 
 ---
 

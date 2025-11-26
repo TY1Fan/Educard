@@ -1,0 +1,181 @@
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-container">
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <h1>✏️ Edit User</h1>
+    <nav class="admin-nav">
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/users">Users</a>
+      <a href="/admin/threads">Threads</a>
+      <a href="/">← Back to Forum</a>
+    </nav>
+  </header>
+
+  <!-- Edit User Form -->
+  <section class="admin-panel">
+    <div class="panel-header">
+      <a href="/admin/users" class="back-link">← Back to Users</a>
+      <h2>Editing: <%= editUser.username %></h2>
+    </div>
+    
+    <div class="panel-content">
+      <form action="/admin/users/<%= editUser.id %>/edit" method="POST" class="edit-user-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <!-- User Info Section -->
+        <div class="form-section">
+          <h3>User Information</h3>
+          
+          <div class="form-group">
+            <label for="username">Username *</label>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              value="<%= editUser.username %>" 
+              required
+              pattern="[a-zA-Z0-9]+"
+              minlength="3"
+              maxlength="50"
+              class="form-input"
+            >
+            <small class="form-help">3-50 alphanumeric characters</small>
+          </div>
+
+          <div class="form-group">
+            <label for="displayName">Display Name</label>
+            <input 
+              type="text" 
+              id="displayName" 
+              name="displayName" 
+              value="<%= editUser.displayName || editUser.username %>" 
+              maxlength="100"
+              class="form-input"
+            >
+            <small class="form-help">How the name appears to others</small>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email *</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              value="<%= editUser.email %>" 
+              required
+              class="form-input"
+            >
+          </div>
+        </div>
+
+        <!-- Role & Status Section -->
+        <div class="form-section">
+          <h3>Role & Status</h3>
+          
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select id="role" name="role" class="form-select">
+              <option value="user" <%= editUser.role === 'user' ? 'selected' : '' %>>User</option>
+              <option value="moderator" <%= editUser.role === 'moderator' ? 'selected' : '' %>>Moderator</option>
+              <option value="admin" <%= editUser.role === 'admin' ? 'selected' : '' %>>Admin</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="isActive">Account Status</label>
+            <select id="isActive" name="isActive" class="form-select">
+              <option value="true" <%= editUser.isActive ? 'selected' : '' %>>Active</option>
+              <option value="false" <%= !editUser.isActive ? 'selected' : '' %>>Inactive</option>
+            </select>
+            <small class="form-help">Inactive users cannot log in</small>
+          </div>
+        </div>
+
+        <!-- Ban Information (if banned) -->
+        <% if (editUser.isBanned) { %>
+          <div class="form-section ban-info-section">
+            <h3>🚫 Ban Information</h3>
+            
+            <div class="info-box warning">
+              <p><strong>Status:</strong> This user is currently banned</p>
+              <p><strong>Banned At:</strong> <%= new Date(editUser.bannedAt).toLocaleString() %></p>
+              <% if (bannerInfo) { %>
+                <p><strong>Banned By:</strong> <%= bannerInfo.displayName || bannerInfo.username %></p>
+              <% } %>
+              <% if (editUser.banReason) { %>
+                <p><strong>Reason:</strong> <%= editUser.banReason %></p>
+              <% } %>
+            </div>
+
+            <form action="/admin/users/<%= editUser.id %>/unban" method="POST" style="margin-top: 15px;">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <button type="submit" class="btn btn-warning">🔓 Unban User</button>
+            </form>
+          </div>
+        <% } %>
+
+        <!-- Account Metadata -->
+        <div class="form-section">
+          <h3>Account Metadata</h3>
+          
+          <div class="metadata-grid">
+            <div class="metadata-item">
+              <span class="metadata-label">User ID:</span>
+              <span class="metadata-value">#<%= editUser.id %></span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Created:</span>
+              <span class="metadata-value"><%= new Date(editUser.createdAt).toLocaleString() %></span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Last Updated:</span>
+              <span class="metadata-value"><%= new Date(editUser.updatedAt).toLocaleString() %></span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Profile:</span>
+              <span class="metadata-value">
+                <a href="/profile/<%= editUser.username %>" target="_blank">View Profile →</a>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+          <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+          
+          <% if (!editUser.isBanned) { %>
+            <button 
+              type="button" 
+              class="btn btn-danger" 
+              onclick="
+                const reason = prompt('Reason for banning this user:');
+                if (reason) {
+                  const form = document.createElement('form');
+                  form.method = 'POST';
+                  form.action = '/admin/users/<%= editUser.id %>/ban';
+                  const csrf = document.createElement('input');
+                  csrf.type = 'hidden';
+                  csrf.name = '_csrf';
+                  csrf.value = '<%= csrfToken %>';
+                  const reasonInput = document.createElement('input');
+                  reasonInput.type = 'hidden';
+                  reasonInput.name = 'reason';
+                  reasonInput.value = reason;
+                  form.appendChild(csrf);
+                  form.appendChild(reasonInput);
+                  document.body.appendChild(form);
+                  form.submit();
+                }
+              "
+            >
+              🔨 Ban User
+            </button>
+          <% } %>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>

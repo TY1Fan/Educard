@@ -17,8 +17,12 @@ router.get('/dashboard', adminController.showDashboard);
 
 // User Management
 router.get('/users', adminController.showUsers);
+router.get('/users/:id/edit', adminController.showEditUser);
+router.post('/users/:id/edit', adminController.updateUser);
 router.post('/users/:id/role', adminController.updateUserRole);
 router.post('/users/:id/toggle-active', adminController.toggleUserActive);
+router.post('/users/:id/ban', adminController.banUser);
+router.post('/users/:id/unban', adminController.unbanUser);
 router.post('/users/:id/delete', adminController.deleteUser);
 
 // Thread Management
