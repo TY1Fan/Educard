@@ -53,4 +53,10 @@ router.post('/thread/:slug/pin', requireAuth, forumController.togglePin);
 // Lock/unlock thread (requires authentication)
 router.post('/thread/:slug/lock', requireAuth, forumController.toggleLock);
 
+// Toggle post reaction (requires authentication)
+router.post('/post/:id/react', requireAuth, forumController.toggleReaction);
+
+// Get post reactions (public)
+router.get('/post/:id/reactions', forumController.getPostReactions);
+
 module.exports = router;

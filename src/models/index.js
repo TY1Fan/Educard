@@ -3,6 +3,7 @@ const User = require('./User');
 const Category = require('./Category');
 const Thread = require('./Thread');
 const Post = require('./Post');
+const PostReaction = require('./PostReaction');
 
 /**
  * Define Model Associations
@@ -70,6 +71,33 @@ Post.belongsTo(User, {
   as: 'author'
 });
 
+// PostReaction associations
+// A post can have many reactions
+Post.hasMany(PostReaction, {
+  foreignKey: 'postId',
+  as: 'reactions',
+  onDelete: 'CASCADE'
+});
+
+// A reaction belongs to one post
+PostReaction.belongsTo(Post, {
+  foreignKey: 'postId',
+  as: 'post'
+});
+
+// A user can have many reactions
+User.hasMany(PostReaction, {
+  foreignKey: 'userId',
+  as: 'reactions',
+  onDelete: 'CASCADE'
+});
+
+// A reaction belongs to one user
+PostReaction.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
 /**
  * Export all models and sequelize instance
  */
@@ -78,5 +106,6 @@ module.exports = {
   User,
   Category,
   Thread,
-  Post
+  Post,
+  PostReaction
 };

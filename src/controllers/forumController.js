@@ -1,6 +1,6 @@
 const { sequelize } = require('../config/database');
 const { Op } = require('sequelize');
-const { Category, Thread, Post, User } = require('../models');
+const { Category, Thread, Post, User, PostReaction } = require('../models');
 const { body, validationResult } = require('express-validator');
 const { uniqueSlugFromDB } = require('../utils/slugify');
 const { processMarkdown } = require('../utils/markdown');
@@ -392,20 +392,64 @@ exports.showThread = async (req, res) => {
     // Fetch posts with pagination
     const { count, rows: posts } = await Post.findAndCountAll({
       where: { threadId: thread.id },
-      include: [{
-        model: User,
-        as: 'author',
-        attributes: ['id', 'username', 'email', 'displayName', 'createdAt']
-      }],
+      include: [
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'username', 'email', 'displayName', 'createdAt']
+        },
+        {
+          model: PostReaction,
+          as: 'reactions',
+          attributes: ['id', 'userId', 'reactionType'],
+          required: false
+        }
+      ],
       order: [['createdAt', 'ASC']],
       limit,
       offset
     });
 
-    // Process markdown for all posts
+    // Get user's reactions if authenticated
+    const userId = req.session.user?.id;
+    let userReactions = [];
+    if (userId) {
+      userReactions = await PostReaction.findAll({
+        where: {
+          postId: posts.map(p => p.id),
+          userId
+        },
+        attributes: ['postId', 'reactionType']
+      });
+    }
+
+    // Create map of user's reactions
+    const userReactionMap = {};
+    userReactions.forEach(r => {
+      if (!userReactionMap[r.postId]) {
+        userReactionMap[r.postId] = [];
+      }
+      userReactionMap[r.postId].push(r.reactionType);
+    });
+
+    // Process markdown and add reaction counts
     const postsWithMarkdown = posts.map(post => {
       const postData = post.toJSON();
       postData.renderedContent = processMarkdown(postData.content);
+      
+      // Count reactions by type
+      const reactionCounts = {};
+      if (postData.reactions) {
+        postData.reactions.forEach(r => {
+          reactionCounts[r.reactionType] = (reactionCounts[r.reactionType] || 0) + 1;
+        });
+      }
+      postData.reactionCounts = reactionCounts;
+      postData.likeCount = reactionCounts.like || 0;
+      
+      // Check if current user has reacted
+      postData.userHasLiked = userReactionMap[post.id]?.includes('like') || false;
+      
       return postData;
     });
 
@@ -793,5 +837,125 @@ exports.toggleLock = async (req, res) => {
     console.error('Error toggling lock:', error);
     req.flash('error', 'Failed to update thread lock status.');
     res.redirect('back');
+  }
+};
+
+/**
+ * Toggle Post Reaction (Like)
+ * Allows users to like/unlike a post (toggle)
+ */
+exports.toggleReaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const reactionType = req.body.type || 'like';
+
+    // Find the post
+    const post = await Post.findByPk(id);
+    
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    // Check if reaction already exists
+    const existingReaction = await PostReaction.findOne({
+      where: {
+        postId: id,
+        userId,
+        reactionType
+      }
+    });
+
+    if (existingReaction) {
+      // Unlike - remove reaction
+      await existingReaction.destroy();
+      
+      // Get updated count
+      const reactionCount = await PostReaction.count({
+        where: { postId: id, reactionType }
+      });
+
+      return res.json({
+        success: true,
+        action: 'removed',
+        reactionCount,
+        message: 'Reaction removed'
+      });
+    } else {
+      // Like - add reaction
+      await PostReaction.create({
+        postId: id,
+        userId,
+        reactionType
+      });
+
+      // Get updated count
+      const reactionCount = await PostReaction.count({
+        where: { postId: id, reactionType }
+      });
+
+      return res.json({
+        success: true,
+        action: 'added',
+        reactionCount,
+        message: 'Reaction added'
+      });
+    }
+  } catch (error) {
+    console.error('Error toggling reaction:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update reaction'
+    });
+  }
+};
+
+/**
+ * Get Reactions for a Post
+ * Returns list of users who reacted to a post
+ */
+exports.getPostReactions = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { type } = req.query;
+
+    const where = { postId: id };
+    if (type) {
+      where.reactionType = type;
+    }
+
+    const reactions = await PostReaction.findAll({
+      where,
+      include: [{
+        model: User,
+        as: 'user',
+        attributes: ['id', 'username', 'displayName', 'email']
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    const reactionsData = reactions.map(r => ({
+      id: r.id,
+      type: r.reactionType,
+      createdAt: r.createdAt,
+      user: {
+        id: r.user.id,
+        username: r.user.username,
+        displayName: r.user.displayName || r.user.username,
+        email: r.user.email
+      }
+    }));
+
+    res.json({
+      success: true,
+      reactions: reactionsData,
+      count: reactionsData.length
+    });
+  } catch (error) {
+    console.error('Error fetching reactions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch reactions'
+    });
   }
 };

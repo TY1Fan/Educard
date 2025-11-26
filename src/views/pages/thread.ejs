@@ -343,7 +343,7 @@
             </div>
             
             <footer class="post-footer">
-              <div>
+              <div class="post-meta">
                 <time datetime="<%= post.createdAt %>">
                   Posted <%= new Date(post.createdAt).toLocaleString() %>
                 </time>
@@ -353,6 +353,28 @@
                     (Edited <%= new Date(post.editedAt).toLocaleString() %>)
                   </span>
                 <% } %>
+                
+                <!-- Post Reactions -->
+                <div class="post-reactions">
+                  <% if (isAuthenticated) { %>
+                    <button class="reaction-btn <%= post.userHasLiked ? 'active' : '' %>" 
+                            data-post-id="<%= post.id %>" 
+                            data-reaction="like"
+                            title="<%= post.userHasLiked ? 'Unlike this post' : 'Like this post' %>">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                      </svg>
+                      <span class="reaction-count"><%= post.likeCount || 0 %></span>
+                    </button>
+                  <% } else { %>
+                    <span class="reaction-display" title="<%= post.likeCount %> <%= post.likeCount === 1 ? 'like' : 'likes' %>">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                      </svg>
+                      <span class="reaction-count"><%= post.likeCount || 0 %></span>
+                    </span>
+                  <% } %>
+                </div>
               </div>
               
               <% if (isAuthenticated && user.id === post.userId) { %>

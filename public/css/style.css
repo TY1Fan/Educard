@@ -1195,6 +1195,109 @@ textarea {
 }
 
 /* ================================
+   Post Reactions
+   ================================ */
+
+.post-reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.reaction-btn,
+.reaction-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.reaction-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--secondary-color);
+  cursor: pointer;
+}
+
+.reaction-btn:hover {
+  background: var(--bg-color);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.reaction-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reaction-btn.active {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+}
+
+.reaction-btn.active:hover {
+  background: #fecaca;
+  border-color: #dc2626;
+}
+
+.reaction-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.reaction-btn.active svg {
+  fill: #dc2626;
+}
+
+.reaction-count {
+  font-weight: 500;
+  min-width: 1.5ch;
+  text-align: center;
+}
+
+.reaction-display {
+  color: var(--secondary-color);
+  border: 1px solid transparent;
+}
+
+.reaction-display svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Reaction animation */
+@keyframes reaction-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.reaction-animate {
+  animation: reaction-pulse 0.3s ease-out;
+}
+
+/* Post footer layout */
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ================================
    Jump Navigation Buttons
    ================================ */
 
