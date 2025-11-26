@@ -377,7 +377,7 @@ exports.showThread = async (req, res) => {
         {
           model: User,
           as: 'author',
-          attributes: ['id', 'username', 'createdAt']
+          attributes: ['id', 'username', 'email', 'displayName', 'createdAt']
         }
       ]
     });
@@ -395,7 +395,7 @@ exports.showThread = async (req, res) => {
       include: [{
         model: User,
         as: 'author',
-        attributes: ['id', 'username', 'createdAt']
+        attributes: ['id', 'username', 'email', 'displayName', 'createdAt']
       }],
       order: [['createdAt', 'ASC']],
       limit,

@@ -111,18 +111,23 @@
     }
 
     .post-author {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
       text-align: center;
     }
 
     .author-info strong {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
     }
 
     .author-info a {
       color: var(--primary-color);
       text-decoration: none;
-      font-size: 1.1rem;
+      font-size: 1rem;
+      font-weight: 600;
     }
 
     .author-info a:hover {
@@ -132,7 +137,7 @@
     .author-info small {
       display: block;
       color: var(--secondary-color);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
 
     .post-content {
@@ -325,8 +330,9 @@
       <% posts.forEach((post, index) => { %>
         <article class="post <%= post.isFirstPost ? 'first-post' : '' %>">
           <aside class="post-author">
+            <%- include('../partials/user-avatar', { user: post.author, size: 'large', linkToProfile: true }) %>
             <div class="author-info">
-              <strong><a href="/profile/<%= post.author.username %>"><%= post.author.username %></a></strong>
+              <strong><a href="/profile/<%= post.author.username %>"><%= post.author.displayName || post.author.username %></a></strong>
               <small>Member since <%= new Date(post.author.createdAt).toLocaleDateString() %></small>
             </div>
           </aside>

@@ -1,0 +1,39 @@
+<%
+/**
+ * User Avatar Partial
+ * Displays user avatar with Gravatar or default fallback
+ * 
+ * Parameters:
+ * - user: User object (required)
+ * - size: 'small', 'medium', 'large', 'xlarge' (default: 'medium')
+ * - linkToProfile: boolean (default: false)
+ */
+
+const { getUserAvatar, getAvatarSize } = require('../../utils/avatar');
+
+const avatarSize = typeof size !== 'undefined' ? size : 'medium';
+const link = typeof linkToProfile !== 'undefined' ? linkToProfile : false;
+const pixelSize = getAvatarSize(avatarSize);
+const avatarUrl = getUserAvatar(user, pixelSize);
+const displayName = user.displayName || user.username;
+%>
+
+<% if (link) { %>
+  <a href="/profile/<%= user.username %>" class="avatar-link" title="<%= displayName %>">
+    <img src="<%= avatarUrl %>" 
+         alt="<%= displayName %>'s avatar" 
+         class="avatar avatar-<%= avatarSize %>" 
+         width="<%= pixelSize %>" 
+         height="<%= pixelSize %>"
+         loading="lazy"
+         onerror="this.src='/images/default-avatar.svg'">
+  </a>
+<% } else { %>
+  <img src="<%= avatarUrl %>" 
+       alt="<%= displayName %>'s avatar" 
+       class="avatar avatar-<%= avatarSize %>" 
+       width="<%= pixelSize %>" 
+       height="<%= pixelSize %>"
+       loading="lazy"
+       onerror="this.src='/images/default-avatar.svg'">
+<% } %>

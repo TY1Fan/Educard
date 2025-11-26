@@ -1,13 +1,21 @@
 <style>
   .profile-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 2rem;
     padding: 2rem;
     background: white;
     border-radius: 8px;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
+    align-items: flex-start;
+  }
+
+  .profile-avatar {
+    flex-shrink: 0;
+  }
+
+  .profile-main {
+    flex: 1;
   }
 
   .profile-info h1 {
@@ -132,7 +140,12 @@
     .profile-header {
       flex-direction: column;
       gap: 1rem;
+      align-items: center;
       text-align: center;
+    }
+
+    .profile-avatar {
+      order: -1;
     }
 
     .profile-actions {
@@ -147,19 +160,24 @@
 
 <div class="container">
   <div class="profile-header">
-    <div class="profile-info">
-      <h1><%= profileUser.displayName || profileUser.username %></h1>
-      <p class="username">@<%= profileUser.username %></p>
+    <div class="profile-avatar">
+      <%- include('../partials/user-avatar', { user: profileUser, size: 'xlarge', linkToProfile: false }) %>
+    </div>
+    <div class="profile-main">
+      <div class="profile-info">
+        <h1><%= profileUser.displayName || profileUser.username %></h1>
+        <p class="username">@<%= profileUser.username %></p>
       <p class="member-since">
         Member since <%= new Date(profileUser.createdAt).toLocaleDateString() %>
       </p>
-    </div>
-    
-    <% if (isOwnProfile) { %>
-      <div class="profile-actions">
-        <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
       </div>
-    <% } %>
+      
+      <% if (isOwnProfile) { %>
+        <div class="profile-actions">
+          <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
+        </div>
+      <% } %>
+    </div>
   </div>
 
   <div class="profile-stats">

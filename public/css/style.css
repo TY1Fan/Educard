@@ -1363,6 +1363,74 @@ textarea {
 }
 
 /* ================================
+   Avatar Styles
+   ================================ */
+
+.avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-light);
+  border: 2px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.avatar-small {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-medium {
+  width: 48px;
+  height: 48px;
+}
+
+.avatar-large {
+  width: 80px;
+  height: 80px;
+}
+
+.avatar-xlarge {
+  width: 120px;
+  height: 120px;
+}
+
+.avatar-link {
+  display: inline-block;
+  line-height: 0;
+  transition: opacity 0.2s;
+}
+
+.avatar-link:hover {
+  opacity: 0.8;
+}
+
+.avatar-link:hover .avatar {
+  border-color: var(--primary-color);
+}
+
+/* Avatar in post author section */
+.post-author {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.post-author .avatar {
+  margin-top: 0.25rem;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Avatar in thread listings */
+.thread-item .avatar {
+  margin-right: 0.5rem;
+}
+
+/* ================================
    Print Styles
    ================================ */
 

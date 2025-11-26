@@ -18,7 +18,7 @@ exports.showProfile = async (req, res) => {
     // Find user
     const user = await User.findOne({
       where: { username },
-      attributes: ['id', 'username', 'displayName', 'createdAt']
+      attributes: ['id', 'username', 'email', 'displayName', 'createdAt']
     });
 
     if (!user) {
