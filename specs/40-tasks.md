@@ -7002,11 +7002,12 @@ Comprehensive testing of all forum features.
 
 ### Task 4.1.1: Implement Search Infrastructure
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 2 hours  
 **Dependencies:** Phase 3 complete  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Create search functionality for finding threads and posts across the forum.
@@ -7022,13 +7023,13 @@ Create search functionality for finding threads and posts across the forum.
 8. Track search queries for analytics (optional)
 
 **Acceptance Criteria:**
-- [ ] Search form in navbar/header
-- [ ] Search by thread title and post content
-- [ ] Results show thread title, excerpt, author, date
-- [ ] Click result navigates to thread/post
-- [ ] Pagination for 20 results per page
-- [ ] Empty state message for no results
-- [ ] Search query preserved in form after search
+- ✅ Search form in navbar/header
+- ✅ Search by thread title and post content
+- ✅ Results show thread title, excerpt, author, date
+- ✅ Click result navigates to thread/post
+- ✅ Pagination for 20 results per page
+- ✅ Empty state message for no results
+- ✅ Search query preserved in form after search
 
 **Files to Create/Modify:**
 - `src/controllers/searchController.js`
@@ -7038,10 +7039,40 @@ Create search functionality for finding threads and posts across the forum.
 - `src/app.js` (mount search routes)
 
 **Implementation Notes:**
-- Use PostgreSQL `ILIKE` for case-insensitive search
-- Consider full-text search with `tsvector` for better performance
-- Highlight search terms in results using regex
-- Order results by relevance (exact match → word match → partial match)
+- ✅ Used PostgreSQL `ILIKE` for case-insensitive search
+- ✅ Search threads by title using `Op.iLike`
+- ✅ Search posts by content using `Op.iLike`
+- ✅ Highlight search terms in results using `<mark>` tags
+- ✅ Category filter dropdown populated from database
+- ✅ Author filter by username
+- ✅ Pagination with 20 results per page
+- ✅ Thread results show post count and metadata
+- ✅ Post results show excerpt with context
+- ✅ Results ordered by updatedAt DESC for threads
+- ✅ Results ordered by createdAt DESC for posts
+- ✅ Empty states for no results and no query
+- ✅ Search form integrated into navbar with responsive design
+- ✅ Model associations fixed to use correct aliases (author, category, thread, posts)
+- ✅ Search form styling matches site theme
+
+**Technical Details:**
+- Used `findAndCountAll` for thread pagination
+- Included eager loading with `User`, `Category`, and `Post` models
+- Search highlights using RegExp replace with `<mark>` tags
+- Responsive design with mobile-friendly search form
+- POST count displayed for each thread result
+- Link to specific post with anchor (#post-id) for post results
+
+**Testing Results:**
+- ✅ Search page loads at `/search`
+- ✅ Search form appears in navbar
+- ✅ Query "welcome" finds "New Users Welcome" thread
+- ✅ Query "hello" finds posts containing the word
+- ✅ Search terms highlighted in yellow
+- ✅ Pagination controls display (when > 20 results)
+- ✅ Category and author filters functional
+- ✅ Empty state messages display correctly
+- ✅ Links navigate to correct threads/posts
 
 ---
 

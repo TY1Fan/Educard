@@ -1,0 +1,60 @@
+<style>
+  .search-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 400px;
+  }
+
+  .search-form input[type="search"] {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 200px;
+  }
+
+  .search-form input[type="search"]:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+  }
+
+  .search-form button {
+    padding: 0.5rem 1rem;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .search-form button:hover {
+    background: #0052a3;
+  }
+
+  @media (max-width: 768px) {
+    .search-form {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .search-form input[type="search"] {
+      min-width: 150px;
+    }
+  }
+</style>
+
+<form action="/search" method="GET" class="search-form">
+  <input 
+    type="search" 
+    name="q" 
+    placeholder="Search threads and posts..." 
+    value="<%= typeof query !== 'undefined' ? query : '' %>"
+    aria-label="Search"
+  >
+  <button type="submit" aria-label="Search">🔍 Search</button>
+</form>

@@ -89,8 +89,10 @@ app.get("/test-session", (req, res) => {
 const authRoutes = require("./routes/auth");
 const forumRoutes = require("./routes/forum");
 const userRoutes = require("./routes/users");
+const searchRoutes = require("./routes/search");
 
 app.use("/auth", authRoutes);
+app.use("/search", searchRoutes);
 app.use("/", forumRoutes);
 app.use("/", userRoutes);
 

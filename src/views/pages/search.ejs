@@ -1,0 +1,417 @@
+<style>
+  .search-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .search-header {
+    margin-bottom: 2rem;
+  }
+
+  .search-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+    color: #333;
+  }
+
+  .search-main-form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  .search-main-form input[type="search"] {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .search-main-form input[type="search"]:focus {
+    outline: none;
+    border-color: #0066cc;
+  }
+
+  .search-filters {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-filters label {
+    font-weight: 500;
+    color: #666;
+  }
+
+  .search-filters select,
+  .search-filters input[type="text"] {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+
+  .search-filters button {
+    padding: 0.5rem 1.5rem;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-left: auto;
+  }
+
+  .search-filters button:hover {
+    background: #0052a3;
+  }
+
+  .search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+  }
+
+  .search-results-count {
+    font-size: 1.1rem;
+    color: #666;
+  }
+
+  .search-results-count strong {
+    color: #333;
+  }
+
+  .search-section {
+    margin-bottom: 3rem;
+  }
+
+  .search-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .search-result-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+  }
+
+  .search-result-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .search-result-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .search-result-title a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  .search-result-title a:hover {
+    text-decoration: underline;
+  }
+
+  .search-result-meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+  }
+
+  .search-result-meta a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  .search-result-meta a:hover {
+    text-decoration: underline;
+  }
+
+  .search-result-excerpt {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .search-result-excerpt mark {
+    background: #ffeb3b;
+    padding: 0 2px;
+    font-weight: 500;
+  }
+
+  .post-result-context {
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 0.5rem;
+  }
+
+  .empty-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .empty-results h2 {
+    font-size: 1.5rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .empty-results p {
+    color: #888;
+    line-height: 1.6;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 2rem 0;
+  }
+
+  .pagination a,
+  .pagination span {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .pagination a:hover {
+    background: #f0f0f0;
+  }
+
+  .pagination .active {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
+  }
+
+  .pagination .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    .search-page {
+      padding: 1rem 0.5rem;
+    }
+
+    .search-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .search-filters {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .search-filters button {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    .search-result-item {
+      padding: 1rem;
+    }
+
+    .search-result-title {
+      font-size: 1.1rem;
+    }
+  }
+</style>
+
+<div class="search-page">
+  <div class="search-header">
+    <h1>Search Forum</h1>
+  </div>
+
+  <div class="search-main-form">
+    <form action="/search" method="GET">
+      <input 
+        type="search" 
+        name="q" 
+        placeholder="Search threads and posts..." 
+        value="<%= query %>"
+        required
+        autofocus
+      >
+      
+      <div class="search-filters">
+        <div>
+          <label for="category">Category:</label>
+          <select name="category" id="category">
+            <option value="">All Categories</option>
+            <% categories.forEach(cat => { %>
+              <option value="<%= cat.id %>" <%= category == cat.id ? 'selected' : '' %>>
+                <%= cat.name %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div>
+          <label for="author">Author:</label>
+          <input 
+            type="text" 
+            name="author" 
+            id="author" 
+            placeholder="Username"
+            value="<%= author %>"
+          >
+        </div>
+
+        <button type="submit">🔍 Search</button>
+      </div>
+    </form>
+  </div>
+
+  <% if (query) { %>
+    <div class="search-results-header">
+      <div class="search-results-count">
+        Found <strong><%= totalResults %></strong> thread(s)
+        <% if (posts.length > 0) { %>
+          and <strong><%= posts.length %></strong> post(s)
+        <% } %>
+        matching "<strong><%= query %></strong>"
+      </div>
+    </div>
+
+    <% if (threads.length > 0 || posts.length > 0) { %>
+      
+      <!-- Thread Results -->
+      <% if (threads.length > 0) { %>
+        <div class="search-section">
+          <h2>Threads</h2>
+          <% threads.forEach(thread => { %>
+            <div class="search-result-item">
+              <div class="search-result-title">
+                <a href="/thread/<%= thread.slug %>">
+                  <%- thread.title.replace(new RegExp(`(${query})`, 'gi'), '<mark>$1</mark>') %>
+                </a>
+              </div>
+              <div class="search-result-meta">
+                Posted by 
+                <a href="/profile/<%= thread.author.username %>">
+                  <%= thread.author.displayName || thread.author.username %>
+                </a>
+                in 
+                <a href="/category/<%= thread.category.slug %>">
+                  <%= thread.category.name %>
+                </a>
+                • <%= thread.posts ? thread.posts.length : 0 %> posts
+                • <%= new Date(thread.createdAt).toLocaleDateString() %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <!-- Post Results -->
+      <% if (posts.length > 0) { %>
+        <div class="search-section">
+          <h2>Posts</h2>
+          <% posts.forEach(post => { 
+            const excerpt = post.content.length > 200 ? post.content.substring(0, 200) + '...' : post.content;
+          %>
+            <div class="search-result-item">
+              <div class="search-result-title">
+                <a href="/thread/<%= post.thread.slug %>#post-<%= post.id %>">
+                  <%= post.thread.title %>
+                </a>
+              </div>
+              <div class="search-result-meta">
+                Posted by 
+                <a href="/profile/<%= post.author.username %>">
+                  <%= post.author.displayName || post.author.username %>
+                </a>
+                in 
+                <a href="/category/<%= post.thread.category.slug %>">
+                  <%= post.thread.category.name %>
+                </a>
+                • <%= new Date(post.createdAt).toLocaleDateString() %>
+              </div>
+              <div class="search-result-excerpt">
+                <%- excerpt.replace(new RegExp(`(${query})`, 'gi'), '<mark>$1</mark>') %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="pagination">
+          <% if (currentPage > 1) { %>
+            <a href="/search?q=<%= encodeURIComponent(query) %>&category=<%= category %>&author=<%= encodeURIComponent(author) %>&page=<%= currentPage - 1 %>">
+              ← Previous
+            </a>
+          <% } else { %>
+            <span class="disabled">← Previous</span>
+          <% } %>
+
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+              <span class="active"><%= i %></span>
+            <% } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) { %>
+              <a href="/search?q=<%= encodeURIComponent(query) %>&category=<%= category %>&author=<%= encodeURIComponent(author) %>&page=<%= i %>">
+                <%= i %>
+              </a>
+            <% } else if (i === currentPage - 3 || i === currentPage + 3) { %>
+              <span>...</span>
+            <% } %>
+          <% } %>
+
+          <% if (currentPage < totalPages) { %>
+            <a href="/search?q=<%= encodeURIComponent(query) %>&category=<%= category %>&author=<%= encodeURIComponent(author) %>&page=<%= currentPage + 1 %>">
+              Next →
+            </a>
+          <% } else { %>
+            <span class="disabled">Next →</span>
+          <% } %>
+        </div>
+      <% } %>
+
+    <% } else { %>
+      <div class="empty-results">
+        <h2>No results found</h2>
+        <p>
+          We couldn't find any threads or posts matching "<strong><%= query %></strong>".
+        </p>
+        <p>
+          Try different keywords or check your spelling.
+        </p>
+      </div>
+    <% } %>
+  <% } else { %>
+    <div class="empty-results">
+      <h2>Start searching</h2>
+      <p>
+        Enter a search term above to find threads and posts across the forum.
+      </p>
+      <p>
+        You can filter by category and author to narrow your results.
+      </p>
+    </div>
+  <% } %>
+</div>

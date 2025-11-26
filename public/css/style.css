@@ -160,6 +160,11 @@ a:hover {
   align-items: center;
   margin: 0;
   padding: 0;
+  flex-wrap: wrap;
+}
+
+.nav-search {
+  margin-left: auto;
 }
 
 .main-nav a {
