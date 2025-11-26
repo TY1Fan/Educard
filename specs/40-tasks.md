@@ -6004,11 +6004,12 @@ router.post('/post/:id/delete', requireAuth, forumController.deletePost);
 
 ### Task 3.4.4: Implement Thread Deletion
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Task 3.4.3  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Implement thread deletion (cascades to all posts).
@@ -6097,6 +6098,39 @@ threadDeleteButtons.forEach(button => {
 - Verify thread and all posts deleted
 - Try as non-owner (should 403)
 - Confirmation displays
+
+**Implementation Notes:**
+- ✅ Added `deleteThread()` controller function to forumController.js
+- ✅ Fetches thread by slug with category association
+- ✅ Returns 404 if thread not found
+- ✅ Ownership verification: checks thread.userId === session.user.id
+- ✅ Returns 403 Forbidden if user doesn't own the thread
+- ✅ Deletes thread using thread.destroy()
+- ✅ Cascade delete: All posts automatically deleted via onDelete: 'CASCADE'
+- ✅ Redirects to category page after deletion
+- ✅ Flash success message: "Thread and all its posts deleted successfully."
+- ✅ Flash error message on failure
+- ✅ Error handling with try-catch
+- ✅ Added POST route: /thread/:slug/delete with requireAuth middleware
+- ✅ Enhanced main.js with strong confirmation for thread deletion
+- ✅ Multi-line confirmation message with warning emoji
+- ✅ Separate confirmation handlers for threads vs posts
+- ✅ Tested: Thread deletion works correctly
+- ✅ Tested: Posts cascade deleted when thread is deleted
+- ✅ Delete button already in thread.ejs view with inline confirmation
+
+**Confirmation Message:**
+```
+⚠️ DELETE ENTIRE THREAD?
+
+This will permanently delete the thread and ALL posts in it.
+
+This action CANNOT be undone!
+
+Are you absolutely sure?
+```
+
+**Note:** Thread creators can now delete entire threads with strong confirmation and automatic cascade deletion of all posts!
 
 ---
 

@@ -600,3 +600,49 @@ exports.deletePost = async (req, res) => {
     res.redirect('back');
   }
 };
+
+/**
+ * Delete Thread
+ * Handles deleting an entire thread with all its posts
+ */
+exports.deleteThread = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const userId = req.session.user.id;
+
+    const thread = await Thread.findOne({
+      where: { slug },
+      include: [{
+        model: Category,
+        as: 'category'
+      }]
+    });
+
+    if (!thread) {
+      return res.status(404).render('errors/404', {
+        title: 'Thread Not Found',
+        message: 'The requested thread does not exist.'
+      });
+    }
+
+    // Check ownership
+    if (thread.userId !== userId) {
+      return res.status(403).render('errors/403', {
+        title: 'Forbidden',
+        message: 'You can only delete your own threads.'
+      });
+    }
+
+    const categorySlug = thread.category.slug;
+
+    // Delete thread (cascades to posts)
+    await thread.destroy();
+
+    req.flash('success', 'Thread and all its posts deleted successfully.');
+    res.redirect(`/category/${categorySlug}`);
+  } catch (error) {
+    console.error('Error deleting thread:', error);
+    req.flash('error', 'Failed to delete thread.');
+    res.redirect('back');
+  }
+};
