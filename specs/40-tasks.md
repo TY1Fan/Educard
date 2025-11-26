@@ -5382,11 +5382,12 @@ router.get('/thread/:slug', forumController.showThread);
 
 ### Task 3.3.2: Create Reply Form Partial
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Task 3.3.1  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Create a reusable reply form partial for posting replies.
@@ -5434,6 +5435,22 @@ Create a reusable reply form partial for posting replies.
 **Validation:**
 - Form renders in thread view
 - Styled consistently
+
+**Implementation Notes:**
+- ✅ Created `src/views/partials/reply-form.ejs` partial
+- ✅ Form includes textarea for reply content (1-10,000 chars)
+- ✅ CSRF token included for security
+- ✅ Error display support for validation messages
+- ✅ Form data preservation on errors
+- ✅ Submit button styled with primary button class
+- ✅ Embedded CSS for consistent styling
+- ✅ Form hint for guidelines and character limits
+- ✅ Mobile responsive (prevents iOS zoom with 16px font)
+- ✅ Focus states with border color transition
+- ✅ Integrated into `src/views/pages/thread.ejs`
+- ✅ Shows for authenticated users only
+- ✅ Guest message with login/register links for unauthenticated users
+- ✅ Form action: POST /thread/:slug/reply (ready for Task 3.3.3)
 
 ---
 

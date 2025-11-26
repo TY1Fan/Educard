@@ -1,0 +1,104 @@
+<form action="/thread/<%= threadSlug %>/reply" method="POST" class="reply-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  
+  <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+    <div class="alert alert-error">
+      <ul>
+        <% errors.forEach(error => { %>
+          <li><%= error.msg %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+  
+  <div class="form-group">
+    <label for="content">Your Reply</label>
+    <textarea 
+      id="content" 
+      name="content" 
+      rows="6"
+      required
+      minlength="1"
+      maxlength="10000"
+      placeholder="Write your reply..."><%= typeof formData !== 'undefined' && formData.content ? formData.content : '' %></textarea>
+    <small class="form-hint">Be respectful and constructive. Minimum 1 character, maximum 10,000 characters.</small>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Post Reply</button>
+  </div>
+</form>
+
+<style>
+  .reply-form {
+    width: 100%;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+  }
+
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .form-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--secondary-color);
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+  }
+
+  .alert-error {
+    background-color: #fee;
+    border: 1px solid #fcc;
+    color: #c00;
+  }
+
+  .alert ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .alert li {
+    margin: 0.25rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .form-group textarea {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+  }
+</style>

@@ -296,8 +296,11 @@
     <% if (isAuthenticated) { %>
       <section class="reply-section">
         <h3>Reply to Thread</h3>
-        <p>Reply functionality will be implemented in Task 3.3.2</p>
-        <!-- Reply form will be added in next task -->
+        <%- include('../partials/reply-form', { 
+          threadSlug: thread.slug,
+          errors: typeof errors !== 'undefined' ? errors : [],
+          formData: typeof formData !== 'undefined' ? formData : {}
+        }) %>
       </section>
     <% } else { %>
       <div class="guest-message">
