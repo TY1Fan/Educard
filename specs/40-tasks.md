@@ -5582,11 +5582,12 @@ router.post('/thread/:slug/reply',
 
 ### Task 3.4.1: Create Edit Post Form
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 3.3.3  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Create form for editing existing posts.
@@ -5706,6 +5707,25 @@ router.get('/post/:id/edit', requireAuth, forumController.showEditPost);
 - Click edit on own post
 - Form shows with content
 - Try accessing edit for others' post (should 403)
+
+**Implementation Notes:**
+- ✅ Added `showEditPost()` controller function to forumController.js
+- ✅ Fetches post by ID with thread and category associations
+- ✅ Returns 404 if post not found
+- ✅ Ownership verification: checks post.userId === session.user.id
+- ✅ Returns 403 Forbidden if user doesn't own the post
+- ✅ Created `src/views/pages/edit-post.ejs` view (3.2KB)
+- ✅ Breadcrumb navigation: Home → Category → Thread → Edit Post
+- ✅ Form pre-filled with current post content
+- ✅ CSRF token included for security
+- ✅ Content textarea with validation attributes (1-10,000 chars)
+- ✅ Error display support for validation messages
+- ✅ Save Changes button and Cancel link
+- ✅ Embedded CSS for consistent styling
+- ✅ Mobile responsive design
+- ✅ Added GET route: /post/:id/edit with requireAuth middleware
+- ✅ Route redirects to login if not authenticated (302)
+- ✅ Form action: POST /post/:id/edit (ready for Task 3.4.2)
 
 ---
 

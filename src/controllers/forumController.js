@@ -411,3 +411,49 @@ exports.createReply = async (req, res) => {
     res.redirect(`/thread/${req.params.slug}`);
   }
 };
+
+/**
+ * Show Edit Post Form
+ * Displays form for editing an existing post
+ */
+exports.showEditPost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+
+    const post = await Post.findByPk(id, {
+      include: [{
+        model: Thread,
+        as: 'thread',
+        include: [{ model: Category, as: 'category' }]
+      }]
+    });
+
+    if (!post) {
+      return res.status(404).render('errors/404', {
+        title: 'Post Not Found',
+        message: 'The requested post does not exist.'
+      });
+    }
+
+    // Check ownership
+    if (post.userId !== userId) {
+      return res.status(403).render('errors/403', {
+        title: 'Forbidden',
+        message: 'You can only edit your own posts.'
+      });
+    }
+
+    res.render('pages/edit-post', {
+      title: 'Edit Post',
+      post,
+      errors: null
+    });
+  } catch (error) {
+    console.error('Error showing edit post:', error);
+    res.status(500).render('errors/500', {
+      title: 'Error',
+      message: 'Failed to load edit form'
+    });
+  }
+};
