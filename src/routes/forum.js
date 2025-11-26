@@ -21,4 +21,7 @@ router.post('/category/:slug/new-thread',
   forumController.createThread
 );
 
+// View thread with posts
+router.get('/thread/:slug', forumController.showThread);
+
 module.exports = router;

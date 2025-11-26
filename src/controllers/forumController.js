@@ -282,3 +282,71 @@ exports.createThread = async (req, res) => {
     });
   }
 };
+
+/**
+ * Show Thread
+ * Displays a thread with all its posts, paginated
+ */
+exports.showThread = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const offset = (page - 1) * limit;
+
+    // Find thread with category and author
+    const thread = await Thread.findOne({
+      where: { slug },
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['id', 'name', 'slug']
+        },
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'username', 'createdAt']
+        }
+      ]
+    });
+
+    if (!thread) {
+      return res.status(404).render('errors/404', {
+        title: 'Thread Not Found',
+        message: 'The requested thread does not exist.'
+      });
+    }
+
+    // Fetch posts with pagination
+    const { count, rows: posts } = await Post.findAndCountAll({
+      where: { threadId: thread.id },
+      include: [{
+        model: User,
+        as: 'author',
+        attributes: ['id', 'username', 'createdAt']
+      }],
+      order: [['createdAt', 'ASC']],
+      limit,
+      offset
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    res.render('pages/thread', {
+      title: `${thread.title} - Educard Forum`,
+      thread,
+      posts,
+      currentPage: page,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    });
+  } catch (error) {
+    console.error('Error fetching thread:', error);
+    res.status(500).render('errors/500', {
+      title: 'Error',
+      message: 'Failed to load thread'
+    });
+  }
+};

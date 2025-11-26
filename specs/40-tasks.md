@@ -5038,11 +5038,12 @@ router.post('/category/:slug/new-thread',
 
 ### Task 3.3.1: Create Thread View (Post Display)
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 2 hours  
 **Dependencies:** Task 3.2.4  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Create the page that displays a thread with all its posts.
@@ -5354,6 +5355,28 @@ router.get('/thread/:slug', forumController.showThread);
 - Posts in chronological order
 - Author info shows
 - Pagination works (if enough posts)
+
+**Implementation Notes:**
+- ✅ Added `showThread()` controller function to forumController.js
+- ✅ Fetches thread with category and author associations
+- ✅ Fetches posts with pagination (15 posts per page)
+- ✅ Posts ordered chronologically (ASC by createdAt)
+- ✅ Created `src/views/pages/thread.ejs` template
+- ✅ Breadcrumb navigation: Home → Category → Thread
+- ✅ First post highlighted with left border
+- ✅ Author info displayed (username, member since date)
+- ✅ Timestamps for all posts (posted date/time)
+- ✅ Edit indicators for edited posts
+- ✅ Pagination controls with page info
+- ✅ Edit/Delete actions for post owners
+- ✅ Reply section placeholder (to be implemented in Task 3.3.2)
+- ✅ Guest message with login/register links
+- ✅ 404 error handling for non-existent threads
+- ✅ Responsive design (grid layout, mobile-friendly)
+- ✅ Added route: GET /thread/:slug
+- ✅ Tested with existing threads - working correctly
+
+**Note:** Thread creation from Task 3.2.4 now successfully redirects to working thread view pages.
 
 ---
 
