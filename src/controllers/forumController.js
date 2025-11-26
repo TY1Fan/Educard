@@ -350,3 +350,64 @@ exports.showThread = async (req, res) => {
     });
   }
 };
+
+/**
+ * Create Reply Validation
+ * Validation rules for creating a reply to a thread
+ */
+exports.createReplyValidation = [
+  body('content')
+    .trim()
+    .isLength({ min: 1, max: 10000 })
+    .withMessage('Reply must be 1-10,000 characters')
+];
+
+/**
+ * Create Reply
+ * Handles posting a reply to an existing thread
+ */
+exports.createReply = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const errors = validationResult(req);
+    
+    // Find thread
+    const thread = await Thread.findOne({ 
+      where: { slug },
+      include: [{ model: Category, as: 'category' }]
+    });
+    
+    if (!thread) {
+      return res.status(404).render('errors/404', {
+        title: 'Thread Not Found',
+        message: 'The requested thread does not exist.'
+      });
+    }
+
+    if (!errors.isEmpty()) {
+      req.flash('error', errors.array()[0].msg);
+      return res.redirect(`/thread/${slug}`);
+    }
+
+    const { content } = req.body;
+    const userId = req.session.user.id;
+
+    // Create post
+    await Post.create({
+      threadId: thread.id,
+      userId,
+      content,
+      isFirstPost: false
+    });
+
+    // Update thread's updatedAt to bump it to top
+    await thread.update({ updatedAt: new Date() });
+
+    req.flash('success', 'Reply posted successfully!');
+    res.redirect(`/thread/${slug}`);
+  } catch (error) {
+    console.error('Error creating reply:', error);
+    req.flash('error', 'Failed to post reply. Please try again.');
+    res.redirect(`/thread/${req.params.slug}`);
+  }
+};

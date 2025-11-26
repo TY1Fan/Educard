@@ -5456,11 +5456,12 @@ Create a reusable reply form partial for posting replies.
 
 ### Task 3.3.3: Implement Reply Creation Logic
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 1 hour  
 **Dependencies:** Task 3.3.2  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Implement backend logic to create post replies.
@@ -5554,6 +5555,26 @@ router.post('/thread/:slug/reply',
 - Verify thread updatedAt changed
 - Test validation errors
 - Verify redirect works
+
+**Implementation Notes:**
+- ✅ Added `createReplyValidation` middleware with express-validator
+- ✅ Validation rule: content (1-10,000 characters)
+- ✅ Added `createReply()` controller function to forumController.js
+- ✅ Fetches thread with category association
+- ✅ Returns 404 if thread not found
+- ✅ Validates content using validationResult()
+- ✅ Creates new post with isFirstPost: false
+- ✅ Updates thread's updatedAt timestamp to bump to top
+- ✅ Flash success message: "Reply posted successfully!"
+- ✅ Flash error messages for validation failures
+- ✅ Redirects back to thread after posting
+- ✅ Error handling with try-catch
+- ✅ Added POST route: /thread/:slug/reply with requireAuth middleware
+- ✅ Route includes validation middleware
+- ✅ Tested: Posts created successfully and display in chronological order
+- ✅ Flash messages integrated via layout system
+
+**Note:** Users can now create threads AND post replies. The forum is fully functional for basic discussion!
 
 ---
 

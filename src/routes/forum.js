@@ -24,4 +24,11 @@ router.post('/category/:slug/new-thread',
 // View thread with posts
 router.get('/thread/:slug', forumController.showThread);
 
+// Create reply to thread (requires authentication and validation)
+router.post('/thread/:slug/reply', 
+  requireAuth,
+  forumController.createReplyValidation,
+  forumController.createReply
+);
+
 module.exports = router;
