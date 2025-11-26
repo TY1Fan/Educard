@@ -11,6 +11,13 @@ const { requireAuth } = require('../middlewares/auth');
 // Edit profile form (requires authentication) - must come before :username route
 router.get('/profile/edit', requireAuth, userController.showEditProfile);
 
+// Update profile (requires authentication and validation)
+router.post('/profile/edit', 
+  requireAuth,
+  userController.updateProfileValidation,
+  userController.updateProfile
+);
+
 // User profile
 router.get('/profile/:username', userController.showProfile);
 

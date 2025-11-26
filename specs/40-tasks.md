@@ -6646,11 +6646,12 @@ router.get('/profile/edit', requireAuth, userController.showEditProfile);
 
 ### Task 3.5.3: Implement Profile Update Logic
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** Medium  
 **Estimated Time:** 1 hour  
 **Dependencies:** Task 3.5.2  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Implement backend logic to update user profiles.
@@ -6755,6 +6756,40 @@ router.post('/profile/edit',
 - Try duplicate email (should fail)
 - Verify session updated
 - Check flash message
+
+**Implementation Notes:**
+- ✅ Added imports: body, validationResult from express-validator, Op from sequelize
+- ✅ Added `updateProfileValidation` middleware array
+- ✅ Display name validation:
+  - Optional field (checkFalsy: true)
+  - Trimmed
+  - Max length: 100 characters
+- ✅ Email validation:
+  - Required field
+  - Trimmed
+  - Valid email format check
+  - Normalized
+  - Custom async validator for uniqueness check
+  - Uses Op.ne to exclude current user from uniqueness check
+  - Throws error if email already in use by another user
+- ✅ Added `updateProfile()` controller function
+- ✅ Fetches authenticated user by session ID
+- ✅ Uses validationResult() to check for errors
+- ✅ Re-renders edit form with errors if validation fails
+- ✅ Updates user with new displayName and email
+- ✅ DisplayName defaults to username if empty
+- ✅ Updates session.user.email to keep session in sync
+- ✅ Flash success message: "Profile updated successfully!"
+- ✅ Flash error message on failure
+- ✅ Redirects to user's profile page after success
+- ✅ Redirects back to edit form on error
+- ✅ Error handling with try-catch
+- ✅ Added POST route: /profile/edit with requireAuth and validation middleware
+- ✅ Route includes both authentication and validation checks
+- ✅ Tested: Controller functions exist and export correctly
+- ✅ Tested: Route registered properly
+
+**Note:** Users can now update their profile information with full validation and email uniqueness enforcement!
 
 ---
 
