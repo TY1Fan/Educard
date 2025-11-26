@@ -34,4 +34,11 @@ router.post('/thread/:slug/reply',
 // Edit post form (requires authentication)
 router.get('/post/:id/edit', requireAuth, forumController.showEditPost);
 
+// Update post (requires authentication and validation)
+router.post('/post/:id/edit', 
+  requireAuth,
+  forumController.updatePostValidation,
+  forumController.updatePost
+);
+
 module.exports = router;

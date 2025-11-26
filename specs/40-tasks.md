@@ -5731,11 +5731,12 @@ router.get('/post/:id/edit', requireAuth, forumController.showEditPost);
 
 ### Task 3.4.2: Implement Post Update Logic
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 45 minutes  
 **Dependencies:** Task 3.4.1  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Implement backend logic to update posts.
@@ -5835,6 +5836,30 @@ router.post('/post/:id/edit',
 - Verify content updated
 - Verify editedAt set
 - Check "Edited" indicator displays
+
+**Implementation Notes:**
+- ✅ Added `updatePostValidation` middleware with express-validator
+- ✅ Validation rule: content (1-10,000 characters) with trim
+- ✅ Added `updatePost()` controller function to forumController.js
+- ✅ Fetches post by ID with thread and category associations
+- ✅ Returns 404 if post not found
+- ✅ Ownership verification: checks post.userId === session.user.id
+- ✅ Returns 403 Forbidden if user doesn't own the post
+- ✅ Validates content using validationResult()
+- ✅ Re-renders edit form with errors if validation fails
+- ✅ Updates post content and editedAt timestamp
+- ✅ Sets editedAt to new Date() on update
+- ✅ Flash success message: "Post updated successfully!"
+- ✅ Flash error message on failure
+- ✅ Redirects to thread page after successful update
+- ✅ Error handling with try-catch
+- ✅ Added POST route: /post/:id/edit with requireAuth middleware
+- ✅ Route includes validation middleware
+- ✅ Tested: Post content updated successfully
+- ✅ Tested: editedAt timestamp set correctly
+- ✅ Tested: "Edited" indicator displays on thread view
+
+**Note:** Users can now edit their posts with full validation and timestamps!
 
 ---
 

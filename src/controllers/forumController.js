@@ -457,3 +457,72 @@ exports.showEditPost = async (req, res) => {
     });
   }
 };
+
+/**
+ * Update Post Validation
+ * Validation rules for updating a post
+ */
+exports.updatePostValidation = [
+  body('content')
+    .trim()
+    .isLength({ min: 1, max: 10000 })
+    .withMessage('Content must be 1-10,000 characters')
+];
+
+/**
+ * Update Post
+ * Handles updating an existing post
+ */
+exports.updatePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.session.user.id;
+    const errors = validationResult(req);
+
+    const post = await Post.findByPk(id, {
+      include: [{
+        model: Thread,
+        as: 'thread',
+        include: [{ model: Category, as: 'category' }]
+      }]
+    });
+
+    if (!post) {
+      return res.status(404).render('errors/404', {
+        title: 'Post Not Found',
+        message: 'The requested post does not exist.'
+      });
+    }
+
+    // Check ownership
+    if (post.userId !== userId) {
+      return res.status(403).render('errors/403', {
+        title: 'Forbidden',
+        message: 'You can only edit your own posts.'
+      });
+    }
+
+    if (!errors.isEmpty()) {
+      return res.render('pages/edit-post', {
+        title: 'Edit Post',
+        post,
+        errors: errors.array()
+      });
+    }
+
+    const { content } = req.body;
+
+    // Update post
+    await post.update({
+      content,
+      editedAt: new Date()
+    });
+
+    req.flash('success', 'Post updated successfully!');
+    res.redirect(`/thread/${post.thread.slug}`);
+  } catch (error) {
+    console.error('Error updating post:', error);
+    req.flash('error', 'Failed to update post.');
+    res.redirect('back');
+  }
+};
