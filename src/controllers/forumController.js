@@ -33,10 +33,49 @@ exports.showHome = async (req, res) => {
       raw: false // Ensure we get model instances, not raw data
     });
 
-    // Convert threadCount from string to number for each category
+    // Fetch the most recent thread for each category (for last activity)
+    const categoryIds = categories.map(c => c.id);
+    const lastThreads = await Thread.findAll({
+      where: {
+        categoryId: categoryIds
+      },
+      include: [
+        {
+          model: User,
+          as: 'author',
+          attributes: ['id', 'username', 'displayName']
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['id']
+        }
+      ],
+      attributes: ['id', 'title', 'slug', 'updatedAt', 'categoryId'],
+      order: [['updatedAt', 'DESC']]
+    });
+
+    // Create a map of categoryId -> last thread
+    const lastThreadMap = {};
+    lastThreads.forEach(thread => {
+      if (!lastThreadMap[thread.categoryId]) {
+        lastThreadMap[thread.categoryId] = thread;
+      }
+    });
+
+    // Convert threadCount from string to number for each category and add last activity
     const categoriesWithCounts = categories.map(category => {
       const categoryData = category.toJSON();
       categoryData.threadCount = parseInt(categoryData.threadCount) || 0;
+      const lastThread = lastThreadMap[category.id];
+      if (lastThread) {
+        categoryData.lastActivity = {
+          threadTitle: lastThread.title,
+          threadSlug: lastThread.slug,
+          updatedAt: lastThread.updatedAt,
+          author: lastThread.author
+        };
+      }
       return categoryData;
     });
 
@@ -106,10 +145,40 @@ exports.showCategoryThreads = async (req, res) => {
       distinct: true
     });
 
-    // Convert postCount from string to number
+    // Fetch last post for each thread
+    const threadIds = threads.map(t => t.id);
+    const lastPosts = await Post.findAll({
+      where: {
+        threadId: threadIds
+      },
+      include: [{
+        model: User,
+        as: 'author',
+        attributes: ['id', 'username', 'displayName']
+      }],
+      attributes: ['id', 'threadId', 'createdAt', 'userId'],
+      order: [['createdAt', 'DESC']]
+    });
+
+    // Create a map of threadId -> last post
+    const lastPostMap = {};
+    lastPosts.forEach(post => {
+      if (!lastPostMap[post.threadId]) {
+        lastPostMap[post.threadId] = post;
+      }
+    });
+
+    // Convert postCount from string to number and add last post info
     const threadsWithCounts = threads.map(thread => {
       const threadData = thread.toJSON();
       threadData.postCount = parseInt(threadData.postCount) || 0;
+      const lastPost = lastPostMap[thread.id];
+      if (lastPost) {
+        threadData.lastPost = {
+          createdAt: lastPost.createdAt,
+          author: lastPost.author
+        };
+      }
       return threadData;
     });
 

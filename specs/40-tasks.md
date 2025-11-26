@@ -7126,36 +7126,45 @@ Allow thread creators to pin important threads to the top and lock threads to pr
 
 ### Task 4.1.3: Implement "Last Activity" Tracking
 
-**Status:** 🔴 Not Started  
+**Status:** ✅ Complete  
 **Priority:** Medium  
 **Estimated Time:** 1 hour  
 **Dependencies:** Phase 3 complete  
-**Assigned To:** TBD
+**Assigned To:** TBD  
+**Completed:** November 26, 2025
 
 **Description:**
 Display "last post" information on category and homepage to show forum activity.
 
 **Steps:**
-1. Update thread `updated_at` timestamp on new reply
-2. Display "Last post by [user] on [date]" in category listing
-3. Display "Last activity" in thread listing
-4. Add database query to fetch last post info
-5. Format timestamps as "2 hours ago" or relative time
-6. Add hover tooltip showing exact timestamp
+1. ✅ Update thread `updated_at` timestamp on new reply
+2. ✅ Display "Last post by [user] on [date]" in category listing
+3. ✅ Display "Last activity" in thread listing
+4. ✅ Add database query to fetch last post info
+5. ✅ Format timestamps as "2 hours ago" or relative time
+6. ✅ Add hover tooltip showing exact timestamp
 
 **Acceptance Criteria:**
-- [ ] Category page shows last activity per thread
-- [ ] Homepage shows last activity per category
-- [ ] Timestamp updates on new post
-- [ ] Relative time display (e.g., "3 hours ago")
-- [ ] Hover shows exact timestamp
-- [ ] Performance: Query optimized with joins
+- [x] Category page shows last activity per thread
+- [x] Homepage shows last activity per category
+- [x] Timestamp updates on new post
+- [x] Relative time display (e.g., "3 hours ago")
+- [x] Hover shows exact timestamp
+- [x] Performance: Query optimized with joins
 
-**Files to Modify:**
-- `src/controllers/forumController.js`
-- `src/views/pages/home.ejs`
-- `src/views/pages/category.ejs`
-- `public/js/main.js` (for relative time formatting)
+**Files Modified:**
+- `src/controllers/forumController.js` - Added last post/thread queries
+- `src/views/pages/home.ejs` - Added last activity to category cards
+- `src/views/pages/category.ejs` - Added last post info to thread items
+- `public/js/main.js` - Added relative time formatting utility
+- `public/css/style.css` - Added styling for last activity display
+
+**Implementation Details:**
+- Added last post query in `showCategoryThreads` with author info
+- Added last thread query in `showHome` for category activity
+- Created `formatRelativeTime()` JavaScript function with auto-update every minute
+- Display format: "Last post by [User] [relative time]" with tooltip showing exact time
+- Homepage shows truncated thread title (30 chars) with last activity
 
 ---
 

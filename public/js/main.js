@@ -1,6 +1,52 @@
 // Educard Forum - Client-side JavaScript
+
+/**
+ * Format timestamp as relative time (e.g., "2 hours ago", "3 days ago")
+ */
+function formatRelativeTime(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now - date) / 1000);
+  
+  if (seconds < 60) return 'just now';
+  
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+  
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+  
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+  
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+  
+  const years = Math.floor(days / 365);
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`;
+}
+
+/**
+ * Update all elements with class 'relative-time' to show relative time
+ */
+function updateRelativeTimes() {
+  const timeElements = document.querySelectorAll('.relative-time');
+  timeElements.forEach(element => {
+    const datetime = element.getAttribute('datetime');
+    if (datetime) {
+      element.textContent = formatRelativeTime(datetime);
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   console.log('✅ Educard Forum loaded');
+  
+  // Initialize relative time display
+  updateRelativeTimes();
+  
+  // Update relative times every minute
+  setInterval(updateRelativeTimes, 60000);
 
   // Strong confirmation for thread deletion
   const threadDeleteForms = document.querySelectorAll('form[action*="/thread/"][action*="/delete"]');

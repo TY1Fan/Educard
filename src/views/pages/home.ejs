@@ -26,6 +26,17 @@
               <%= category.threadCount || 0 %> 
               <%= (category.threadCount === 1) ? 'thread' : 'threads' %>
             </span>
+            <% if (category.lastActivity) { %>
+              <div class="last-activity">
+                <small>
+                  Last: <a href="/thread/<%= category.lastActivity.threadSlug %>"><%= category.lastActivity.threadTitle.substring(0, 30) %><%= category.lastActivity.threadTitle.length > 30 ? '...' : '' %></a>
+                  by <a href="/profile/<%= category.lastActivity.author.username %>"><%= category.lastActivity.author.displayName || category.lastActivity.author.username %></a>
+                  <time datetime="<%= category.lastActivity.updatedAt %>" class="relative-time" title="<%= new Date(category.lastActivity.updatedAt).toLocaleString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>">
+                    <%= new Date(category.lastActivity.updatedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+                  </time>
+                </small>
+              </div>
+            <% } %>
           </div>
         </div>
       <% }) %>
