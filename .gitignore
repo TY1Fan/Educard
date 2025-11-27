@@ -48,5 +48,15 @@ tmp/
 temp/
 
 # Docker
+
+# Vagrant
+.vagrant/
+*.box
+k8s/kubeconfig-vagrant
+
+# Kubernetes secrets (DO NOT COMMIT)
+k8s/secret.yaml
+k8s/*-secret.yaml
 .dockerignore
 docker-compose.override.yml
+k8s/kubeconfig-vagrant-local
