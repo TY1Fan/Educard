@@ -58,23 +58,26 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
 </head>
 <body>
-  <header class="site-header">
+  <!-- Skip to main content link for keyboard users -->
+  <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+  <header class="site-header" role="banner">
     <div class="container">
       <h1 class="site-title">
-        <a href="/">Educard</a>
+        <a href="/" aria-label="Educard Forum Home">Educard</a>
       </h1>
       <%- include('../partials/nav') %>
     </div>
   </header>
 
-  <main class="main-content">
+  <main id="main-content" class="main-content" role="main">
     <div class="container">
       <%- include('../partials/flash') %>
       <%- body %>
     </div>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer" role="contentinfo">
     <div class="container">
       <p>&copy; 2025 Educard Forum. An educational discussion platform.</p>
     </div>

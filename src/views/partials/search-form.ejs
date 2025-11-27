@@ -48,13 +48,21 @@
   }
 </style>
 
-<form action="/search" method="GET" class="search-form">
+<form action="/search" method="GET" class="search-form" role="search">
+  <label for="search-input" class="sr-only">Search threads and posts</label>
   <input 
+    id="search-input"
     type="search" 
     name="q" 
     placeholder="Search threads and posts..." 
     value="<%= typeof query !== 'undefined' ? query : '' %>"
-    aria-label="Search"
+    aria-label="Search threads and posts"
+    autocomplete="off"
   >
-  <button type="submit" aria-label="Search">🔍 Search</button>
+  <button type="submit" aria-label="Submit search">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
+      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+    </svg>
+    <span>Search</span>
+  </button>
 </form>

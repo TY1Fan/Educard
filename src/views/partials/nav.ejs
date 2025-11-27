@@ -1,4 +1,4 @@
-<nav class="main-nav">
+<nav class="main-nav" role="navigation" aria-label="Main navigation">
   <ul class="nav-list">
     <li><a href="/">Home</a></li>
     <li class="nav-search">
@@ -8,21 +8,21 @@
     <% if (isAuthenticated) { %>
       <!-- Logged in navigation -->
       <li class="nav-notifications">
-        <a href="/notifications" class="notification-bell" title="Notifications">
-          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+        <a href="/notifications" class="notification-bell" aria-label="Notifications">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
             <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
           </svg>
-          <span class="notification-badge" id="notification-badge" data-count="0" style="display: none;">0</span>
+          <span class="notification-badge" id="notification-badge" data-count="0" style="display: none;" aria-live="polite" aria-atomic="true">0</span>
         </a>
       </li>
       <% if (isModerator) { %>
         <li class="nav-moderation">
-          <a href="/moderation/queue" class="moderation-icon" title="Moderation Queue">
-            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+          <a href="/moderation/queue" class="moderation-icon" aria-label="Moderation Queue">
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
               <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
             </svg>
-            <span class="moderation-badge" id="moderation-badge" data-count="0" style="display: none;">0</span>
+            <span class="moderation-badge" id="moderation-badge" data-count="0" style="display: none;" aria-live="polite" aria-atomic="true">0</span>
           </a>
         </li>
       <% } %>
