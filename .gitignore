@@ -57,6 +57,7 @@ k8s/kubeconfig-vagrant
 # Kubernetes secrets (DO NOT COMMIT)
 k8s/secret.yaml
 k8s/*-secret.yaml
+k8s/dockerhub-secret.yaml
 .dockerignore
 docker-compose.override.yml
 k8s/kubeconfig-vagrant-local

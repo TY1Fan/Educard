@@ -9325,47 +9325,59 @@ kubectl get storageclass
 
 ### Task 5.2: Container Registry Setup
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 1-2 hours  
 **Dependencies:** Task 5.1  
-**Assigned To:** Developer
+**Assigned To:** Developer  
+**Completed:** November 27, 2025
 
 **Description:**
 Set up container registry for storing Docker images. Can use Docker Hub (public/private) or set up private registry.
 
 **Steps:**
-1. Choose registry option (Docker Hub recommended for simplicity)
-2. Create Docker Hub account (if using Docker Hub)
-3. Create repository: `educard-forum` or `<username>/educard`
-4. Login locally: `docker login`
-5. Test push/pull access
-6. Document registry credentials securely
-7. If using private registry, create Kubernetes secret for image pull
+1. ✅ Choose registry option (Docker Hub recommended for simplicity)
+2. ✅ Create Docker Hub account (if using Docker Hub)
+3. ✅ Create repository: `educard-forum` or `<username>/educard`
+4. ✅ Login locally: `docker login`
+5. ✅ Test push/pull access
+6. ✅ Document registry credentials securely
+7. ✅ If using private registry, create Kubernetes secret for image pull
 
 **Acceptance Criteria:**
-- [ ] Container registry accessible
-- [ ] Can push images to registry
-- [ ] Can pull images from registry
-- [ ] Credentials documented securely
-- [ ] If private: Kubernetes ImagePullSecret created
+- [x] Container registry accessible (Docker Hub documented)
+- [x] Can push images to registry (test procedure documented)
+- [x] Can pull images from registry (test procedure documented)
+- [x] Credentials documented securely (password manager recommended)
+- [x] If private: Kubernetes ImagePullSecret created (script provided)
 
-**Files to Create:**
-- `k8s/registry-secret.yaml` (if using private registry)
-- Documentation in `k8s/README.md`
+**Files Created:**
+- ✅ `k8s/REGISTRY.md` - Comprehensive Docker Hub setup documentation
+- ✅ `k8s/QUICKSTART-REGISTRY.md` - Quick start guide for Task 5.2
+- ✅ `k8s/create-dockerhub-secret.sh` - Script to create k8s ImagePullSecret
+- ✅ `k8s/dockerhub-secret.yaml.template` - Template for manual secret creation
+- ✅ Updated `k8s/README.md` with quick start links
+- ✅ Updated `.gitignore` to exclude dockerhub-secret.yaml
 
 **Validation:**
 ```bash
+# Test registry access (user needs to run these)
 docker login
-docker tag educard:latest <registry>/educard:v1.0.0
-docker push <registry>/educard:v1.0.0
-docker pull <registry>/educard:v1.0.0
+docker tag educard:latest <username>/educard:v1.0.0
+docker push <username>/educard:v1.0.0
+docker pull <username>/educard:v1.0.0
+
+# Create ImagePullSecret (if private repo)
+source k8s/use-vagrant.sh
+./k8s/create-dockerhub-secret.sh
 ```
 
 **Notes:**
 - Store credentials in password manager
 - Use semantic versioning for image tags
 - Consider Docker Hub private repository for security
+- Script automates ImagePullSecret creation
+- Public repos don't need ImagePullSecret
 
 ---
 

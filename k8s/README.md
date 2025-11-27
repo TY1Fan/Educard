@@ -4,6 +4,12 @@
 
 This guide documents the k3s (lightweight Kubernetes) deployment process for the Educard application.
 
+## Quick Start Guides
+
+- **[Container Registry Setup](./QUICKSTART-REGISTRY.md)** - Set up Docker Hub registry (Task 5.2)
+- **[Vagrant Setup](./VAGRANT.md)** - Local development with Vagrant VM
+- **[Quick K3s Setup](./QUICKSTART.md)** - Fast cluster deployment (Task 5.1)
+
 ## Prerequisites
 
 ### Server Requirements
