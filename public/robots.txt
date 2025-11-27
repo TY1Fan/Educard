@@ -1,0 +1,42 @@
+# Educard Forum - Robots.txt
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow private areas
+Disallow: /admin/
+Disallow: /profile/edit
+Disallow: /auth/
+Disallow: /notifications/
+
+# Disallow API endpoints
+Disallow: /api/
+Disallow: /*/api/
+
+# Disallow form submission endpoints
+Disallow: /*/delete
+Disallow: /*/edit
+Disallow: /*/reply
+Disallow: /*/new-thread
+
+# Allow category and thread pages
+Allow: /category/
+Allow: /thread/
+Allow: /profile/
+
+# Sitemap location
+Sitemap: http://localhost:3000/sitemap.xml
+
+# Crawl-delay (be nice to the server)
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /

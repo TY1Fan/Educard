@@ -82,9 +82,24 @@ exports.showHome = async (req, res) => {
       return categoryData;
     });
 
+    // SEO data
+    const seo = require('../utils/seo');
+    const totalThreads = categoriesWithCounts.reduce((sum, cat) => sum + cat.threadCount, 0);
+    const metaDescription = `Educard Forum - An educational discussion platform with ${categoriesWithCounts.length} categories and ${totalThreads} discussion threads. Join the conversation!`;
+    const canonicalUrl = seo.SITE_URL + '/';
+    const openGraph = seo.generateOpenGraph({
+      title: 'Educard Forum - Educational Discussion Platform',
+      description: metaDescription,
+      type: 'website',
+      url: canonicalUrl
+    });
+
     res.render('pages/home', {
-      title: 'Home - Educard Forum',
-      categories: categoriesWithCounts
+      title: 'Educard Forum',
+      categories: categoriesWithCounts,
+      metaDescription,
+      canonicalUrl,
+      openGraph
     });
   } catch (error) {
     console.error('Error fetching categories:', error);
@@ -187,6 +202,20 @@ exports.showCategoryThreads = async (req, res) => {
 
     const totalPages = Math.ceil(count.length / limit);
 
+    // SEO data
+    const seo = require('../utils/seo');
+    const metaDescription = seo.generateDescription(
+      category.description || `Discuss ${category.name} topics on Educard Forum. Join the conversation with ${count.length} threads.`,
+      `Browse ${category.name} category with ${count.length} discussion threads.`
+    );
+    const canonicalUrl = seo.generateCanonicalUrl(`/category/${category.slug}`);
+    const openGraph = seo.generateOpenGraph({
+      title: `${category.name} - Educard Forum`,
+      description: metaDescription,
+      type: 'website',
+      url: canonicalUrl
+    });
+
     res.render('pages/category', {
       title: `${category.name} - Educard Forum`,
       category: category.toJSON(),
@@ -194,7 +223,10 @@ exports.showCategoryThreads = async (req, res) => {
       currentPage: page,
       totalPages,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
+      metaDescription,
+      canonicalUrl,
+      openGraph
     });
   } catch (error) {
     console.error('Error fetching threads:', error);
@@ -461,14 +493,41 @@ exports.showThread = async (req, res) => {
 
     const totalPages = Math.ceil(count / limit);
 
+    // SEO data
+    const seo = require('../utils/seo');
+    const firstPost = postsWithMarkdown[0];
+    const metaDescription = firstPost ? seo.generateDescription(firstPost.content) : seo.generateDescription(thread.title);
+    const canonicalUrl = seo.generateCanonicalUrl(`/thread/${thread.slug}`);
+    const openGraph = seo.generateOpenGraph({
+      title: `${thread.title} - ${thread.category.name} - Educard Forum`,
+      description: metaDescription,
+      type: 'article',
+      url: canonicalUrl
+    });
+    
+    // Structured data for thread
+    const structuredData = seo.generateThreadStructuredData(thread, thread.category, postsWithMarkdown);
+    
+    // Breadcrumb structured data
+    const breadcrumbs = [
+      { name: 'Home', url: '/' },
+      { name: thread.category.name, url: `/category/${thread.category.slug}` },
+      { name: thread.title, url: `/thread/${thread.slug}` }
+    ];
+    const breadcrumbData = seo.generateBreadcrumbStructuredData(breadcrumbs);
+
     res.render('pages/thread', {
-      title: `${thread.title} - Educard Forum`,
+      title: seo.generateTitle(thread.title, thread.category.name),
       thread,
       posts: postsWithMarkdown,
       currentPage: page,
       totalPages,
       hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
+      hasPrevPage: page > 1,
+      metaDescription,
+      canonicalUrl,
+      openGraph,
+      structuredData: [structuredData, breadcrumbData]
     });
   } catch (error) {
     console.error('Error fetching thread:', error);

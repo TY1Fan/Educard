@@ -59,6 +59,10 @@ const { csrfToken, csrfProtection } = require("./middlewares/csrf");
 app.use(csrfToken); // Generate token for all requests
 app.use(csrfProtection); // Validate token on state-changing requests
 
+// SEO middleware - makes SEO utilities available to all views
+const seoMiddleware = require("./middleware/seo");
+app.use(seoMiddleware);
+
 // Make session user and flash messages available in all views
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
@@ -129,12 +133,14 @@ const searchRoutes = require("./routes/search");
 const notificationRoutes = require("./routes/notifications");
 const adminRoutes = require("./routes/admin");
 const moderationRoutes = require("./routes/moderation");
+const sitemapRoutes = require("./routes/sitemap");
 
 app.use("/auth", authRoutes);
 app.use("/search", searchRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/admin", adminRoutes);
 app.use("/moderation", moderationRoutes);
+app.use("/", sitemapRoutes);
 app.use("/", forumRoutes);
 app.use("/", userRoutes);
 

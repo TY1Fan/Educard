@@ -3,7 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
   <title><%= title || 'Educard Forum' %></title>
+  <% if (typeof metaDescription !== 'undefined' && metaDescription) { %>
+  <meta name="description" content="<%= metaDescription %>">
+  <% } else { %>
+  <meta name="description" content="An educational discussion platform for students and educators to share knowledge and collaborate.">
+  <% } %>
+  
+  <!-- Canonical URL -->
+  <% if (typeof canonicalUrl !== 'undefined' && canonicalUrl) { %>
+  <link rel="canonical" href="<%= canonicalUrl %>">
+  <% } %>
+  
+  <!-- Open Graph / Facebook -->
+  <% if (typeof openGraph !== 'undefined' && openGraph) { %>
+    <% Object.keys(openGraph).forEach(function(key) { %>
+  <meta property="<%= key %>" content="<%= openGraph[key] %>">
+    <% }); %>
+  <% } else { %>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Educard Forum">
+  <meta property="og:title" content="<%= title || 'Educard Forum' %>">
+  <meta property="og:description" content="An educational discussion platform for students and educators to share knowledge and collaborate.">
+  <meta property="og:url" content="<%= typeof canonicalUrl !== 'undefined' ? canonicalUrl : 'http://localhost:3000' %>">
+  <% } %>
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= title || 'Educard Forum' %>">
+  <% if (typeof metaDescription !== 'undefined' && metaDescription) { %>
+  <meta name="twitter:description" content="<%= metaDescription %>">
+  <% } %>
+  
+  <!-- Structured Data (JSON-LD) -->
+  <% if (typeof structuredData !== 'undefined' && structuredData) { %>
+    <% if (Array.isArray(structuredData)) { %>
+      <% structuredData.forEach(function(data) { %>
+  <script type="application/ld+json">
+  <%- JSON.stringify(data, null, 2) %>
+  </script>
+      <% }); %>
+    <% } else { %>
+  <script type="application/ld+json">
+  <%- JSON.stringify(structuredData, null, 2) %>
+  </script>
+    <% } %>
+  <% } %>
+  
+  <!-- Stylesheets -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/markdown.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">

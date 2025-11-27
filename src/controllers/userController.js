@@ -67,14 +67,33 @@ exports.showProfile = async (req, res) => {
 
     const isOwnProfile = req.session.user && req.session.user.id === user.id;
 
+    // SEO data
+    const seo = require('../utils/seo');
+    const displayName = user.displayName || user.username;
+    const metaDescription = `${displayName}'s profile on Educard Forum. ${threadCount} threads created, ${postCount} posts made. Member since ${new Date(user.createdAt).toLocaleDateString()}.`;
+    const canonicalUrl = seo.generateCanonicalUrl(`/profile/${user.username}`);
+    const openGraph = seo.generateOpenGraph({
+      title: `${displayName} - Educard Forum`,
+      description: metaDescription,
+      type: 'profile',
+      url: canonicalUrl
+    });
+    
+    // Structured data for profile
+    const structuredData = seo.generateProfileStructuredData(user, threadCount, postCount);
+
     res.render('pages/profile', {
-      title: `${user.username}'s Profile`,
+      title: `${displayName}'s Profile - Educard Forum`,
       profileUser: user,
       threadCount,
       postCount,
       recentThreads,
       recentPosts,
-      isOwnProfile
+      isOwnProfile,
+      metaDescription,
+      canonicalUrl,
+      openGraph,
+      structuredData
     });
   } catch (error) {
     console.error('Error showing profile:', error);
