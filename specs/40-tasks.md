@@ -9660,35 +9660,37 @@ kubectl get secret educard-secrets -n educard-prod -o yaml
 
 ### Task 5.6: PostgreSQL StatefulSet
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** Critical  
 **Estimated Time:** 2-3 hours  
 **Dependencies:** Task 5.5  
-**Assigned To:** Developer
+**Assigned To:** Developer  
+**Completed:** November 27, 2025
 
 **Description:**
 Deploy PostgreSQL database as a StatefulSet with persistent storage for data durability.
 
 **Steps:**
-1. Create PersistentVolumeClaim for database storage
-2. Create PostgreSQL StatefulSet manifest
-3. Create PostgreSQL Service (ClusterIP)
-4. Apply manifests to cluster
-5. Verify database pod is running
-6. Test database connectivity
+1. ✅ Create PersistentVolumeClaim for database storage
+2. ✅ Create PostgreSQL StatefulSet manifest
+3. ✅ Create PostgreSQL Service (ClusterIP)
+4. ✅ Apply manifests to cluster
+5. ✅ Verify database pod is running
+6. ✅ Test database connectivity
 
 **Acceptance Criteria:**
-- [ ] PVC created with sufficient storage (10Gi minimum)
-- [ ] PostgreSQL StatefulSet deployed
-- [ ] PostgreSQL Service created
-- [ ] Database pod running and ready
-- [ ] Can connect to database from within cluster
-- [ ] Data persists across pod restarts
+- [x] PVC created with sufficient storage (10Gi)
+- [x] PostgreSQL StatefulSet deployed
+- [x] PostgreSQL Service created (headless)
+- [x] Database pod running and ready (1/1)
+- [x] Can connect to database from within cluster
+- [x] Data persists across pod restarts (tested)
 
-**Files to Create:**
-- `k8s/postgres-pvc.yaml`
-- `k8s/postgres-statefulset.yaml`
-- `k8s/postgres-service.yaml`
+**Files Created:**
+- ✅ `k8s/postgres-pvc.yaml` - PersistentVolumeClaim (10Gi, local-path)
+- ✅ `k8s/postgres-statefulset.yaml` - PostgreSQL StatefulSet with probes
+- ✅ `k8s/postgres-service.yaml` - Headless service
+- ✅ `k8s/deploy-postgres.sh` - Automated deployment script
 
 **postgres-pvc.yaml:**
 ```yaml
@@ -9778,18 +9780,46 @@ spec:
   clusterIP: None
 ```
 
+**Database Configuration:**
+- Image: postgres:15-alpine
+- Storage: 10Gi PersistentVolume (local-path)
+- Resources: 256Mi-512Mi RAM, 250m-500m CPU
+- Credentials: From educard-secrets
+- Database: educard_prod
+- Probes: Liveness and Readiness configured
+
 **Validation:**
 ```bash
+# Deploy all resources (✅ Tested)
+./k8s/deploy-postgres.sh
+
+# Or manually:
 kubectl apply -f k8s/postgres-pvc.yaml
 kubectl apply -f k8s/postgres-statefulset.yaml
 kubectl apply -f k8s/postgres-service.yaml
+
+# Verify resources (✅ All running)
 kubectl get pvc -n educard-prod
 kubectl get statefulset -n educard-prod
 kubectl get pods -n educard-prod
 kubectl logs -n educard-prod postgres-0
-# Test connection
-kubectl run -it --rm psql --image=postgres:15-alpine --restart=Never -n educard-prod -- psql -h postgres-service -U <user> -d educard_prod
+
+# Test connection (✅ Successful)
+kubectl run -it --rm psql-test --image=postgres:15-alpine --restart=Never \
+  -n educard-prod --env="PGPASSWORD=<password>" \
+  -- psql -h postgres-service -U educard -d educard_prod -c "SELECT version();"
+
+# Test persistence (✅ Verified)
+# Created test table, deleted pod, verified data persisted
 ```
+
+**Deployment Results:**
+- PVC: postgres-pvc (10Gi, Bound) ✅
+- StatefulSet: postgres (1/1 Ready) ✅
+- Service: postgres-service (Headless, ClusterIP:None) ✅
+- Pod: postgres-0 (Running, PostgreSQL 15.15) ✅
+- Connection: Internal cluster access verified ✅
+- Persistence: Data survives pod restarts ✅
 
 ---
 
