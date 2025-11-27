@@ -8,6 +8,11 @@ const expressLayouts = require("express-ejs-layouts");
 // Create Express application
 const app = express();
 
+// Security middleware (MUST be early in middleware chain)
+const { securityHeaders, additionalSecurityHeaders } = require("./middleware/securityHeaders");
+app.use(securityHeaders);
+app.use(additionalSecurityHeaders);
+
 // View engine setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));

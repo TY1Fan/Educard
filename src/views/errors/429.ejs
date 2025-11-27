@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Too Many Requests' %> - Educard Forum</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .error-container {
+      background: white;
+      border-radius: 20px;
+      padding: 50px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .error-code {
+      font-size: 120px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      line-height: 1;
+    }
+
+    .error-title {
+      font-size: 32px;
+      color: #2d3748;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .error-message {
+      font-size: 18px;
+      color: #718096;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .error-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+
+    .countdown {
+      font-size: 24px;
+      color: #667eea;
+      font-weight: 600;
+      margin: 20px 0;
+    }
+
+    .info-box {
+      background: #f7fafc;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin: 30px 0;
+      text-align: left;
+      border-radius: 8px;
+    }
+
+    .info-box h3 {
+      color: #2d3748;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .info-box ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .info-box li {
+      color: #4a5568;
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+    }
+
+    .info-box li:before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 15px 40px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 20px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .error-container {
+        padding: 30px 20px;
+      }
+
+      .error-code {
+        font-size: 80px;
+      }
+
+      .error-title {
+        font-size: 24px;
+      }
+
+      .error-message {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-icon">⏱️</div>
+    <div class="error-code">429</div>
+    <h1 class="error-title"><%= title || 'Too Many Requests' %></h1>
+    <p class="error-message">
+      <%= message || 'You have made too many requests in a short period of time. Please slow down and try again later.' %>
+    </p>
+
+    <div class="countdown" id="countdown">
+      Please wait <span id="timer">15:00</span> before trying again
+    </div>
+
+    <div class="info-box">
+      <h3>Why am I seeing this?</h3>
+      <ul>
+        <li>We limit requests to protect our servers and ensure fair use</li>
+        <li>This is a temporary restriction that will lift automatically</li>
+        <li>If you continue to see this, you may be making requests too quickly</li>
+      </ul>
+    </div>
+
+    <a href="/" class="btn">Return to Homepage</a>
+  </div>
+
+  <script>
+    // Countdown timer
+    let timeLeft = 15 * 60; // 15 minutes in seconds
+    const timerElement = document.getElementById('timer');
+
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (timeLeft > 0) {
+        timeLeft--;
+        setTimeout(updateTimer, 1000);
+      } else {
+        document.getElementById('countdown').innerHTML = 
+          '✅ You can try again now! <a href="#" onclick="location.reload()">Reload page</a>';
+      }
+    }
+
+    updateTimer();
+  </script>
+</body>
+</html>

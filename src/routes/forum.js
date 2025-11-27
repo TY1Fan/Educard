@@ -3,6 +3,7 @@ const router = express.Router();
 const forumController = require('../controllers/forumController');
 const { requireAuth } = require('../middlewares/auth');
 const { cacheCategory, cacheThread } = require('../middleware/cache');
+const { createLimiter } = require('../middleware/rateLimiter');
 
 /**
  * Forum Routes
@@ -15,8 +16,9 @@ router.get('/category/:slug', cacheCategory(), forumController.showCategoryThrea
 // New thread form (requires authentication)
 router.get('/category/:slug/new-thread', requireAuth, forumController.showNewThread);
 
-// Create new thread (requires authentication and validation)
+// Create new thread (requires authentication and validation, with rate limiting)
 router.post('/category/:slug/new-thread', 
+  createLimiter,
   requireAuth, 
   forumController.createThreadValidation,
   forumController.createThread
@@ -25,8 +27,9 @@ router.post('/category/:slug/new-thread',
 // View thread with posts (with cache)
 router.get('/thread/:slug', cacheThread(), forumController.showThread);
 
-// Create reply to thread (requires authentication and validation)
+// Create reply to thread (requires authentication and validation, with rate limiting)
 router.post('/thread/:slug/reply', 
+  createLimiter,
   requireAuth,
   forumController.createReplyValidation,
   forumController.createReply
@@ -35,8 +38,9 @@ router.post('/thread/:slug/reply',
 // Edit post form (requires authentication)
 router.get('/post/:id/edit', requireAuth, forumController.showEditPost);
 
-// Update post (requires authentication and validation)
+// Update post (requires authentication and validation, with rate limiting)
 router.post('/post/:id/edit', 
+  createLimiter,
   requireAuth,
   forumController.updatePostValidation,
   forumController.updatePost

@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { requireGuest, requireAuth } = require('../middlewares/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
-// Registration routes (guest only)
+// Registration routes (guest only, with rate limiting)
 router.get('/register', requireGuest, authController.showRegister);
-router.post('/register', requireGuest, authController.registerValidation, authController.register);
+router.post('/register', authLimiter, requireGuest, authController.registerValidation, authController.register);
 
-// Login routes (guest only)
+// Login routes (guest only, with rate limiting)
 router.get('/login', requireGuest, authController.showLogin);
-router.post('/login', requireGuest, authController.login);
+router.post('/login', authLimiter, requireGuest, authController.login);
 
 // Logout routes (authenticated only)
 router.post('/logout', requireAuth, authController.logout);
