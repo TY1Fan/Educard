@@ -9383,37 +9383,44 @@ source k8s/use-vagrant.sh
 
 ### Task 5.3: Production Dockerfile
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 2 hours  
 **Dependencies:** Task 5.2  
-**Assigned To:** Developer
+**Assigned To:** Developer  
+**Completed:** November 27, 2025
 
 **Description:**
 Create optimized production Dockerfile using multi-stage builds. Minimize image size and improve security.
 
 **Steps:**
-1. Create `Dockerfile.production` in project root
-2. Use multi-stage build (builder + production)
-3. Builder stage: install dependencies, build if needed
-4. Production stage: only runtime dependencies
-5. Use non-root user for security
-6. Set up proper signal handling
-7. Build and test image locally
-8. Tag and push to registry
+1. ✅ Create `Dockerfile.production` in project root
+2. ✅ Use multi-stage build (builder + production)
+3. ✅ Builder stage: install dependencies, build if needed
+4. ✅ Production stage: only runtime dependencies
+5. ✅ Use non-root user for security
+6. ✅ Set up proper signal handling
+7. ✅ Build and test image locally
+8. ⏳ Tag and push to registry (Task 5.4)
 
 **Acceptance Criteria:**
-- [ ] Multi-stage Dockerfile created
-- [ ] Image builds successfully
-- [ ] Image size optimized (<500MB)
-- [ ] Runs as non-root user
-- [ ] Health check endpoint accessible
-- [ ] Environment variables configurable
-- [ ] Image pushed to registry with version tag
+- [x] Multi-stage Dockerfile created
+- [x] Image builds successfully
+- [x] Image size optimized (<500MB) - **260MB achieved**
+- [x] Runs as non-root user (nodejs UID 1001)
+- [x] Health check endpoint accessible
+- [x] Environment variables configurable
+- [ ] Image pushed to registry (next task)
 
-**Files to Create:**
-- `Dockerfile.production`
-- `.dockerignore` (if not exists, optimize it)
+**Files Created:**
+- ✅ `Dockerfile.production` - Multi-stage production Dockerfile with:
+  - Builder stage with build tools for native modules
+  - Production stage with minimal dependencies
+  - dumb-init for signal handling
+  - Non-root user (nodejs:1001)
+  - Health check configured
+- ✅ Updated `.dockerignore` - Optimized build context
+- ✅ `k8s/TASK-5.3-SUMMARY.md` - Implementation documentation
 
 **Example Dockerfile:**
 ```dockerfile
@@ -9436,17 +9443,43 @@ CMD ["node", "server.js"]
 
 **Validation:**
 ```bash
+# Build image (✅ Tested)
 docker build -f Dockerfile.production -t educard:prod .
-docker run -p 3000:3000 --env-file .env educard:prod
-curl http://localhost:3000/health
-docker tag educard:prod <registry>/educard:v1.0.0
-docker push <registry>/educard:v1.0.0
+
+# Test locally (✅ Verified)
+docker run -d -p 3001:3000 \
+  -e NODE_ENV=production \
+  -e PORT=3000 \
+  -e DB_HOST=localhost \
+  -e SESSION_SECRET=test \
+  educard:prod
+
+# Check health (✅ Returns {"status":"ok"})
+curl http://localhost:3001/health
+
+# Verify non-root user (✅ nodejs UID 1001)
+docker exec <container> whoami
+
+# Tag for registry (next step)
+docker tag educard:prod <username>/educard:v1.0.0
+
+# Push to registry (next step)
+docker push <username>/educard:v1.0.0
 ```
 
+**Build Results:**
+- Image size: **260MB** (target: <500MB) ✅
+- Build time: ~19 seconds
+- Security: Non-root user (nodejs:1001)
+- Health check: Configured and working
+
 **Notes:**
-- Use Alpine Linux for smaller image size
-- Ensure health check endpoint exists
-- Test container locally before pushing
+- Alpine Linux base (260MB final size)
+- Health check endpoint exists and working
+- Container tested successfully locally
+- Native modules (bcrypt) compiled properly
+- dumb-init for graceful shutdown
+- Ready for registry push and k8s deployment
 
 ---
 
