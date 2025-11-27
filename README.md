@@ -192,9 +192,9 @@ Comprehensive project documentation is organized in multiple locations:
 - [Task Breakdown](./specs/40-tasks.md) - Detailed task list with acceptance criteria
 - [Traceability Matrix](./specs/50-traceability.md) - Requirements to tasks mapping
 
-**Technical Documentation** (`docs/`):
+**Technical Documentation:**
+- [docs/README.md](./docs/README.md) - **📚 Documentation index and navigation**
 - [SECURITY.md](./SECURITY.md) - Security policy, authentication, and vulnerability reporting
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Production deployment guide and configuration
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Developer contribution guidelines and workflow
 - [docs/DATABASE.md](./docs/DATABASE.md) - Database schema, relationships, and migrations
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) - System architecture and design decisions
@@ -203,8 +203,10 @@ Comprehensive project documentation is organized in multiple locations:
 - [docs/ACCESSIBILITY.md](./docs/ACCESSIBILITY.md) - Accessibility features and WCAG compliance
 - [docs/CROSS_BROWSER_TESTING.md](./docs/CROSS_BROWSER_TESTING.md) - Browser compatibility testing
 
-**Docker Documentation:**
-- [DOCKER.md](./DOCKER.md) - Docker setup and container management
+**Deployment Documentation:**
+- [docs/deployment/DOCKER.md](./docs/deployment/DOCKER.md) - Docker setup and container management
+- [docs/deployment/DEPLOYMENT.md](./docs/deployment/DEPLOYMENT.md) - Production deployment guide
+- [k8s/README.md](./k8s/README.md) - Kubernetes deployment guide
 
 ## � Project Structure
 
@@ -232,20 +234,25 @@ educard/
 │   ├── images/                       # Static images
 │   └── uploads/                      # User uploaded files
 ├── docs/                             # Technical documentation
+│   ├── README.md                     # Documentation index
+│   ├── phases/                       # Phase completion docs
+│   ├── deployment/                   # Deployment guides
+│   ├── k8s-tasks/                    # Kubernetes task summaries
 │   ├── DATABASE.md
 │   ├── ARCHITECTURE.md
 │   ├── ENVIRONMENT.md
 │   ├── TROUBLESHOOTING.md
 │   ├── ACCESSIBILITY.md
 │   └── CROSS_BROWSER_TESTING.md
+├── k8s/                              # Kubernetes deployment files
 ├── specs/                            # Project specifications
-├── tests/                            # Test files
+├── tests/                            # Test files and scripts
 ├── server.js                         # Application entry point
 ├── package.json                      # Dependencies and scripts
-├── Dockerfile                        # Docker configuration
+├── Dockerfile                        # Development Docker configuration
+├── Dockerfile.production             # Production Docker configuration
 ├── docker-compose.yml                # Multi-container setup
 ├── SECURITY.md                       # Security policy
-├── DEPLOYMENT.md                     # Deployment guide
 ├── CONTRIBUTING.md                   # Contribution guidelines
 ├── .env                              # Environment variables (not committed)
 ├── .env.example                      # Environment template

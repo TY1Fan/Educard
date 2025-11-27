@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: educard-prod
+  labels:
+    app: educard
+    environment: production
+    managed-by: kubectl

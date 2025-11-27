@@ -9485,31 +9485,33 @@ docker push <username>/educard:v1.0.0
 
 ### Task 5.4: Kubernetes Namespace and ConfigMap
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** High  
 **Estimated Time:** 1 hour  
 **Dependencies:** Task 5.1  
-**Assigned To:** Developer
+**Assigned To:** Developer  
+**Completed:** November 27, 2025
 
 **Description:**
 Create Kubernetes namespace for the application and ConfigMap for non-sensitive configuration.
 
 **Steps:**
-1. Create `k8s/` directory in project root
-2. Create namespace manifest
-3. Create ConfigMap for environment variables
-4. Apply namespace and ConfigMap to cluster
-5. Verify resources created
+1. ✅ Create `k8s/` directory in project root (already exists)
+2. ✅ Create namespace manifest
+3. ✅ Create ConfigMap for environment variables
+4. ✅ Apply namespace and ConfigMap to cluster
+5. ✅ Verify resources created
 
 **Acceptance Criteria:**
-- [ ] Namespace `educard-prod` created
-- [ ] ConfigMap with app configuration created
-- [ ] Resources applied to cluster successfully
-- [ ] Can view resources with kubectl
+- [x] Namespace `educard-prod` created
+- [x] ConfigMap with app configuration created (7 data items)
+- [x] Resources applied to cluster successfully
+- [x] Can view resources with kubectl
 
-**Files to Create:**
-- `k8s/namespace.yaml`
-- `k8s/configmap.yaml`
+**Files Created:**
+- ✅ `k8s/namespace.yaml` - Namespace manifest with labels
+- ✅ `k8s/configmap.yaml` - ConfigMap with non-sensitive environment variables
+- ✅ `k8s/apply-base-resources.sh` - Helper script to apply resources
 
 **namespace.yaml:**
 ```yaml
@@ -9538,14 +9540,37 @@ data:
   APP_URL: "https://yourdomain.com"
 ```
 
+**ConfigMap Contents:**
+- NODE_ENV: production
+- PORT: 3000
+- DB_HOST: postgres-service
+- DB_PORT: 5432
+- DB_NAME: educard_prod
+- APP_URL: http://localhost:3000
+- SESSION_MAX_AGE: 86400000
+
 **Validation:**
 ```bash
+# Apply all resources (✅ Tested)
+./k8s/apply-base-resources.sh
+
+# Or manually:
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/configmap.yaml
+
+# Verify namespace (✅ Active)
 kubectl get namespace educard-prod
+
+# Verify ConfigMap (✅ 7 data items)
 kubectl get configmap -n educard-prod
 kubectl describe configmap educard-config -n educard-prod
 ```
+
+**Deployment Results:**
+- Namespace: educard-prod (Active) ✅
+- ConfigMap: educard-config (7 items) ✅
+- Labels: app=educard, environment=production ✅
+- Helper script: apply-base-resources.sh ✅
 
 ---
 
