@@ -5,6 +5,7 @@ const Thread = require('./Thread');
 const Post = require('./Post');
 const PostReaction = require('./PostReaction');
 const Notification = require('./Notification');
+const Report = require('./Report');
 
 /**
  * Define Model Associations
@@ -119,6 +120,31 @@ Notification.belongsTo(User, {
   as: 'actor'
 });
 
+// Report associations
+// A report belongs to one user (reporter)
+Report.belongsTo(User, {
+  foreignKey: 'reporterId',
+  as: 'reporter'
+});
+
+// A report can be resolved by a moderator
+Report.belongsTo(User, {
+  foreignKey: 'resolvedBy',
+  as: 'resolver'
+});
+
+// A user can have many reports (as reporter)
+User.hasMany(Report, {
+  foreignKey: 'reporterId',
+  as: 'submittedReports'
+});
+
+// A user can resolve many reports (as moderator)
+User.hasMany(Report, {
+  foreignKey: 'resolvedBy',
+  as: 'resolvedReports'
+});
+
 /**
  * Export all models and sequelize instance
  */
@@ -129,5 +155,6 @@ module.exports = {
   Thread,
   Post,
   PostReaction,
-  Notification
+  Notification,
+  Report
 };

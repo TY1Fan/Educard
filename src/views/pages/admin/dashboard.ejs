@@ -189,13 +189,14 @@
       <div class="panel-content">
         <% if (categoryStats && categoryStats.length > 0) { %>
           <div class="category-stats">
-            <% categoryStats.forEach(category => { %>
+            <% categoryStats.slice(0, 5).forEach(category => { %>
+              <% const barWidth = Math.min((category.dataValues.threadCount / categoryStats[0].dataValues.threadCount) * 100, 100); %>
               <div class="category-stat-item">
                 <div class="category-stat-name">
                   <a href="/category/<%= category.slug %>"><%= category.name %></a>
                 </div>
                 <div class="category-stat-bar">
-                  <div class="stat-bar-fill" style="width: <%= Math.min((category.dataValues.threadCount / categoryStats[0].dataValues.threadCount) * 100, 100) %>%"></div>
+                  <div class="stat-bar-fill" data-width="<%= barWidth %>"></div>
                 </div>
                 <div class="category-stat-count">
                   <%= category.dataValues.threadCount %> threads
@@ -210,3 +211,10 @@
     </section>
   </div>
 </div>
+
+<script>
+  // Apply widths from data attributes to avoid EJS linting issues
+  document.querySelectorAll('.stat-bar-fill[data-width]').forEach(function(bar) {
+    bar.style.width = bar.getAttribute('data-width') + '%';
+  });
+</script>

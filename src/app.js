@@ -104,11 +104,13 @@ const userRoutes = require("./routes/users");
 const searchRoutes = require("./routes/search");
 const notificationRoutes = require("./routes/notifications");
 const adminRoutes = require("./routes/admin");
+const moderationRoutes = require("./routes/moderation");
 
 app.use("/auth", authRoutes);
 app.use("/search", searchRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/admin", adminRoutes);
+app.use("/moderation", moderationRoutes);
 app.use("/", forumRoutes);
 app.use("/", userRoutes);
 

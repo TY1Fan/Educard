@@ -1,0 +1,221 @@
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-container">
+  <!-- Header -->
+  <header class="admin-header">
+    <h1>🛡️ Moderation Queue</h1>
+    <nav class="admin-nav">
+      <a href="/">← Back to Forum</a>
+      <% if (user && user.role === 'admin') { %>
+        <a href="/admin">Admin Dashboard</a>
+      <% } %>
+    </nav>
+  </header>
+
+  <!-- Status Filters -->
+  <div class="admin-filters">
+    <a href="/moderation/queue?status=pending" class="filter-btn <%= currentStatus === 'pending' ? 'active' : '' %>">
+      ⏳ Pending
+    </a>
+    <a href="/moderation/queue?status=resolved" class="filter-btn <%= currentStatus === 'resolved' ? 'active' : '' %>">
+      ✅ Resolved
+    </a>
+    <a href="/moderation/queue?status=dismissed" class="filter-btn <%= currentStatus === 'dismissed' ? 'active' : '' %>">
+      ❌ Dismissed
+    </a>
+  </div>
+
+  <!-- Reports List -->
+  <section class="admin-panel">
+    <div class="panel-content">
+      <% if (reports && reports.length > 0) { %>
+        <div class="reports-list">
+          <% reports.forEach(report => { %>
+            <div class="report-card <%= report.status %>">
+              <div class="report-header">
+                <div class="report-type-badge <%= report.reportType %>">
+                  <%= report.reportType === 'post' ? '💬' : report.reportType === 'thread' ? '📝' : '👤' %>
+                  <%= report.reportType.charAt(0).toUpperCase() + report.reportType.slice(1) %>
+                </div>
+                <div class="report-status <%= report.status %>">
+                  <%= report.status.charAt(0).toUpperCase() + report.status.slice(1) %>
+                </div>
+                <div class="report-date">
+                  <%= new Date(report.createdAt).toLocaleString() %>
+                </div>
+              </div>
+
+              <div class="report-body">
+                <!-- Reporter Info -->
+                <div class="report-info">
+                  <strong>Reported by:</strong>
+                  <a href="/profile/<%= report.reporter.username %>">
+                    <%= report.reporter.displayName || report.reporter.username %>
+                  </a>
+                  <% if (report.reporter.role !== 'user') { %>
+                    <span class="<%= report.reporter.role %>-badge"><%= report.reporter.role %></span>
+                  <% } %>
+                </div>
+
+                <!-- Reason -->
+                <div class="report-reason">
+                  <strong>Reason:</strong>
+                  <p><%= report.reason %></p>
+                </div>
+
+                <!-- Reported Content -->
+                <% if (report.reportedItem) { %>
+                  <div class="reported-content">
+                    <strong>Reported Content:</strong>
+                    <div class="content-preview">
+                      <% if (report.reportType === 'post') { %>
+                        <div class="post-preview">
+                          <div class="preview-meta">
+                            <a href="/profile/<%= report.reportedItem.author.username %>">
+                              <%= report.reportedItem.author.displayName || report.reportedItem.author.username %>
+                            </a>
+                            in
+                            <a href="/thread/<%= report.reportedItem.thread.id %>">
+                              <%= report.reportedItem.thread.title %>
+                            </a>
+                            <% if (report.reportedItem.isHidden) { %>
+                              <span class="status-badge banned">🚫 Hidden</span>
+                            <% } %>
+                          </div>
+                          <div class="preview-content">
+                            <%= report.reportedItem.content.substring(0, 200) %><%= report.reportedItem.content.length > 200 ? '...' : '' %>
+                          </div>
+                          <div class="preview-actions">
+                            <a href="/thread/<%= report.reportedItem.thread.id %>#post-<%= report.reportedItem.id %>" class="btn-small">View Post</a>
+                            <% if (report.status === 'pending') { %>
+                              <% if (!report.reportedItem.isHidden) { %>
+                                <form action="/moderation/posts/<%= report.reportedItem.id %>/hide" method="POST" style="display: inline;" onsubmit="const reason = prompt('Reason for hiding this post:'); if (!reason) return false; this.querySelector('input[name=reason]').value = reason;">
+                                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                  <input type="hidden" name="reason" value="">
+                                  <button type="submit" class="btn-small btn-danger">Hide Post</button>
+                                </form>
+                              <% } else { %>
+                                <form action="/moderation/posts/<%= report.reportedItem.id %>/unhide" method="POST" style="display: inline;">
+                                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                  <button type="submit" class="btn-small btn-warning">Unhide Post</button>
+                                </form>
+                              <% } %>
+                            <% } %>
+                          </div>
+                        </div>
+                      <% } else if (report.reportType === 'thread') { %>
+                        <div class="thread-preview">
+                          <div class="preview-meta">
+                            <a href="/profile/<%= report.reportedItem.author.username %>">
+                              <%= report.reportedItem.author.displayName || report.reportedItem.author.username %>
+                            </a>
+                            in
+                            <a href="/category/<%= report.reportedItem.category.slug %>">
+                              <%= report.reportedItem.category.name %>
+                            </a>
+                          </div>
+                          <div class="preview-title">
+                            <strong><%= report.reportedItem.title %></strong>
+                          </div>
+                          <div class="preview-actions">
+                            <a href="/thread/<%= report.reportedItem.id %>" class="btn-small">View Thread</a>
+                          </div>
+                        </div>
+                      <% } else if (report.reportType === 'user') { %>
+                        <div class="user-preview">
+                          <div class="preview-meta">
+                            <a href="/profile/<%= report.reportedItem.username %>">
+                              <%= report.reportedItem.displayName || report.reportedItem.username %>
+                            </a>
+                            <span class="<%= report.reportedItem.role %>-badge"><%= report.reportedItem.role %></span>
+                          </div>
+                          <div class="preview-actions">
+                            <a href="/profile/<%= report.reportedItem.username %>" class="btn-small">View Profile</a>
+                            <% if (user.role === 'admin') { %>
+                              <a href="/admin/users/<%= report.reportedItem.id %>/edit" class="btn-small">Manage User</a>
+                            <% } %>
+                          </div>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                <% } else { %>
+                  <div class="reported-content">
+                    <p class="text-muted">⚠️ The reported content has been deleted</p>
+                  </div>
+                <% } %>
+
+                <!-- Resolution Info -->
+                <% if (report.status !== 'pending') { %>
+                  <div class="resolution-info">
+                    <strong>Resolved by:</strong>
+                    <% if (report.resolver) { %>
+                      <a href="/profile/<%= report.resolver.username %>">
+                        <%= report.resolver.displayName || report.resolver.username %>
+                      </a>
+                      <span class="<%= report.resolver.role %>-badge"><%= report.resolver.role %></span>
+                    <% } %>
+                    <br>
+                    <strong>Resolved at:</strong> <%= new Date(report.resolvedAt).toLocaleString() %>
+                    <% if (report.moderatorNotes) { %>
+                      <br>
+                      <strong>Notes:</strong> <%= report.moderatorNotes %>
+                    <% } %>
+                  </div>
+                <% } %>
+              </div>
+
+              <!-- Actions -->
+              <% if (report.status === 'pending') { %>
+                <div class="report-actions">
+                  <form action="/moderation/reports/<%= report.id %>/resolve" method="POST" style="display: inline;" onsubmit="const resolveNotes = prompt('Add notes (optional):'); this.querySelector('input[name=notes]').value = resolveNotes || '';">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="resolved">
+                    <input type="hidden" name="notes" value="">
+                    <button type="submit" class="btn btn-primary">✅ Mark Resolved</button>
+                  </form>
+                  <form action="/moderation/reports/<%= report.id %>/resolve" method="POST" style="display: inline;" onsubmit="const dismissNotes = prompt('Reason for dismissal (optional):'); this.querySelector('input[name=notes]').value = dismissNotes || '';">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="dismissed">
+                    <input type="hidden" name="notes" value="">
+                    <button type="submit" class="btn btn-secondary">❌ Dismiss</button>
+                  </form>
+                </div>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+          <div class="admin-pagination">
+            <%
+              const paramString = currentStatus ? '&status=' + currentStatus : '';
+            %>
+            <% if (currentPage > 1) { %>
+              <a href="?page=<%= currentPage - 1 %><%= paramString %>" class="pagination-btn">← Previous</a>
+            <% } else { %>
+              <span class="pagination-btn disabled">← Previous</span>
+            <% } %>
+            
+            <span class="pagination-info">Page <%= currentPage %> of <%= totalPages %></span>
+            
+            <% if (currentPage < totalPages) { %>
+              <a href="?page=<%= currentPage + 1 %><%= paramString %>" class="pagination-btn">Next →</a>
+            <% } else { %>
+              <span class="pagination-btn disabled">Next →</span>
+            <% } %>
+          </div>
+        <% } %>
+      <% } else { %>
+        <p class="empty-state">
+          <% if (currentStatus === 'pending') { %>
+            🎉 No pending reports! The community is doing great.
+          <% } else { %>
+            No <%= currentStatus %> reports found.
+          <% } %>
+        </p>
+      <% } %>
+    </div>
+  </section>
+</div>

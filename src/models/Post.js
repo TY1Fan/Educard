@@ -72,6 +72,31 @@ const Post = sequelize.define('Post', {
     type: DataTypes.DATE,
     allowNull: true,
     field: 'edited_at'
+  },
+  isHidden: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    field: 'is_hidden',
+    comment: 'Whether the post is hidden by moderators'
+  },
+  hiddenBy: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'hidden_by',
+    comment: 'Moderator who hid this post'
+  },
+  hiddenAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'hidden_at',
+    comment: 'When the post was hidden'
+  },
+  hiddenReason: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    field: 'hidden_reason',
+    comment: 'Reason for hiding the post'
   }
 }, {
   tableName: 'posts',

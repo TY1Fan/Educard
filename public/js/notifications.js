@@ -160,11 +160,91 @@ class NotificationManager {
   }
 }
 
+/**
+ * Moderation Manager
+ * Manages moderation queue badge for moderators
+ */
+class ModerationManager {
+  constructor() {
+    this.badge = document.getElementById('moderation-badge');
+    this.pollInterval = null;
+    this.pollFrequency = 60000; // Poll every 60 seconds
+    
+    if (this.badge) {
+      this.init();
+    }
+  }
+
+  init() {
+    // Initial fetch
+    this.updateBadge();
+    
+    // Start polling
+    this.startPolling();
+    
+    // Stop polling when page is hidden
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        this.stopPolling();
+      } else {
+        this.startPolling();
+      }
+    });
+  }
+
+  async updateBadge() {
+    try {
+      const response = await fetch('/moderation/api/pending-count');
+      const data = await response.json();
+
+      if (data.success && typeof data.count === 'number') {
+        this.setBadgeCount(data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching moderation count:', error);
+    }
+  }
+
+  setBadgeCount(count) {
+    if (!this.badge) return;
+
+    if (count > 0) {
+      this.badge.textContent = count > 99 ? '99+' : count;
+      this.badge.dataset.count = count;
+      this.badge.style.display = 'flex';
+    } else {
+      this.badge.style.display = 'none';
+      this.badge.dataset.count = '0';
+    }
+  }
+
+  startPolling() {
+    if (this.pollInterval) return;
+    
+    this.pollInterval = setInterval(() => {
+      this.updateBadge();
+    }, this.pollFrequency);
+  }
+
+  stopPolling() {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = null;
+    }
+  }
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
   // Only initialize if user is authenticated (badge exists)
-  const badge = document.getElementById('notification-badge');
-  if (badge) {
+  const notificationBadge = document.getElementById('notification-badge');
+  if (notificationBadge) {
     window.notificationManager = new NotificationManager();
+  }
+
+  // Initialize moderation manager for moderators
+  const moderationBadge = document.getElementById('moderation-badge');
+  if (moderationBadge) {
+    window.moderationManager = new ModerationManager();
   }
 });
