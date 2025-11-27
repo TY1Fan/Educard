@@ -9,8 +9,6 @@
  * - linkToProfile: boolean (default: false)
  */
 
-const { getUserAvatar, getAvatarSize } = require('../../utils/avatar');
-
 const avatarSize = typeof size !== 'undefined' ? size : 'medium';
 const link = typeof linkToProfile !== 'undefined' ? linkToProfile : false;
 const pixelSize = getAvatarSize(avatarSize);

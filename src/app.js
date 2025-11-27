@@ -13,6 +13,11 @@ const { securityHeaders, additionalSecurityHeaders } = require("./middleware/sec
 app.use(securityHeaders);
 app.use(additionalSecurityHeaders);
 
+// Make utility functions available to all templates
+const { getUserAvatar, getAvatarSize } = require("./utils/avatar");
+app.locals.getUserAvatar = getUserAvatar;
+app.locals.getAvatarSize = getAvatarSize;
+
 // View engine setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
