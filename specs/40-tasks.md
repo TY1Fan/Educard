@@ -9264,25 +9264,1441 @@ Document the forum system for developers and users.
 
 ---
 
-## 11. Notes for Phase 5
+## 11. Phase 5: K3s Deployment
 
-**Phase 5 Preview (Deployment & Production):**
-- Production environment setup
-- Database migration to production
-- Server deployment (VPS, cloud platform)
-- Domain and SSL/HTTPS configuration
-- Environment variable management
-- Monitoring and logging setup
-- Backup and recovery procedures
-- Performance monitoring
-- Error tracking (Sentry, etc.)
-- CI/CD pipeline (optional)
-- Monitoring configuration
-- Backup procedures
+**Phase Duration:** 1 week  
+**Phase Goal:** Deploy production-ready application on k3s cluster  
+**Phase Priority:** High (production deployment)
 
 ---
 
-## 10. Task Management Tips
+### Task 5.1: K3s Cluster Setup
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** Phase 4 complete  
+**Assigned To:** DevOps/Developer
+
+**Description:**
+Install and configure k3s (lightweight Kubernetes) on the production server. Set up basic cluster infrastructure including storage and networking.
+
+**Steps:**
+1. Provision server/VPS (minimum 2GB RAM, 2 CPU cores recommended)
+2. Install k3s: `curl -sfL https://get.k3s.io | sh -`
+3. Verify installation: `sudo k3s kubectl get nodes`
+4. Configure kubectl access from local machine
+5. Copy k3s config: `sudo cat /etc/rancher/k3s/k3s.yaml`
+6. Set up local kubectl with remote cluster
+7. Install Helm 3: `curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash`
+8. Verify local-path storage provisioner is available
+9. Test cluster with hello-world deployment
+
+**Acceptance Criteria:**
+- [ ] K3s installed and running on server
+- [ ] kubectl can access cluster from local machine
+- [ ] Helm 3 installed locally
+- [ ] Storage provisioner (local-path) is available
+- [ ] Can list nodes: `kubectl get nodes`
+- [ ] Can list namespaces: `kubectl get namespaces`
+- [ ] Test pod deploys successfully
+
+**Files to Create:**
+- `k8s/README.md` - K3s setup documentation
+- Local kubeconfig saved securely
+
+**Validation:**
+```bash
+kubectl get nodes
+kubectl get pods -A
+kubectl get storageclass
+```
+
+**Notes:**
+- Document server IP and SSH access
+- Save kubeconfig file securely
+- Note k3s version installed
+- Default storage class: local-path
+
+---
+
+### Task 5.2: Container Registry Setup
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 1-2 hours  
+**Dependencies:** Task 5.1  
+**Assigned To:** Developer
+
+**Description:**
+Set up container registry for storing Docker images. Can use Docker Hub (public/private) or set up private registry.
+
+**Steps:**
+1. Choose registry option (Docker Hub recommended for simplicity)
+2. Create Docker Hub account (if using Docker Hub)
+3. Create repository: `educard-forum` or `<username>/educard`
+4. Login locally: `docker login`
+5. Test push/pull access
+6. Document registry credentials securely
+7. If using private registry, create Kubernetes secret for image pull
+
+**Acceptance Criteria:**
+- [ ] Container registry accessible
+- [ ] Can push images to registry
+- [ ] Can pull images from registry
+- [ ] Credentials documented securely
+- [ ] If private: Kubernetes ImagePullSecret created
+
+**Files to Create:**
+- `k8s/registry-secret.yaml` (if using private registry)
+- Documentation in `k8s/README.md`
+
+**Validation:**
+```bash
+docker login
+docker tag educard:latest <registry>/educard:v1.0.0
+docker push <registry>/educard:v1.0.0
+docker pull <registry>/educard:v1.0.0
+```
+
+**Notes:**
+- Store credentials in password manager
+- Use semantic versioning for image tags
+- Consider Docker Hub private repository for security
+
+---
+
+### Task 5.3: Production Dockerfile
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 2 hours  
+**Dependencies:** Task 5.2  
+**Assigned To:** Developer
+
+**Description:**
+Create optimized production Dockerfile using multi-stage builds. Minimize image size and improve security.
+
+**Steps:**
+1. Create `Dockerfile.production` in project root
+2. Use multi-stage build (builder + production)
+3. Builder stage: install dependencies, build if needed
+4. Production stage: only runtime dependencies
+5. Use non-root user for security
+6. Set up proper signal handling
+7. Build and test image locally
+8. Tag and push to registry
+
+**Acceptance Criteria:**
+- [ ] Multi-stage Dockerfile created
+- [ ] Image builds successfully
+- [ ] Image size optimized (<500MB)
+- [ ] Runs as non-root user
+- [ ] Health check endpoint accessible
+- [ ] Environment variables configurable
+- [ ] Image pushed to registry with version tag
+
+**Files to Create:**
+- `Dockerfile.production`
+- `.dockerignore` (if not exists, optimize it)
+
+**Example Dockerfile:**
+```dockerfile
+# Builder stage
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Production stage
+FROM node:18-alpine
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+USER nodejs
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+**Validation:**
+```bash
+docker build -f Dockerfile.production -t educard:prod .
+docker run -p 3000:3000 --env-file .env educard:prod
+curl http://localhost:3000/health
+docker tag educard:prod <registry>/educard:v1.0.0
+docker push <registry>/educard:v1.0.0
+```
+
+**Notes:**
+- Use Alpine Linux for smaller image size
+- Ensure health check endpoint exists
+- Test container locally before pushing
+
+---
+
+### Task 5.4: Kubernetes Namespace and ConfigMap
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 1 hour  
+**Dependencies:** Task 5.1  
+**Assigned To:** Developer
+
+**Description:**
+Create Kubernetes namespace for the application and ConfigMap for non-sensitive configuration.
+
+**Steps:**
+1. Create `k8s/` directory in project root
+2. Create namespace manifest
+3. Create ConfigMap for environment variables
+4. Apply namespace and ConfigMap to cluster
+5. Verify resources created
+
+**Acceptance Criteria:**
+- [ ] Namespace `educard-prod` created
+- [ ] ConfigMap with app configuration created
+- [ ] Resources applied to cluster successfully
+- [ ] Can view resources with kubectl
+
+**Files to Create:**
+- `k8s/namespace.yaml`
+- `k8s/configmap.yaml`
+
+**namespace.yaml:**
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: educard-prod
+  labels:
+    app: educard
+    environment: production
+```
+
+**configmap.yaml:**
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: educard-config
+  namespace: educard-prod
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "educard_prod"
+  APP_URL: "https://yourdomain.com"
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl get namespace educard-prod
+kubectl get configmap -n educard-prod
+kubectl describe configmap educard-config -n educard-prod
+```
+
+---
+
+### Task 5.5: Kubernetes Secrets
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 1 hour  
+**Dependencies:** Task 5.4  
+**Assigned To:** Developer
+
+**Description:**
+Create Kubernetes Secret for sensitive data like database credentials and session secrets.
+
+**Steps:**
+1. Generate strong passwords and secrets
+2. Create Secret manifest (do NOT commit to git)
+3. Apply Secret to cluster
+4. Verify Secret created
+5. Document how to recreate Secret (without exposing values)
+
+**Acceptance Criteria:**
+- [ ] Secret created with database credentials
+- [ ] Secret created with session secret
+- [ ] Secret NOT committed to git
+- [ ] Secret values are base64 encoded
+- [ ] Documentation for recreating Secret exists
+
+**Files to Create:**
+- `k8s/secret.yaml` (add to .gitignore)
+- `k8s/secret.yaml.example` (template without real values)
+
+**secret.yaml.example:**
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: educard-secrets
+  namespace: educard-prod
+type: Opaque
+stringData:
+  DB_USER: "your-db-user"
+  DB_PASSWORD: "your-strong-db-password"
+  SESSION_SECRET: "your-64-char-random-string"
+  # Add other sensitive variables
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/secret.yaml
+kubectl get secret educard-secrets -n educard-prod
+kubectl describe secret educard-secrets -n educard-prod
+# Verify values (carefully): kubectl get secret educard-secrets -n educard-prod -o yaml
+```
+
+**Security Notes:**
+- Add `k8s/secret.yaml` to `.gitignore`
+- Use strong, randomly generated passwords
+- Store original values in secure password manager
+- Consider using sealed-secrets or external secrets operator for production
+
+---
+
+### Task 5.6: PostgreSQL StatefulSet
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** Task 5.5  
+**Assigned To:** Developer
+
+**Description:**
+Deploy PostgreSQL database as a StatefulSet with persistent storage for data durability.
+
+**Steps:**
+1. Create PersistentVolumeClaim for database storage
+2. Create PostgreSQL StatefulSet manifest
+3. Create PostgreSQL Service (ClusterIP)
+4. Apply manifests to cluster
+5. Verify database pod is running
+6. Test database connectivity
+
+**Acceptance Criteria:**
+- [ ] PVC created with sufficient storage (10Gi minimum)
+- [ ] PostgreSQL StatefulSet deployed
+- [ ] PostgreSQL Service created
+- [ ] Database pod running and ready
+- [ ] Can connect to database from within cluster
+- [ ] Data persists across pod restarts
+
+**Files to Create:**
+- `k8s/postgres-pvc.yaml`
+- `k8s/postgres-statefulset.yaml`
+- `k8s/postgres-service.yaml`
+
+**postgres-pvc.yaml:**
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: educard-prod
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+```
+
+**postgres-statefulset.yaml:**
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: educard-prod
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_NAME
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_PASSWORD
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+```
+
+**postgres-service.yaml:**
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: educard-prod
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/postgres-pvc.yaml
+kubectl apply -f k8s/postgres-statefulset.yaml
+kubectl apply -f k8s/postgres-service.yaml
+kubectl get pvc -n educard-prod
+kubectl get statefulset -n educard-prod
+kubectl get pods -n educard-prod
+kubectl logs -n educard-prod postgres-0
+# Test connection
+kubectl run -it --rm psql --image=postgres:15-alpine --restart=Never -n educard-prod -- psql -h postgres-service -U <user> -d educard_prod
+```
+
+---
+
+### Task 5.7: Application Deployment
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 2 hours  
+**Dependencies:** Task 5.6  
+**Assigned To:** Developer
+
+**Description:**
+Deploy the Educard application as a Kubernetes Deployment with multiple replicas for high availability.
+
+**Steps:**
+1. Create Deployment manifest with app configuration
+2. Configure environment variables from ConfigMap and Secret
+3. Set resource limits and requests
+4. Configure liveness and readiness probes
+5. Apply Deployment to cluster
+6. Verify pods are running
+7. Check application logs
+
+**Acceptance Criteria:**
+- [ ] Deployment created with 2+ replicas
+- [ ] Environment variables configured correctly
+- [ ] Resource limits set appropriately
+- [ ] Liveness probe configured
+- [ ] Readiness probe configured
+- [ ] All pods running and ready
+- [ ] Application logs show successful startup
+
+**Files to Create:**
+- `k8s/app-deployment.yaml`
+
+**app-deployment.yaml:**
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: educard-app
+  namespace: educard-prod
+  labels:
+    app: educard
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: educard
+  template:
+    metadata:
+      labels:
+        app: educard
+    spec:
+      containers:
+      - name: educard
+        image: <your-registry>/educard:v1.0.0
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: PORT
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_PASSWORD
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: SESSION_SECRET
+        - name: APP_URL
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: APP_URL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/app-deployment.yaml
+kubectl get deployment -n educard-prod
+kubectl get pods -n educard-prod -l app=educard
+kubectl logs -n educard-prod -l app=educard --tail=50
+kubectl describe deployment educard-app -n educard-prod
+```
+
+---
+
+### Task 5.8: Application Service
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 30 minutes  
+**Dependencies:** Task 5.7  
+**Assigned To:** Developer
+
+**Description:**
+Create Kubernetes Service to expose the application within the cluster and enable load balancing.
+
+**Steps:**
+1. Create Service manifest (ClusterIP type)
+2. Configure service to select application pods
+3. Apply Service to cluster
+4. Test service connectivity within cluster
+
+**Acceptance Criteria:**
+- [ ] Service created successfully
+- [ ] Service selects correct pods
+- [ ] Service load balances between replicas
+- [ ] Can access application through service DNS
+
+**Files to Create:**
+- `k8s/app-service.yaml`
+
+**app-service.yaml:**
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: educard-service
+  namespace: educard-prod
+  labels:
+    app: educard
+spec:
+  type: ClusterIP
+  selector:
+    app: educard
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/app-service.yaml
+kubectl get service -n educard-prod
+kubectl describe service educard-service -n educard-prod
+# Test from within cluster
+kubectl run -it --rm curl --image=curlimages/curl --restart=Never -n educard-prod -- curl http://educard-service/health
+```
+
+**Notes:**
+- SessionAffinity helps with session management
+- Service name becomes DNS: educard-service.educard-prod.svc.cluster.local
+
+---
+
+### Task 5.9: Database Migration Job
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 1-2 hours  
+**Dependencies:** Task 5.8  
+**Assigned To:** Developer
+
+**Description:**
+Create Kubernetes Job to run database migrations before application starts serving traffic.
+
+**Steps:**
+1. Create Job manifest for running migrations
+2. Use same application image
+3. Override command to run migrations
+4. Apply Job to cluster
+5. Monitor Job execution
+6. Verify migrations completed successfully
+
+**Acceptance Criteria:**
+- [ ] Migration Job manifest created
+- [ ] Job runs migrations successfully
+- [ ] Database schema created
+- [ ] All migrations applied
+- [ ] Job completes successfully
+- [ ] Can run Job manually when needed
+
+**Files to Create:**
+- `k8s/migration-job.yaml`
+
+**migration-job.yaml:**
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: educard-migration
+  namespace: educard-prod
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      labels:
+        app: educard-migration
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: <your-registry>/educard:v1.0.0
+        command: ["npm", "run", "db:migrate"]
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_PASSWORD
+      backoffLimit: 3
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/migration-job.yaml
+kubectl get jobs -n educard-prod
+kubectl logs -n educard-prod -l app=educard-migration
+kubectl describe job educard-migration -n educard-prod
+# Check if migrations completed
+kubectl exec -it -n educard-prod postgres-0 -- psql -U <user> -d educard_prod -c "\dt"
+```
+
+**Notes:**
+- Run this Job before first deployment
+- Re-run when new migrations are added
+- Delete Job before re-running: `kubectl delete job educard-migration -n educard-prod`
+
+---
+
+### Task 5.10: Database Seed Job
+
+**Status:** 🔴 Not Started  
+**Priority:** Medium  
+**Estimated Time:** 1 hour  
+**Dependencies:** Task 5.9  
+**Assigned To:** Developer
+
+**Description:**
+Create Kubernetes Job to seed initial categories and admin user in the database.
+
+**Steps:**
+1. Create seed script or use existing seeder
+2. Create Job manifest for seeding
+3. Apply Job to cluster
+4. Verify seed data created
+5. Document seeding process
+
+**Acceptance Criteria:**
+- [ ] Seed Job manifest created
+- [ ] Job seeds initial categories
+- [ ] Job creates admin user (if applicable)
+- [ ] Seed data visible in database
+- [ ] Job completes successfully
+
+**Files to Create:**
+- `k8s/seed-job.yaml`
+- `src/scripts/seed-production.js` (if not exists)
+
+**seed-job.yaml:**
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: educard-seed
+  namespace: educard-prod
+spec:
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      labels:
+        app: educard-seed
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: seed
+        image: <your-registry>/educard:v1.0.0
+        command: ["npm", "run", "db:seed"]
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_NAME
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_PASSWORD
+      backoffLimit: 3
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/seed-job.yaml
+kubectl get jobs -n educard-prod
+kubectl logs -n educard-prod -l app=educard-seed
+# Verify seed data
+kubectl exec -it -n educard-prod postgres-0 -- psql -U <user> -d educard_prod -c "SELECT * FROM categories;"
+```
+
+---
+
+### Task 5.11: Install cert-manager
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 1 hour  
+**Dependencies:** Task 5.1  
+**Assigned To:** Developer
+
+**Description:**
+Install cert-manager for automatic SSL/TLS certificate management using Let's Encrypt.
+
+**Steps:**
+1. Install cert-manager using kubectl or Helm
+2. Verify cert-manager pods are running
+3. Create ClusterIssuer for Let's Encrypt
+4. Test certificate issuance
+
+**Acceptance Criteria:**
+- [ ] cert-manager installed and running
+- [ ] All cert-manager pods ready
+- [ ] ClusterIssuer created for Let's Encrypt
+- [ ] Can issue test certificate
+
+**Files to Create:**
+- `k8s/cert-manager-issuer.yaml`
+
+**Installation:**
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
+```
+
+**cert-manager-issuer.yaml:**
+```yaml
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your-email@example.com
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - http01:
+        ingress:
+          class: traefik
+```
+
+**Validation:**
+```bash
+kubectl get pods -n cert-manager
+kubectl get clusterissuer
+kubectl apply -f k8s/cert-manager-issuer.yaml
+kubectl describe clusterissuer letsencrypt-prod
+```
+
+**Notes:**
+- Use staging issuer for testing first
+- Production issuer has rate limits
+- Email will receive certificate expiry notices
+
+---
+
+### Task 5.12: Ingress Configuration
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 2 hours  
+**Dependencies:** Task 5.8, Task 5.11  
+**Assigned To:** Developer
+
+**Description:**
+Configure Traefik Ingress to expose the application externally with SSL/TLS certificate.
+
+**Steps:**
+1. Configure DNS A record to point to server IP
+2. Create Ingress manifest
+3. Configure TLS with cert-manager annotations
+4. Apply Ingress to cluster
+5. Verify certificate issuance
+6. Test HTTPS access
+
+**Acceptance Criteria:**
+- [ ] DNS record pointing to server
+- [ ] Ingress created successfully
+- [ ] SSL certificate issued automatically
+- [ ] Application accessible via HTTPS
+- [ ] HTTP redirects to HTTPS
+- [ ] Certificate valid and trusted
+
+**Files to Create:**
+- `k8s/ingress.yaml`
+
+**ingress.yaml:**
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: educard-ingress
+  namespace: educard-prod
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+  - hosts:
+    - yourdomain.com
+    - www.yourdomain.com
+    secretName: educard-tls
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: educard-service
+            port:
+              number: 80
+  - host: www.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: educard-service
+            port:
+              number: 80
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/ingress.yaml
+kubectl get ingress -n educard-prod
+kubectl describe ingress educard-ingress -n educard-prod
+kubectl get certificate -n educard-prod
+kubectl describe certificate educard-tls -n educard-prod
+# Test access
+curl -I https://yourdomain.com
+curl https://yourdomain.com/health
+```
+
+**Notes:**
+- DNS propagation may take time
+- Certificate issuance takes 1-5 minutes
+- Monitor cert-manager logs if issues
+
+---
+
+### Task 5.13: Database Backup CronJob
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 2 hours  
+**Dependencies:** Task 5.6  
+**Assigned To:** Developer
+
+**Description:**
+Set up automated database backups using Kubernetes CronJob. Store backups in persistent volume.
+
+**Steps:**
+1. Create PVC for backup storage
+2. Create backup script
+3. Create CronJob manifest for daily backups
+4. Apply CronJob to cluster
+5. Test backup manually
+6. Verify backup files created
+7. Test restore procedure
+
+**Acceptance Criteria:**
+- [ ] Backup PVC created
+- [ ] CronJob runs daily
+- [ ] Backups created successfully
+- [ ] Backups stored in PVC
+- [ ] Restore procedure documented and tested
+- [ ] Old backups cleaned up (retention policy)
+
+**Files to Create:**
+- `k8s/backup-pvc.yaml`
+- `k8s/backup-cronjob.yaml`
+- `k8s/restore-job.yaml` (template)
+- `docs/BACKUP_RESTORE.md`
+
+**backup-pvc.yaml:**
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: educard-prod
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 20Gi
+```
+
+**backup-cronjob.yaml:**
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: educard-prod
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: backup
+            image: postgres:15-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              BACKUP_FILE="/backups/backup-$(date +%Y%m%d-%H%M%S).sql.gz"
+              pg_dump -h postgres-service -U $DB_USER -d $DB_NAME | gzip > $BACKUP_FILE
+              echo "Backup created: $BACKUP_FILE"
+              # Cleanup backups older than 30 days
+              find /backups -name "backup-*.sql.gz" -type f -mtime +30 -delete
+            env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: educard-secrets
+                  key: DB_USER
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: educard-config
+                  key: DB_NAME
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: educard-secrets
+                  key: DB_PASSWORD
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
+```
+
+**Validation:**
+```bash
+kubectl apply -f k8s/backup-pvc.yaml
+kubectl apply -f k8s/backup-cronjob.yaml
+kubectl get cronjob -n educard-prod
+# Trigger manual backup
+kubectl create job --from=cronjob/postgres-backup manual-backup-1 -n educard-prod
+kubectl get jobs -n educard-prod
+kubectl logs -n educard-prod -l job-name=manual-backup-1
+# Check backup files
+kubectl exec -it -n educard-prod postgres-0 -- ls -lh /backups
+```
+
+---
+
+### Task 5.14: Monitoring Setup
+
+**Status:** 🔴 Not Started  
+**Priority:** Medium  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** Task 5.7  
+**Assigned To:** Developer
+
+**Description:**
+Set up basic monitoring for the k3s cluster and application. Install metrics-server and configure resource monitoring.
+
+**Steps:**
+1. Install metrics-server (usually included with k3s)
+2. Verify metrics-server is running
+3. Test metrics collection
+4. Set up kubectl top commands
+5. Document monitoring commands
+6. Optional: Install simple dashboard (Kubernetes Dashboard)
+
+**Acceptance Criteria:**
+- [ ] Metrics-server installed and running
+- [ ] Can view node metrics: `kubectl top nodes`
+- [ ] Can view pod metrics: `kubectl top pods`
+- [ ] Resource usage visible
+- [ ] Monitoring commands documented
+
+**Installation:**
+```bash
+# Check if metrics-server exists
+kubectl get deployment metrics-server -n kube-system
+
+# If not installed:
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+**Validation:**
+```bash
+kubectl get pods -n kube-system | grep metrics
+kubectl top nodes
+kubectl top pods -n educard-prod
+kubectl top pods -n educard-prod --containers
+```
+
+**Files to Create:**
+- `docs/MONITORING.md`
+
+**Basic Monitoring Commands:**
+```bash
+# Node resources
+kubectl top nodes
+
+# Pod resources
+kubectl top pods -n educard-prod
+
+# Pod logs
+kubectl logs -n educard-prod -l app=educard --tail=100 -f
+
+# Events
+kubectl get events -n educard-prod --sort-by='.lastTimestamp'
+
+# Pod status
+kubectl get pods -n educard-prod -w
+```
+
+**Notes:**
+- Consider adding Prometheus/Grafana for advanced monitoring
+- Can use k9s CLI tool for better cluster visibility
+- Monitor disk usage on PVCs regularly
+
+---
+
+### Task 5.15: Deployment Testing and Validation
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** Task 5.12  
+**Assigned To:** Developer
+
+**Description:**
+Comprehensive testing of the production deployment. Verify all features work correctly in k3s environment.
+
+**Steps:**
+1. Access application via domain
+2. Test user registration
+3. Test user login
+4. Test creating threads and posts
+5. Test editing and deleting content
+6. Test all major features
+7. Check application logs
+8. Verify database persistence
+9. Test pod restart/recovery
+10. Test rolling updates
+11. Document any issues found
+
+**Acceptance Criteria:**
+- [ ] Application accessible via HTTPS
+- [ ] All core features working
+- [ ] No errors in logs
+- [ ] Database data persists across restarts
+- [ ] Pods restart automatically on failure
+- [ ] Rolling updates work without downtime
+- [ ] SSL certificate valid
+- [ ] Performance acceptable
+
+**Testing Checklist:**
+- [ ] Homepage loads correctly
+- [ ] Can register new user
+- [ ] Can login with credentials
+- [ ] Can create new thread
+- [ ] Can reply to thread
+- [ ] Can edit own post
+- [ ] Can delete own post
+- [ ] Can view user profile
+- [ ] Search works (if implemented)
+- [ ] Admin features work (if implemented)
+- [ ] Mobile responsive
+- [ ] No console errors
+
+**Pod Resilience Testing:**
+```bash
+# Delete a pod, should auto-restart
+kubectl delete pod -n educard-prod -l app=educard --grace-period=0 --force
+
+# Watch pods recover
+kubectl get pods -n educard-prod -w
+
+# Verify app still works
+curl https://yourdomain.com/health
+```
+
+**Rolling Update Test:**
+```bash
+# Update image version
+kubectl set image deployment/educard-app -n educard-prod educard=<registry>/educard:v1.0.1
+
+# Watch rollout
+kubectl rollout status deployment/educard-app -n educard-prod
+
+# Verify no downtime
+while true; do curl -s https://yourdomain.com/health; sleep 1; done
+```
+
+**Database Persistence Test:**
+```bash
+# Create test data through app
+# Delete postgres pod
+kubectl delete pod -n educard-prod postgres-0
+
+# Wait for pod to restart
+kubectl get pods -n educard-prod -w
+
+# Verify data still exists through app
+```
+
+**Validation:**
+- All tests pass
+- No data loss
+- No downtime during updates
+- Application performs well
+
+---
+
+### Task 5.16: Documentation and Runbook
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 2-3 hours  
+**Dependencies:** Task 5.15  
+**Assigned To:** Developer
+
+**Description:**
+Create comprehensive documentation for the k3s deployment including setup guide, operations runbook, and troubleshooting guide.
+
+**Steps:**
+1. Document complete deployment process
+2. Create operations runbook
+3. Document common tasks
+4. Create troubleshooting guide
+5. Document rollback procedures
+6. Document scaling procedures
+7. Add diagrams if helpful
+
+**Acceptance Criteria:**
+- [ ] Complete deployment guide exists
+- [ ] Operations runbook created
+- [ ] Common kubectl commands documented
+- [ ] Troubleshooting guide written
+- [ ] Rollback procedure documented
+- [ ] Scaling guide created
+- [ ] Emergency contacts/procedures noted
+
+**Files to Create:**
+- `k8s/README.md` (comprehensive guide)
+- `docs/K3S_DEPLOYMENT.md`
+- `docs/OPERATIONS_RUNBOOK.md`
+- `docs/TROUBLESHOOTING.md`
+
+**Documentation Sections:**
+
+**K3S_DEPLOYMENT.md** should include:
+- Prerequisites
+- Server requirements
+- k3s installation
+- kubectl setup
+- Deployment steps (all tasks)
+- Verification procedures
+- Post-deployment checklist
+
+**OPERATIONS_RUNBOOK.md** should include:
+- Daily operations
+- Common tasks
+- Viewing logs
+- Restarting pods
+- Scaling replicas
+- Updating application
+- Database operations
+- Backup verification
+- Certificate renewal
+
+**TROUBLESHOOTING.md** should include:
+- Pod not starting
+- Database connection issues
+- Certificate issues
+- Ingress not working
+- Application errors
+- Performance issues
+- Disk space issues
+- How to access logs
+- How to debug pods
+
+**Common Operations:**
+```bash
+# View application logs
+kubectl logs -n educard-prod -l app=educard --tail=100 -f
+
+# Restart deployment
+kubectl rollout restart deployment/educard-app -n educard-prod
+
+# Scale replicas
+kubectl scale deployment/educard-app -n educard-prod --replicas=3
+
+# Update image
+kubectl set image deployment/educard-app -n educard-prod educard=<registry>/educard:v1.0.1
+
+# Rollback deployment
+kubectl rollout undo deployment/educard-app -n educard-prod
+
+# Get shell in pod
+kubectl exec -it -n educard-prod <pod-name> -- sh
+
+# View resource usage
+kubectl top pods -n educard-prod
+
+# View events
+kubectl get events -n educard-prod --sort-by='.lastTimestamp'
+
+# Trigger manual backup
+kubectl create job --from=cronjob/postgres-backup manual-backup -n educard-prod
+```
+
+**Validation:**
+- Documentation is clear and complete
+- New team member could follow documentation
+- All commands are accurate
+- Troubleshooting guide is helpful
+
+---
+
+## 12. Phase 5 Summary
+
+**Total Tasks:** 16 tasks  
+**Estimated Total Time:** 25-30 hours  
+**Priority:** Critical (Production Deployment)
+
+**Sub-Phases:**
+- **5.1:** K3s Setup (Tasks 5.1-5.2, 3-4 hours)
+- **5.2:** Container & Configuration (Tasks 5.3-5.5, 4 hours)
+- **5.3:** Database Deployment (Tasks 5.6, 5.9-5.10, 5.13, 6-7 hours)
+- **5.4:** Application Deployment (Tasks 5.7-5.8, 2.5 hours)
+- **5.5:** Ingress & SSL (Tasks 5.11-5.12, 3 hours)
+- **5.6:** Monitoring & Operations (Tasks 5.14-5.16, 6-8 hours)
+
+**Completion Criteria:**
+- All 16 tasks completed
+- Application accessible via HTTPS
+- Database running with backups
+- Monitoring configured
+- Documentation complete
+- All features tested and working
+
+**Phase 5 Deliverables:**
+1. K3s cluster fully configured
+2. Containerized application deployed
+3. PostgreSQL with persistent storage
+4. Automated SSL/TLS certificates
+5. Automated database backups
+6. Basic monitoring setup
+7. Complete documentation
+8. Tested and validated deployment
+
+**Key Technologies:**
+- 🚢 **K3s** - Lightweight Kubernetes
+- 🐳 **Docker** - Containerization
+- 🔐 **cert-manager** - SSL/TLS automation
+- 🔄 **Traefik** - Ingress controller (built-in k3s)
+- 💾 **PostgreSQL StatefulSet** - Persistent database
+- 📊 **metrics-server** - Resource monitoring
+- 🔄 **CronJobs** - Automated backups
+
+**Production Ready Checklist:**
+- [x] Application containerized
+- [x] Multi-replica deployment
+- [x] Database with persistence
+- [x] Automated backups
+- [x] SSL/TLS certificates
+- [x] Health checks configured
+- [x] Resource limits set
+- [x] Monitoring in place
+- [x] Documentation complete
+
+---
+
+## 13. Notes for Phase 6
+
+**Phase 6 Preview (Testing & Quality Assurance):**
+- Comprehensive testing in production
+- Load testing with realistic traffic
+- Security audit and penetration testing
+- Performance optimization
+- UI/UX refinements
+- Bug fixes from production testing
+- Final documentation updates
+- User acceptance testing
+
+---
+
+## 14. Task Management Tips
 
 **How to Use This Document:**
 1. Start with Task 1.1 and work sequentially
