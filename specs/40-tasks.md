@@ -9999,7 +9999,8 @@ kubectl describe deployment educard-app -n educard-prod
 
 ### Task 5.8: Application Service
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
+**Completed:** November 27, 2025  
 **Priority:** High  
 **Estimated Time:** 30 minutes  
 **Dependencies:** Task 5.7  
@@ -10015,10 +10016,10 @@ Create Kubernetes Service to expose the application within the cluster and enabl
 4. Test service connectivity within cluster
 
 **Acceptance Criteria:**
-- [ ] Service created successfully
-- [ ] Service selects correct pods
-- [ ] Service load balances between replicas
-- [ ] Can access application through service DNS
+- [x] Service created successfully
+- [x] Service selects correct pods
+- [x] Service load balances between replicas
+- [x] Can access application through service DNS
 
 **Files to Create:**
 - `k8s/app-service.yaml`
@@ -10047,6 +10048,31 @@ spec:
       timeoutSeconds: 10800
 ```
 
+**Deployment Results:**
+```bash
+# Service Configuration
+Name:              educard-service
+Type:              ClusterIP
+Cluster-IP:        10.43.78.127
+Port:              80/TCP
+TargetPort:        3000/TCP
+Endpoints:         10.42.0.14:3000,10.42.0.15:3000 (2 pods)
+Session Affinity:  ClientIP (10800s timeout)
+
+# DNS Names Available:
+# - educard-service (within namespace)
+# - educard-service.educard-prod.svc.cluster.local (full FQDN)
+
+# Health Check Test
+$ wget -q -O- http://educard-service/health
+{"status":"ok","timestamp":"2025-11-27T14:07:04.884Z","environment":"production"}
+
+# Service Status
+NAME               TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+educard-service    ClusterIP   10.43.78.127   <none>        80/TCP     64m
+postgres-service   ClusterIP   None           <none>        5432/TCP   4h53m
+```
+
 **Validation:**
 ```bash
 kubectl apply -f k8s/app-service.yaml
@@ -10059,6 +10085,8 @@ kubectl run -it --rm curl --image=curlimages/curl --restart=Never -n educard-pro
 **Notes:**
 - SessionAffinity helps with session management
 - Service name becomes DNS: educard-service.educard-prod.svc.cluster.local
+- Load balancing: Traffic distributed across 2 application pods
+- Ready for Ingress/LoadBalancer configuration
 
 ---
 
