@@ -1,0 +1,93 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: educard-seed
+  namespace: educard-prod
+  labels:
+    app: educard
+    component: seed
+    environment: production
+  annotations:
+    description: "Database seeding job for initial data (categories, etc.)"
+spec:
+  # Automatically delete job after completion (100 seconds)
+  ttlSecondsAfterFinished: 100
+  
+  # Retry up to 3 times on failure
+  backoffLimit: 3
+  
+  template:
+    metadata:
+      labels:
+        app: educard-seed
+        component: seed
+    spec:
+      restartPolicy: Never
+      
+      containers:
+      - name: seed
+        # Use the same image as the application
+        image: tyifan/educard:v1.0.0
+        
+        # Override the default command to run seeders
+        # Note: We need to specify config and seeders-path since .sequelizerc is not in the image
+        command:
+        - sh
+        - -c
+        - |
+          echo "Starting database seeding..."
+          npx sequelize-cli db:seed:all \
+            --config /app/src/config/database.js \
+            --seeders-path /app/src/seeders \
+            --env production
+          echo "Seeding completed successfully"
+        
+        # Environment variables from ConfigMap
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_PORT
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_NAME
+        
+        # Credentials from Secrets
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_PASSWORD
+        
+        # Resource limits for seed job
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        
+        # Security context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1001
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL

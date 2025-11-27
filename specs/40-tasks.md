@@ -10235,7 +10235,8 @@ kubectl exec -it -n educard-prod postgres-0 -- psql -U <user> -d educard_prod -c
 
 ### Task 5.10: Database Seed Job
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
+**Completed:** November 27, 2025  
 **Priority:** Medium  
 **Estimated Time:** 1 hour  
 **Dependencies:** Task 5.9  
@@ -10252,11 +10253,11 @@ Create Kubernetes Job to seed initial categories and admin user in the database.
 5. Document seeding process
 
 **Acceptance Criteria:**
-- [ ] Seed Job manifest created
-- [ ] Job seeds initial categories
-- [ ] Job creates admin user (if applicable)
-- [ ] Seed data visible in database
-- [ ] Job completes successfully
+- [x] Seed Job manifest created
+- [x] Job seeds initial categories
+- [x] Job creates admin user (if applicable)
+- [x] Seed data visible in database
+- [x] Job completes successfully
 
 **Files to Create:**
 - `k8s/seed-job.yaml`
@@ -10312,6 +10313,45 @@ spec:
       backoffLimit: 3
 ```
 
+**Deployment Results:**
+```bash
+# Job Configuration
+Name:                educard-seed
+Image:               tyifan/educard:v1.0.0
+Command:             npx sequelize-cli db:seed:all (with config/path flags)
+Backoff Limit:       3 retries
+TTL After Finished:  100 seconds (auto-cleanup)
+
+# Package.json Updated
+Added scripts:
+  "db:seed": "npx sequelize-cli db:seed:all"
+  "db:seed:undo": "npx sequelize-cli db:seed:undo:all"
+
+# Job Execution
+$ kubectl apply -f k8s/seed-job.yaml
+job.batch/educard-seed created
+
+# Job completed in ~20 seconds and auto-deleted via TTL
+
+# Seeded Categories (6 total)
+        name         |        slug        | display_order 
+---------------------+--------------------+---------------
+ Announcements       | announcements      |             0
+ General Discussion  | general-discussion |             1
+ Questions & Answers | questions-answers  |             2
+ Study Groups        | study-groups       |             3
+ Resources           | resources          |             4
+ Off-Topic           | off-topic          |             5
+(6 rows)
+
+# Full Data Verification
+All categories include:
+- Name and slug
+- Description
+- Display order
+- Timestamps (created_at)
+```
+
 **Validation:**
 ```bash
 kubectl apply -f k8s/seed-job.yaml
@@ -10320,6 +10360,12 @@ kubectl logs -n educard-prod -l app=educard-seed
 # Verify seed data
 kubectl exec -it -n educard-prod postgres-0 -- psql -U <user> -d educard_prod -c "SELECT * FROM categories;"
 ```
+
+**Notes:**
+- Sequelize seeders are NOT idempotent (will create duplicates if run multiple times)
+- Check existing data before running: `SELECT COUNT(*) FROM categories;`
+- Helper script available: `./k8s/run-seed.sh` (includes duplicate check)
+- To undo seeding: `DELETE FROM categories;` or use seed:undo command
 
 ---
 

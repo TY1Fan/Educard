@@ -11,7 +11,9 @@
     "format": "prettier --write src/**/*.js",
     "db:analyze": "node src/utils/db-analyze.js",
     "db:migrate": "npx sequelize-cli db:migrate",
-    "db:migrate:undo": "npx sequelize-cli db:migrate:undo"
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo:all"
   },
   "keywords": [
     "forum",
