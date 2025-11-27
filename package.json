@@ -8,7 +8,10 @@
     "dev": "nodemon server.js",
     "test": "echo \"Error: no tests specified\" && exit 0",
     "lint": "eslint src/**/*.js",
-    "format": "prettier --write src/**/*.js"
+    "format": "prettier --write src/**/*.js",
+    "db:analyze": "node src/utils/db-analyze.js",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo"
   },
   "keywords": [
     "forum",

@@ -1,6 +1,23 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
+// Query logging function for development
+const logQuery = (sql, timing) => {
+  const queryTime = timing ? ` (${timing}ms)` : '';
+  
+  // Color code by query type
+  let color = '\x1b[0m'; // Reset
+  if (sql.startsWith('SELECT')) color = '\x1b[36m'; // Cyan
+  else if (sql.startsWith('INSERT')) color = '\x1b[32m'; // Green
+  else if (sql.startsWith('UPDATE')) color = '\x1b[33m'; // Yellow
+  else if (sql.startsWith('DELETE')) color = '\x1b[31m'; // Red
+  
+  // Warn on slow queries (>100ms)
+  const slowQuery = timing && timing > 100 ? ' ⚠️  SLOW QUERY' : '';
+  
+  console.log(`${color}[DB]${queryTime}${slowQuery}\x1b[0m ${sql.substring(0, 200)}${sql.length > 200 ? '...' : ''}`);
+};
+
 // Database configuration object (for Sequelize CLI)
 const config = {
   development: {
@@ -10,12 +27,17 @@ const config = {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
-    logging: console.log,
+    logging: logQuery,
+    benchmark: true, // Show query execution time
     pool: {
       max: 5,
       min: 0,
       acquire: 30000,
       idle: 10000
+    },
+    dialectOptions: {
+      // Add statement timeout to prevent long-running queries
+      statement_timeout: 10000 // 10 seconds
     }
   },
   production: {
