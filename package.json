@@ -32,6 +32,7 @@
     "highlight.js": "^11.11.1",
     "jsdom": "^26.1.0",
     "marked": "^15.0.12",
+    "node-cache": "^5.1.2",
     "pg": "^8.11.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.32.0"

@@ -1,5 +1,6 @@
 const { User, Category, Thread, Post, Notification } = require('../models');
 const { Op } = require('sequelize');
+const { getStats: getCacheStats, resetStats: resetCacheStats, cache } = require('../config/cache');
 
 /**
  * Admin Controller
@@ -514,6 +515,45 @@ exports.deleteUser = async (req, res) => {
     console.error('Error deleting user:', error);
     req.flash('error', 'Failed to delete user');
     res.redirect('back');
+  }
+};
+
+/**
+ * Show Cache Statistics
+ * Display cache performance metrics
+ */
+exports.showCacheStats = async (req, res) => {
+  try {
+    const stats = getCacheStats();
+    const keys = cache.keys();
+    
+    res.render('pages/admin/cache-stats', {
+      title: 'Cache Statistics - Admin',
+      stats,
+      cacheKeys: keys,
+      cacheSize: keys.length
+    });
+  } catch (error) {
+    console.error('Error fetching cache stats:', error);
+    req.flash('error', 'Failed to fetch cache statistics');
+    res.redirect('/admin');
+  }
+};
+
+/**
+ * Clear Cache
+ * Clear all cache entries
+ */
+exports.clearCache = async (req, res) => {
+  try {
+    cache.flushAll();
+    resetCacheStats();
+    req.flash('success', 'Cache cleared successfully');
+    res.redirect('/admin/cache');
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    req.flash('error', 'Failed to clear cache');
+    res.redirect('/admin/cache');
   }
 };
 

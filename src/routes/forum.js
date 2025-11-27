@@ -2,14 +2,15 @@ const express = require('express');
 const router = express.Router();
 const forumController = require('../controllers/forumController');
 const { requireAuth } = require('../middlewares/auth');
+const { cacheCategory, cacheThread } = require('../middleware/cache');
 
 /**
  * Forum Routes
  * Handles category and thread related routes
  */
 
-// Category thread listing
-router.get('/category/:slug', forumController.showCategoryThreads);
+// Category thread listing (with cache)
+router.get('/category/:slug', cacheCategory(), forumController.showCategoryThreads);
 
 // New thread form (requires authentication)
 router.get('/category/:slug/new-thread', requireAuth, forumController.showNewThread);
@@ -21,8 +22,8 @@ router.post('/category/:slug/new-thread',
   forumController.createThread
 );
 
-// View thread with posts
-router.get('/thread/:slug', forumController.showThread);
+// View thread with posts (with cache)
+router.get('/thread/:slug', cacheThread(), forumController.showThread);
 
 // Create reply to thread (requires authentication and validation)
 router.post('/thread/:slug/reply', 

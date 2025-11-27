@@ -18,8 +18,29 @@ app.set("layout", "layouts/main");
 app.set("layout extractScripts", true);
 app.set("layout extractStyles", true);
 
-// Static files middleware
-app.use(express.static(path.join(__dirname, "../public")));
+// Static files middleware with cache headers
+// Cache static assets for 1 week (604800 seconds)
+app.use(express.static(path.join(__dirname, "../public"), {
+  maxAge: '7d', // 7 days
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    // Set cache control headers based on file type
+    if (path.endsWith('.html')) {
+      // HTML files - no cache or short cache
+      res.setHeader('Cache-Control', 'public, max-age=0');
+    } else if (path.endsWith('.css') || path.endsWith('.js')) {
+      // CSS and JS files - cache for 1 week
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    } else if (path.match(/\.(jpg|jpeg|png|gif|svg|ico|webp)$/)) {
+      // Images - cache for 1 month
+      res.setHeader('Cache-Control', 'public, max-age=2592000, immutable');
+    } else if (path.match(/\.(woff|woff2|ttf|eot)$/)) {
+      // Fonts - cache for 1 year
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+}));
 
 // Body parser middleware
 app.use(express.urlencoded({ extended: true }));
@@ -69,8 +90,11 @@ app.use((req, res, next) => {
 // Controllers
 const forumController = require("./controllers/forumController");
 
-// Homepage route
-app.get("/", forumController.showHome);
+// Cache middleware
+const { cacheHome } = require("./middleware/cache");
+
+// Homepage route (with cache)
+app.get("/", cacheHome(), forumController.showHome);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

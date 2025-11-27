@@ -1,6 +1,7 @@
 const { User, Thread, Post, Category } = require('../models');
 const { body, validationResult } = require('express-validator');
 const { Op } = require('sequelize');
+const { invalidateUser } = require('../config/cache');
 
 /**
  * User Controller
@@ -171,6 +172,9 @@ exports.updateProfile = async (req, res) => {
 
     // Update session
     req.session.user.email = email;
+
+    // Invalidate cache for user profile
+    invalidateUser(user.username);
 
     req.flash('success', 'Profile updated successfully!');
     res.redirect(`/profile/${user.username}`);

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const { requireAuth } = require('../middlewares/auth');
+const { cacheUserProfile } = require('../middleware/cache');
 
 /**
  * User Routes
@@ -18,7 +19,7 @@ router.post('/profile/edit',
   userController.updateProfile
 );
 
-// User profile
-router.get('/profile/:username', userController.showProfile);
+// User profile (with cache)
+router.get('/profile/:username', cacheUserProfile(), userController.showProfile);
 
 module.exports = router;

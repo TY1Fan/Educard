@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const { uniqueSlugFromDB } = require('../utils/slugify');
 const { processMarkdown } = require('../utils/markdown');
 const NotificationService = require('../services/notificationService');
+const { invalidateCategory, invalidateThread, invalidateSearch } = require('../config/cache');
 
 /**
  * Forum Controller
@@ -315,6 +316,10 @@ exports.createThread = async (req, res) => {
       return thread;
     });
 
+    // Invalidate cache for category and homepage
+    invalidateCategory(category.id, category.slug);
+    invalidateSearch();
+
     // Success - redirect to the new thread
     req.flash('success', 'Thread created successfully!');
     res.redirect(`/thread/${result.slug}`);
@@ -532,6 +537,11 @@ exports.createReply = async (req, res) => {
     // Update thread's updatedAt to bump it to top
     await thread.update({ updatedAt: new Date() });
 
+    // Invalidate cache for this thread and category
+    invalidateThread(slug);
+    invalidateCategory(thread.category.id, thread.category.slug);
+    invalidateSearch();
+
     // Create notification for thread author
     try {
       const author = await User.findByPk(userId);
@@ -666,6 +676,10 @@ exports.updatePost = async (req, res) => {
       editedAt: new Date()
     });
 
+    // Invalidate cache for this thread
+    invalidateThread(post.thread.slug);
+    invalidateSearch();
+
     req.flash('success', 'Post updated successfully!');
     res.redirect(`/thread/${post.thread.slug}`);
   } catch (error) {
@@ -730,9 +744,15 @@ exports.deletePost = async (req, res) => {
 
     const threadSlug = post.thread.slug;
     const categorySlug = post.thread.category.slug;
+    const categoryId = post.thread.category.id;
 
     // Delete post
     await post.destroy();
+
+    // Invalidate cache for thread and category
+    invalidateThread(threadSlug);
+    invalidateCategory(categoryId, categorySlug);
+    invalidateSearch();
 
     // If it was the first post (and no replies), the thread is gone too
     req.flash('success', 'Post deleted successfully!');
@@ -787,9 +807,16 @@ exports.deleteThread = async (req, res) => {
     }
 
     const categorySlug = thread.category.slug;
+    const categoryId = thread.category.id;
+    const threadSlug = thread.slug;
 
     // Delete thread (cascades to posts)
     await thread.destroy();
+
+    // Invalidate cache for thread and category
+    invalidateThread(threadSlug);
+    invalidateCategory(categoryId, categorySlug);
+    invalidateSearch();
 
     req.flash('success', 'Thread and all its posts deleted successfully.');
     res.redirect(`/category/${categorySlug}`);

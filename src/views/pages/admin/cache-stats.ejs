@@ -1,0 +1,208 @@
+<link rel="stylesheet" href="/css/admin.css">
+
+<div class="admin-container">
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <h1>📊 Cache Statistics</h1>
+    <nav class="admin-nav">
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/users">Users</a>
+      <a href="/admin/threads">Threads</a>
+      <a href="/admin/cache" class="active">Cache</a>
+      <a href="/">← Back to Forum</a>
+    </nav>
+  </header>
+
+  <div class="admin-content">
+    <!-- Actions -->
+    <div class="admin-actions" style="margin-bottom: 2rem;">
+      <h2>Cache Management</h2>
+      <form method="POST" action="/admin/cache/clear" style="display: inline;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to clear all cache?')">
+          🗑️ Clear All Cache
+        </button>
+      </form>
+    </div>
+
+    <!-- Cache Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <div class="stat-label">Hit Rate</div>
+          <div class="stat-value"><%= stats.hitRate %></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <div class="stat-label">Cache Hits</div>
+          <div class="stat-value"><%= stats.hits %></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-info">
+          <div class="stat-label">Cache Misses</div>
+          <div class="stat-value"><%= stats.misses %></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💾</div>
+        <div class="stat-info">
+          <div class="stat-label">Total Keys</div>
+          <div class="stat-value"><%= stats.keys %></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-info">
+          <div class="stat-label">Sets</div>
+          <div class="stat-value"><%= stats.sets %></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🗑️</div>
+        <div class="stat-info">
+          <div class="stat-label">Deletes</div>
+          <div class="stat-value"><%= stats.deletes %></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cache Explanation -->
+    <section class="admin-section">
+      <h2>About Caching</h2>
+      <div class="info-box">
+        <p><strong>Cache Hit:</strong> Data was found in cache and served directly (fast)</p>
+        <p><strong>Cache Miss:</strong> Data wasn't in cache and had to be fetched from database (slower)</p>
+        <p><strong>Hit Rate:</strong> Percentage of requests served from cache. Higher is better (target: >70%)</p>
+        <p><strong>TTL (Time To Live):</strong> How long cached data stays valid</p>
+      </div>
+    </section>
+
+    <!-- Cache Configuration -->
+    <section class="admin-section">
+      <h2>Cache Configuration</h2>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Cache Type</th>
+            <th>TTL</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Categories</td>
+            <td>10 minutes</td>
+            <td>Homepage category list (rarely changes)</td>
+          </tr>
+          <tr>
+            <td>Thread Listings</td>
+            <td>3 minutes</td>
+            <td>Threads per category (moderate activity)</td>
+          </tr>
+          <tr>
+            <td>User Profiles</td>
+            <td>5 minutes</td>
+            <td>User profile pages (occasional updates)</td>
+          </tr>
+          <tr>
+            <td>Search Results</td>
+            <td>2 minutes</td>
+            <td>Search query results (frequently changing)</td>
+          </tr>
+          <tr>
+            <td>Statistics</td>
+            <td>10 minutes</td>
+            <td>Admin dashboard stats (low priority)</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Current Cache Keys -->
+    <section class="admin-section">
+      <h2>Current Cache Keys (<%= cacheSize %>)</h2>
+      <% if (cacheKeys.length > 0) { %>
+        <div class="cache-keys-list">
+          <% cacheKeys.slice(0, 50).forEach(key => { %>
+            <div class="cache-key-item">
+              <code><%= key %></code>
+            </div>
+          <% }); %>
+          <% if (cacheKeys.length > 50) { %>
+            <p class="text-muted">... and <%= cacheKeys.length - 50 %> more keys</p>
+          <% } %>
+        </div>
+      <% } else { %>
+        <p class="empty-state">No cache entries found. Cache is empty or has been recently cleared.</p>
+      <% } %>
+    </section>
+
+    <!-- Cache Invalidation Info -->
+    <section class="admin-section">
+      <h2>Cache Invalidation</h2>
+      <div class="info-box">
+        <p>Cache is automatically invalidated when:</p>
+        <ul>
+          <li>New thread is created → invalidates category and homepage cache</li>
+          <li>Thread/post is updated → invalidates thread cache</li>
+          <li>Thread/post is deleted → invalidates thread and category cache</li>
+          <li>User profile is updated → invalidates user profile cache</li>
+          <li>Any content change → invalidates search results cache</li>
+        </ul>
+        <p><strong>Note:</strong> Authenticated users (especially moderators and admins) bypass cache to see real-time updates.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<style>
+.cache-keys-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cache-key-item {
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+.cache-key-item code {
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.info-box {
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+}
+
+.info-box ul {
+  margin: 0.5rem 0 0 1.5rem;
+}
+
+.info-box p:last-child {
+  margin-bottom: 0;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-style: italic;
+  margin-top: 1rem;
+}
+</style>

@@ -28,4 +28,8 @@ router.post('/users/:id/delete', adminController.deleteUser);
 // Thread Management
 router.get('/threads', adminController.showThreads);
 
+// Cache Management
+router.get('/cache', adminController.showCacheStats);
+router.post('/cache/clear', adminController.clearCache);
+
 module.exports = router;
