@@ -192,6 +192,16 @@ a:focus-visible {
   padding: var(--spacing-xl) 0;
 }
 
+/* Prevent horizontal overflow on mobile */
+body {
+  overflow-x: hidden;
+}
+
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
 /* ================================
    Header Styles
    ================================ */
@@ -1805,4 +1815,133 @@ textarea {
   .btn-report:hover {
     background: #ffecec;
   }
+
+/* ================================
+   Mobile & Touch Optimizations
+   ================================ */
+
+/* iOS Safari specific fixes */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea,
+select {
+  /* Prevent zoom on iOS when focusing inputs */
+  font-size: 16px;
+  /* Better appearance on iOS */
+  -webkit-appearance: none;
+  appearance: none;
+  /* Prevent iOS from rounding corners too much */
+  border-radius: var(--border-radius);
+}
+
+/* Touch device optimization */
+@media (hover: none) and (pointer: coarse) {
+  /* Mobile device detected - optimize for touch */
+  
+  /* Better tap highlight color */
+  button, a, input[type="submit"], input[type="button"] {
+    -webkit-tap-highlight-color: rgba(37, 99, 235, 0.2);
+  }
+  
+  /* Increase touch target size on mobile */
+  .nav-list a,
+  .btn,
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  button:hover,
+  a:hover,
+  .btn:hover {
+    transform: none;
+  }
+  
+  /* Better touch scrolling on iOS */
+  .thread-list,
+  .post-list,
+  .overflow-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Prevent text selection on buttons and controls */
+button,
+.btn,
+.nav-list a {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Better momentum scrolling on iOS */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent pull-to-refresh on mobile (if needed) */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Fix for iOS Safari bottom bar covering content */
+@supports (-webkit-touch-callout: none) {
+  /* iOS-specific CSS */
+  .main-content {
+    min-height: calc(100vh - 200px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ================================
+   Browser-Specific Fixes
+   ================================ */
+
+/* Firefox-specific scrollbar styling */
+@-moz-document url-prefix() {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--secondary-color) var(--bg-light);
+  }
+}
+
+/* Webkit browsers scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color);
+}
+
+/* Edge-specific fixes (Chromium-based, minimal needed) */
+@supports (-ms-ime-align: auto) {
+  /* Old Edge specific styles if needed */
+}
+
+/* Safari-specific fixes */
+@supports (backdrop-filter: blur(10px)) {
+  /* Safari supports backdrop-filter */
+  .site-header {
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* ================================
+   Print Styles (Enhanced)
+   ================================ */
 
