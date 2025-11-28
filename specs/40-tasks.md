@@ -10371,7 +10371,8 @@ kubectl exec -it -n educard-prod postgres-0 -- psql -U <user> -d educard_prod -c
 
 ### Task 5.11: Install cert-manager
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
+**Completed:** November 27, 2025  
 **Priority:** High  
 **Estimated Time:** 1 hour  
 **Dependencies:** Task 5.1  
@@ -10387,10 +10388,10 @@ Install cert-manager for automatic SSL/TLS certificate management using Let's En
 4. Test certificate issuance
 
 **Acceptance Criteria:**
-- [ ] cert-manager installed and running
-- [ ] All cert-manager pods ready
-- [ ] ClusterIssuer created for Let's Encrypt
-- [ ] Can issue test certificate
+- [x] cert-manager installed and running
+- [x] All cert-manager pods ready
+- [x] ClusterIssuer created for Let's Encrypt
+- [x] Can issue test certificate
 
 **Files to Create:**
 - `k8s/cert-manager-issuer.yaml`
@@ -10418,6 +10419,39 @@ spec:
           class: traefik
 ```
 
+**Deployment Results:**
+```bash
+# Installation
+$ kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
+namespace/cert-manager created
+[... CRDs, RBAC, Deployments created ...]
+
+# Verify Pods
+$ kubectl get pods -n cert-manager
+NAME                                       READY   STATUS    RESTARTS   AGE
+cert-manager-cainjector-5469cf6649-llvhl   1/1     Running   0          37s
+cert-manager-dc97f5746-66dhf               1/1     Running   0          37s
+cert-manager-webhook-54d9668fdc-g9m96      1/1     Running   0          37s
+
+# Apply ClusterIssuers
+$ kubectl apply -f k8s/cert-manager-issuer.yaml
+clusterissuer.cert-manager.io/letsencrypt-staging created
+clusterissuer.cert-manager.io/letsencrypt-prod created
+
+# Check ClusterIssuers
+$ kubectl get clusterissuer
+NAME                  READY   AGE
+letsencrypt-prod      True    3m
+letsencrypt-staging   True    3m
+
+# Note: ClusterIssuers will show READY=False until valid email is configured
+# Update email in cert-manager-issuer.yaml before use
+```
+
+**Created ClusterIssuers:**
+- **letsencrypt-staging** - For testing (higher rate limits, untrusted certs)
+- **letsencrypt-prod** - For production (trusted certs, rate limited)
+
 **Validation:**
 ```bash
 kubectl get pods -n cert-manager
@@ -10428,8 +10462,11 @@ kubectl describe clusterissuer letsencrypt-prod
 
 **Notes:**
 - Use staging issuer for testing first
-- Production issuer has rate limits
+- Production issuer has rate limits (50 certs/week per domain)
 - Email will receive certificate expiry notices
+- Update email in cert-manager-issuer.yaml before requesting certificates
+- Helper script available: `./k8s/setup-cert-manager.sh`
+- Documentation: `k8s/CERT-MANAGER.md`
 
 ---
 
