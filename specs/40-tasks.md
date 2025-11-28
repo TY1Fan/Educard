@@ -9305,7 +9305,8 @@ Install and configure k3s (lightweight Kubernetes) on the production server. Set
 - [ ] Test pod deploys successfully
 
 **Files to Create:**
-- `k8s/README.md` - K3s setup documentation
+- `k8s/README.md` 
+- K3s setup documentation
 - Local kubeconfig saved securely
 
 **Validation:**
@@ -10935,29 +10936,50 @@ kubectl exec -it -n educard-prod postgres-0 -- ls -lh /backups
 
 ### Task 5.14: Monitoring Setup
 
-**Status:** 🔴 Not Started  
+**Status:** 🟢 Completed  
 **Priority:** Medium  
 **Estimated Time:** 2-3 hours  
 **Dependencies:** Task 5.7  
-**Assigned To:** Developer
+**Assigned To:** Developer  
+**Completed:** November 28, 2025
 
 **Description:**
 Set up basic monitoring for the k3s cluster and application. Install metrics-server and configure resource monitoring.
 
 **Steps:**
-1. Install metrics-server (usually included with k3s)
-2. Verify metrics-server is running
-3. Test metrics collection
-4. Set up kubectl top commands
-5. Document monitoring commands
-6. Optional: Install simple dashboard (Kubernetes Dashboard)
+1. ✅ Install metrics-server (pre-installed with k3s)
+2. ✅ Verify metrics-server is running
+3. ✅ Test metrics collection
+4. ✅ Set up kubectl top commands
+5. ✅ Document monitoring commands
+6. ✅ Create monitoring helper script
 
 **Acceptance Criteria:**
-- [ ] Metrics-server installed and running
-- [ ] Can view node metrics: `kubectl top nodes`
-- [ ] Can view pod metrics: `kubectl top pods`
-- [ ] Resource usage visible
-- [ ] Monitoring commands documented
+- [x] Metrics-server installed and running (pre-installed in k3s)
+- [x] Can view node metrics: `kubectl top nodes`
+- [x] Can view pod metrics: `kubectl top pods`
+- [x] Resource usage visible
+- [x] Monitoring commands documented
+
+**Deployment Results:**
+```bash
+# Metrics-server status
+$ kubectl get deployment metrics-server -n kube-system
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+metrics-server   1/1     1            1           21h
+
+# Node metrics
+$ kubectl top nodes
+NAME          CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+educard-k3s   40m          2%       1982Mi          52%
+
+# Pod metrics
+$ kubectl top pods -n educard-prod
+NAME                           CPU(cores)   MEMORY(bytes)   
+educard-app-68c8f489dd-hkqjj   1m           83Mi            
+educard-app-68c8f489dd-kvxxh   1m           67Mi            
+postgres-0                     3m           24Mi
+```
 
 **Installation:**
 ```bash
@@ -10976,16 +10998,31 @@ kubectl top pods -n educard-prod
 kubectl top pods -n educard-prod --containers
 ```
 
-**Files to Create:**
-- `docs/MONITORING.md`
+**Files Created:**
+- ✅ `docs/MONITORING.md` - Comprehensive monitoring guide (19KB)
+- ✅ `k8s/check-metrics.sh` - Monitoring helper script (executable)
+- ✅ `docs/k8s-tasks/TASK-5.14-SUMMARY.md` - Implementation summary
+
+**Monitoring Capabilities:**
+- Node metrics: CPU, memory usage with percentages
+- Pod metrics: Per-pod and per-container resource usage
+- Storage metrics: PVC capacity and usage
+- Event monitoring: Warnings and cluster events
+- Log access: Application, database, and system logs
+- Health checks: Pod status, service endpoints, restart counts
+- Automated checks: Helper script with color-coded output
 
 **Basic Monitoring Commands:**
 ```bash
+# Quick health check (recommended)
+./k8s/check-metrics.sh
+
 # Node resources
 kubectl top nodes
 
 # Pod resources
 kubectl top pods -n educard-prod
+kubectl top pods -n educard-prod --containers
 
 # Pod logs
 kubectl logs -n educard-prod -l app=educard --tail=100 -f
@@ -10997,10 +11034,25 @@ kubectl get events -n educard-prod --sort-by='.lastTimestamp'
 kubectl get pods -n educard-prod -w
 ```
 
+**Helper Script Output:**
+The `check-metrics.sh` script provides:
+- ✅ Cluster accessibility check
+- ✅ Node resources with color-coded status
+- ✅ Pod status (running, ready, restarts)
+- ✅ Pod resource usage (CPU, memory)
+- ✅ Service endpoint health
+- ✅ Storage (PVC) status
+- ✅ Recent warning events
+- ✅ CronJob status (backups)
+- ✅ System health summary
+
 **Notes:**
+- metrics-server pre-installed in k3s (no installation needed)
+- Helper script provides comprehensive health overview
 - Consider adding Prometheus/Grafana for advanced monitoring
-- Can use k9s CLI tool for better cluster visibility
+- Can use k9s CLI tool for interactive cluster management
 - Monitor disk usage on PVCs regularly
+- Full documentation in docs/MONITORING.md
 
 ---
 
