@@ -1,14 +1,58 @@
-# Educard K3s Deployment Guide
+# Educard Kubernetes Deployment
 
-## Overview
+Complete Kubernetes deployment for the Educard application on K3s.
 
-This guide documents the k3s (lightweight Kubernetes) deployment process for the Educard application.
+## 📋 Quick Reference
 
-## Quick Start Guides
+### Essential Commands
 
-- **[Container Registry Setup](./QUICKSTART-REGISTRY.md)** - Set up Docker Hub registry (Task 5.2)
+```bash
+# Set kubeconfig
+export KUBECONFIG=/Users/tohyifan/Desktop/Educard/k8s/kubeconfig-vagrant-local
+
+# Quick health check
+./k8s/check-metrics.sh
+
+# Run all tests
+./k8s/test-deployment.sh all
+
+# View application logs
+kubectl logs -n educard-prod -l app=educard --tail=100 -f
+
+# Access application (port forward)
+kubectl port-forward -n educard-prod svc/educard-service 8080:80
+```
+
+### Quick Status Check
+
+```bash
+# Check all resources
+kubectl get all -n educard-prod
+
+# Check pods
+kubectl get pods -n educard-prod
+
+# Check services
+kubectl get svc -n educard-prod
+```
+
+## 📚 Complete Documentation
+
+### Primary Guides
+
+- **[K3S_DEPLOYMENT.md](../docs/K3S_DEPLOYMENT.md)** - Complete deployment guide from scratch
+- **[OPERATIONS_RUNBOOK.md](../docs/OPERATIONS_RUNBOOK.md)** - Daily operations and common tasks
+- **[TROUBLESHOOTING.md](../docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[MONITORING.md](../docs/MONITORING.md)** - Monitoring and metrics guide
+- **[BACKUP_RESTORE.md](../docs/BACKUP_RESTORE.md)** - Backup and restore procedures
+- **[DEPLOYMENT_TESTING.md](../docs/DEPLOYMENT_TESTING.md)** - Testing procedures
+- **[INGRESS.md](./INGRESS.md)** - Ingress and SSL/TLS setup
+
+### Quick Start Guides
+
+- **[Container Registry Setup](./QUICKSTART-REGISTRY.md)** - Docker Hub registry setup
 - **[Vagrant Setup](./VAGRANT.md)** - Local development with Vagrant VM
-- **[Quick K3s Setup](./QUICKSTART.md)** - Fast cluster deployment (Task 5.1)
+- **[Quick K3s Setup](./QUICKSTART.md)** - Fast cluster deployment
 
 ## Prerequisites
 
