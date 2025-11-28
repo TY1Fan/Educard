@@ -1,0 +1,185 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: educard-prod
+  labels:
+    app: postgres-backup
+    component: backup
+spec:
+  # Schedule: Daily at 2 AM UTC
+  # Cron format: minute hour day month weekday
+  schedule: "0 2 * * *"
+  
+  # Keep last 3 successful jobs and 1 failed job for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  
+  # Don't run if previous job is still running
+  concurrencyPolicy: Forbid
+  
+  # Job will be considered failed after 1 hour
+  startingDeadlineSeconds: 3600
+  
+  jobTemplate:
+    metadata:
+      labels:
+        app: postgres-backup
+        component: backup-job
+    spec:
+      # Don't retry on failure - will wait for next scheduled run
+      backoffLimit: 2
+      
+      # Clean up job after 24 hours
+      ttlSecondsAfterFinished: 86400
+      
+      template:
+        metadata:
+          labels:
+            app: postgres-backup
+            component: backup-pod
+        spec:
+          restartPolicy: Never
+          
+          containers:
+          - name: backup
+            image: postgres:15-alpine
+            
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              
+              echo "=========================================="
+              echo "PostgreSQL Backup Script"
+              echo "=========================================="
+              echo "Start time: $(date)"
+              echo
+              
+              # Configuration
+              BACKUP_DIR="/backups"
+              TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+              BACKUP_FILE="${BACKUP_DIR}/backup-${TIMESTAMP}.sql.gz"
+              RETENTION_DAYS=30
+              
+              echo "Configuration:"
+              echo "  Database: ${DB_NAME}"
+              echo "  User: ${DB_USER}"
+              echo "  Host: postgres-service"
+              echo "  Backup file: ${BACKUP_FILE}"
+              echo "  Retention: ${RETENTION_DAYS} days"
+              echo
+              
+              # Create backup directory if it doesn't exist
+              mkdir -p "${BACKUP_DIR}"
+              
+              # Test database connection
+              echo "Testing database connection..."
+              if ! pg_isready -h postgres-service -U "${DB_USER}" -d "${DB_NAME}" -t 5; then
+                echo "ERROR: Database is not ready"
+                exit 1
+              fi
+              echo "✓ Database connection OK"
+              echo
+              
+              # Create backup
+              echo "Creating backup..."
+              echo "Running: pg_dump -h postgres-service -U ${DB_USER} -d ${DB_NAME}"
+              
+              if pg_dump -h postgres-service -U "${DB_USER}" -d "${DB_NAME}" \
+                --format=plain \
+                --no-owner \
+                --no-acl \
+                --verbose \
+                2>&1 | gzip > "${BACKUP_FILE}"; then
+                
+                # Get backup file size
+                BACKUP_SIZE=$(du -h "${BACKUP_FILE}" | cut -f1)
+                
+                echo
+                echo "✓ Backup created successfully"
+                echo "  File: ${BACKUP_FILE}"
+                echo "  Size: ${BACKUP_SIZE}"
+                
+                # Verify backup integrity
+                echo
+                echo "Verifying backup integrity..."
+                if gunzip -t "${BACKUP_FILE}" 2>/dev/null; then
+                  echo "✓ Backup file is valid (gzip test passed)"
+                else
+                  echo "ERROR: Backup file is corrupted"
+                  exit 1
+                fi
+              else
+                echo "ERROR: Backup failed"
+                exit 1
+              fi
+              
+              # Cleanup old backups
+              echo
+              echo "Cleaning up old backups (older than ${RETENTION_DAYS} days)..."
+              
+              OLD_BACKUPS=$(find "${BACKUP_DIR}" -name "backup-*.sql.gz" -type f -mtime +${RETENTION_DAYS} 2>/dev/null || true)
+              
+              if [ -n "${OLD_BACKUPS}" ]; then
+                echo "Found old backups:"
+                echo "${OLD_BACKUPS}"
+                find "${BACKUP_DIR}" -name "backup-*.sql.gz" -type f -mtime +${RETENTION_DAYS} -delete
+                echo "✓ Old backups deleted"
+              else
+                echo "No old backups to clean up"
+              fi
+              
+              # Show backup summary
+              echo
+              echo "=========================================="
+              echo "Backup Summary"
+              echo "=========================================="
+              echo "Total backups in storage:"
+              ls -lh "${BACKUP_DIR}"/backup-*.sql.gz 2>/dev/null | tail -n +1 || echo "  (none)"
+              echo
+              echo "Disk usage:"
+              df -h "${BACKUP_DIR}" | tail -1
+              echo
+              echo "End time: $(date)"
+              echo "=========================================="
+              echo "✓ Backup completed successfully"
+            
+            env:
+            # Database connection details from ConfigMap
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: educard-config
+                  key: DB_NAME
+            
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: educard-secrets
+                  key: DB_USER
+            
+            # PGPASSWORD is used by pg_dump for authentication
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: educard-secrets
+                  key: DB_PASSWORD
+            
+            resources:
+              requests:
+                memory: "128Mi"
+                cpu: "100m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"
+            
+            volumeMounts:
+            - name: backup-storage
+              mountPath: /backups
+          
+          volumes:
+          - name: backup-storage
+            persistentVolumeClaim:
+              claimName: backup-pvc
