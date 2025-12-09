@@ -4,9 +4,24 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const expressLayouts = require("express-ejs-layouts");
+const compression = require("compression");
 
 // Create Express application
 const app = express();
+
+// Compression middleware (gzip) - MUST be early
+app.use(compression({
+  level: 6, // Compression level (0-9, 6 is default)
+  threshold: 1024, // Only compress if response is larger than 1KB
+  filter: (req, res) => {
+    // Don't compress if client doesn't support it
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Use compression filter function
+    return compression.filter(req, res);
+  }
+}));
 
 // Security middleware (MUST be early in middleware chain)
 const { securityHeaders, additionalSecurityHeaders } = require("./middleware/securityHeaders");
@@ -102,11 +117,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Request logging middleware (simple for now)
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
+// Performance monitoring middleware
+const { performanceMonitor } = require("./middlewares/performanceMonitor");
+app.use(performanceMonitor);
 
 // Controllers
 const forumController = require("./controllers/forumController");
@@ -124,6 +137,18 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
   });
+});
+
+// Performance stats endpoint (admin only in production)
+const { performanceStatsHandler } = require("./middlewares/performanceMonitor");
+app.get("/performance-stats", (req, res, next) => {
+  // In production, require admin access
+  if (process.env.NODE_ENV === 'production') {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  }
+  performanceStatsHandler(req, res);
 });
 
 // Session test endpoint (temporary - for testing)
