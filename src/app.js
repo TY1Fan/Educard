@@ -69,6 +69,10 @@ const { csrfToken, csrfProtection } = require("./middlewares/csrf");
 app.use(csrfToken); // Generate token for all requests
 app.use(csrfProtection); // Validate token on state-changing requests
 
+// Security logging middleware
+const { securityLogging, logCsrfViolations } = require("./middlewares/securityLogging");
+app.use(securityLogging());
+
 // SEO middleware - makes SEO utilities available to all views
 const seoMiddleware = require("./middleware/seo");
 app.use(seoMiddleware);
@@ -226,7 +230,8 @@ app.use((req, res, next) => {
   `);
 });
 
-// CSRF error handler
+// CSRF error handler (with logging)
+app.use(logCsrfViolations);
 app.use((err, req, res, next) => {
   if (err.code === "EBADCSRFTOKEN" || err.message?.toLowerCase().includes("csrf")) {
     // Render without layout by setting layout to false
