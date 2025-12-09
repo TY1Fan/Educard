@@ -2600,6 +2600,119 @@ a {
 }
 
 /* ================================
+   Password Strength Indicator
+   ================================ */
+
+.password-strength {
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.strength-bar {
+  height: 4px;
+  background: var(--bg-light);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.375rem;
+}
+
+.strength-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-fill.weak {
+  background: var(--error-color);
+}
+
+.strength-fill.medium {
+  background: var(--warning-color);
+}
+
+.strength-fill.strong {
+  background: var(--success-color);
+}
+
+.strength-text {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.strength-text.weak {
+  color: var(--error-color);
+}
+
+.strength-text.medium {
+  color: var(--warning-color);
+}
+
+.strength-text.strong {
+  color: var(--success-color);
+}
+
+/* ================================
+   Enhanced Validation Icons
+   ================================ */
+
+.validation-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.25rem;
+  font-weight: bold;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.form-group.has-validation-icon {
+  position: relative;
+}
+
+.form-group.has-validation-icon input,
+.form-group.has-validation-icon textarea,
+.form-group.has-validation-icon select {
+  padding-right: 2.75rem;
+}
+
+.validation-icon.success {
+  color: var(--success-color);
+  animation: validationSuccess 0.3s ease-out;
+}
+
+.validation-icon.error {
+  color: var(--error-color);
+  animation: validationError 0.3s ease-out;
+}
+
+@keyframes validationSuccess {
+  0% {
+    transform: translateY(-50%) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes validationError {
+  0%, 100% {
+    transform: translateY(-50%) translateX(0);
+  }
+  25% {
+    transform: translateY(-50%) translateX(-4px);
+  }
+  75% {
+    transform: translateY(-50%) translateX(4px);
+  }
+}
+
+/* ================================
    Print Styles (Enhanced)
    ================================ */
 

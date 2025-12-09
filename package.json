@@ -37,6 +37,7 @@
     "express-validator": "^7.0.0",
     "helmet": "^8.1.0",
     "highlight.js": "^11.11.1",
+    "isomorphic-dompurify": "^2.30.0",
     "jsdom": "^26.1.0",
     "marked": "^15.0.12",
     "node-cache": "^5.1.2",

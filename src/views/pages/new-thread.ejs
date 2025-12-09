@@ -52,21 +52,22 @@
     <input 
       type="text" 
       id="title" 
-      name="title" 
+      name="threadTitle" 
       class="form-control"
       value="<%= locals.formData?.title || '' %>"
       required 
-      maxlength="255"
+      minlength="5"
+      maxlength="200"
       placeholder="What's your thread about?"
       autofocus>
-    <small class="form-text">Be clear and descriptive (max 255 characters)</small>
+    <small class="form-help">5-200 characters - Be clear and descriptive</small>
   </div>
 
   <div class="form-group">
     <label for="content">First Post <span class="required">*</span></label>
     <textarea 
       id="content" 
-      name="content" 
+      name="postContent" 
       class="form-control"
       rows="12"
       required
@@ -75,7 +76,7 @@
       placeholder="Start the discussion...
 
 Tip: Be clear and provide context for your discussion. The more details you provide, the better responses you'll get!"><%= locals.formData?.content || '' %></textarea>
-    <small class="form-text">Minimum 10 characters, maximum 10,000 characters</small>
+    <small class="form-help">10-10,000 characters</small>
   </div>
 
   <div class="form-actions">
