@@ -81,6 +81,9 @@ app.use((req, res, next) => {
   res.locals.errorMessage = req.flash("error");
   res.locals.infoMessage = req.flash("info");
   
+  // Add current path for active navigation highlighting
+  res.locals.currentPath = req.path;
+  
   // Add role helper functions for templates
   res.locals.isAdmin = req.session.user && req.session.user.role === 'admin';
   res.locals.isModerator = req.session.user && (req.session.user.role === 'moderator' || req.session.user.role === 'admin');

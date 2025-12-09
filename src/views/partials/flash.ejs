@@ -1,20 +1,36 @@
 <% if (successMessage && successMessage.length > 0) { %>
-  <div class="alert alert-success" role="alert" aria-live="polite">
+  <div class="alert alert-success alert-dismissible" role="alert" aria-live="polite" data-auto-dismiss="5000">
     <span class="alert-icon" aria-hidden="true">✓</span>
     <span class="alert-message"><%= successMessage %></span>
+    <button class="alert-close" aria-label="Dismiss alert" onclick="this.parentElement.remove()">×</button>
   </div>
 <% } %>
 
 <% if (errorMessage && errorMessage.length > 0) { %>
-  <div class="alert alert-error" role="alert" aria-live="assertive">
+  <div class="alert alert-error alert-dismissible" role="alert" aria-live="assertive">
     <span class="alert-icon" aria-hidden="true">✕</span>
     <span class="alert-message"><%= errorMessage %></span>
+    <button class="alert-close" aria-label="Dismiss alert" onclick="this.parentElement.remove()">×</button>
   </div>
 <% } %>
 
 <% if (infoMessage && infoMessage.length > 0) { %>
-  <div class="alert alert-info" role="alert" aria-live="polite">
+  <div class="alert alert-info alert-dismissible" role="alert" aria-live="polite" data-auto-dismiss="5000">
     <span class="alert-icon" aria-hidden="true">ℹ</span>
     <span class="alert-message"><%= infoMessage %></span>
+    <button class="alert-close" aria-label="Dismiss alert" onclick="this.parentElement.remove()">×</button>
   </div>
 <% } %>
+
+<script>
+  // Auto-dismiss alerts
+  document.querySelectorAll('[data-auto-dismiss]').forEach(alert => {
+    const delay = parseInt(alert.dataset.autoDismiss);
+    if (delay > 0) {
+      setTimeout(() => {
+        alert.classList.add('alert-dismissing');
+        setTimeout(() => alert.remove(), 300);
+      }, delay);
+    }
+  });
+</script>
