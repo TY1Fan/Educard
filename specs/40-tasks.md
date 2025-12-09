@@ -11430,19 +11430,1001 @@ kubectl get pods -n educard-prod
 
 ---
 
-## 13. Notes for Phase 6
+## 13. Phase 6: Testing & Quality Assurance
 
-**Phase 6 Preview (Testing & Quality Assurance):**
-- Comprehensive testing in production
-- Load testing with realistic traffic
-- Security audit and penetration testing
-- Performance optimization
-- UI/UX refinements
-- Bug fixes from production testing
-- Final documentation updates
-- User acceptance testing
+**Phase Duration:** 1 week  
+**Phase Goal:** Comprehensive testing, optimization, and production readiness validation  
+**Phase Priority:** Critical  
 
 ---
+
+### Task 6.1: UI/UX Improvements and Polish
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** Phase 5 complete  
+**Assigned To:** Developer
+
+**Description:**
+Improve the user interface and user experience with better styling, responsive design, and interactive elements.
+
+**Steps:**
+1. Review and enhance CSS styling
+   - Improve typography and spacing
+   - Enhance color scheme consistency
+   - Polish button and form styles
+   - Add hover effects and transitions
+2. Ensure responsive design works on all devices
+   - Test on mobile (320px, 375px, 414px widths)
+   - Test on tablet (768px, 1024px)
+   - Test on desktop (1280px, 1920px)
+3. Add loading states for forms
+   - Submit button loading spinner
+   - Disable buttons during submission
+   - Show "Processing..." feedback
+4. Improve error message display
+   - Style error messages consistently
+   - Add icons for error/success/warning
+   - Make errors more user-friendly
+5. Add success flash messages
+   - "Thread created successfully"
+   - "Post added"
+   - "Profile updated"
+6. Improve navigation
+   - Highlight active page
+   - Add breadcrumbs where appropriate
+   - Improve mobile menu
+
+**Acceptance Criteria:**
+- [ ] CSS is clean and well-organized
+- [ ] Site looks professional and polished
+- [ ] Responsive design works on mobile devices
+- [ ] All forms have loading states
+- [ ] Error messages are clear and helpful
+- [ ] Success messages appear after actions
+- [ ] Navigation is intuitive
+- [ ] Hover effects work smoothly
+- [ ] No layout breaking on any screen size
+- [ ] Consistent spacing and alignment throughout
+
+**Files to Update:**
+- `public/css/style.css`
+- `views/partials/header.ejs`
+- `views/partials/footer.ejs`
+- `views/partials/flash.ejs`
+
+**Validation:**
+- Test on Chrome, Firefox, Safari
+- Test on actual mobile device
+- Test all user flows for visual consistency
+- Use browser dev tools for responsive testing
+
+---
+
+### Task 6.2: Input Validation Refinement
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** Task 6.1  
+**Assigned To:** Developer
+
+**Description:**
+Enhance input validation with client-side validation for better UX and comprehensive server-side validation testing.
+
+**Steps:**
+1. Add client-side validation
+   - Real-time validation feedback
+   - Field-specific error messages
+   - Disable submit until valid
+   - Show validation status icons
+2. Test all server-side validation
+   - Empty fields
+   - Too short/long inputs
+   - Special characters
+   - SQL injection attempts
+   - XSS attempts
+3. Implement proper error messages
+   - Specific field errors
+   - Clear instructions
+   - Validation rules displayed
+4. Test edge cases
+   - Unicode characters
+   - Very long inputs
+   - Concurrent submissions
+   - Duplicate submissions
+
+**Acceptance Criteria:**
+- [ ] Client-side validation provides immediate feedback
+- [ ] Server-side validation catches all invalid inputs
+- [ ] Error messages are specific and helpful
+- [ ] All edge cases handled gracefully
+- [ ] No confusing or technical error messages
+- [ ] Form state preserved on validation error
+- [ ] Validation works consistently across all forms
+
+**Edge Cases to Test:**
+- Username: empty, too short (<3), too long (>30), special chars, existing username
+- Email: invalid format, missing @, existing email
+- Password: too short (<8), no uppercase, no number, no special char
+- Thread title: empty, too short, too long (>200)
+- Post content: empty, too short (<10), too long (>10000)
+- Category: not selected, invalid ID
+
+**Files to Update:**
+- `src/middlewares/validation.js`
+- `public/js/validation.js` (new file for client-side)
+- All form views
+
+**Validation:**
+```bash
+# Test validation with various inputs
+# - Try submitting empty forms
+# - Try extremely long inputs
+# - Try special characters: <script>, ' OR '1'='1
+# - Try Unicode: 你好, émojis
+```
+
+---
+
+### Task 6.3: Security Hardening and Audit
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** Task 6.2  
+**Assigned To:** Developer
+
+**Description:**
+Conduct comprehensive security audit and implement hardening measures to protect against common vulnerabilities.
+
+**Steps:**
+1. Verify route authorization
+   - Check all routes require authentication
+   - Check all routes verify ownership
+   - Test unauthorized access attempts
+2. Test CSRF protection
+   - Verify tokens on all POST/PUT/DELETE
+   - Test requests without CSRF token
+3. Test XSS prevention
+   - Try injecting `<script>alert('XSS')</script>`
+   - Test in all user inputs (threads, posts, profile)
+   - Verify output escaping in templates
+4. Test SQL injection prevention
+   - Try `' OR '1'='1`
+   - Test in all query parameters
+   - Verify parameterized queries used
+5. Review password hashing
+   - Verify bcrypt is used
+   - Check salt rounds (should be 10+)
+   - Ensure passwords never logged
+6. Ensure HTTPS-ready
+   - Secure cookie flags set
+   - HSTS header configured
+   - No mixed content warnings
+7. Add security headers
+   - Content-Security-Policy
+   - X-Frame-Options
+   - X-Content-Type-Options
+   - Referrer-Policy
+
+**Acceptance Criteria:**
+- [ ] All routes properly authorized
+- [ ] CSRF protection working on all forms
+- [ ] XSS attempts properly escaped
+- [ ] SQL injection attempts blocked
+- [ ] Passwords hashed with bcrypt (10+ rounds)
+- [ ] Secure cookies configured
+- [ ] Security headers implemented
+- [ ] No sensitive data in logs
+- [ ] No hardcoded secrets in code
+- [ ] Environment variables used for secrets
+
+**Security Checklist:**
+- [ ] Authentication: Sessions secure, logout works, session timeout configured
+- [ ] Authorization: Users can only edit/delete own content
+- [ ] Input validation: All inputs validated and sanitized
+- [ ] Output encoding: All user content escaped in templates
+- [ ] CSRF: Tokens on all state-changing operations
+- [ ] Rate limiting: Consider adding to prevent abuse
+- [ ] Error handling: No stack traces exposed to users
+- [ ] Dependencies: Run `npm audit` and fix vulnerabilities
+- [ ] Secrets: All secrets in environment variables
+- [ ] Headers: Security headers configured
+
+**Files to Update:**
+- `src/app.js` (add security middleware)
+- `src/middlewares/auth.js`
+- `src/config/session.js`
+- `.env.example`
+
+**Validation:**
+```bash
+# Run security audit
+npm audit
+
+# Test security headers
+curl -I https://educard.local
+
+# Manual penetration testing
+# - Try accessing other users' edit pages
+# - Try SQL injection in forms
+# - Try XSS in thread content
+# - Try CSRF by crafting external form
+```
+
+---
+
+### Task 6.4: Performance Optimization
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** Task 6.3  
+**Assigned To:** Developer
+
+**Description:**
+Optimize application performance through database indexing, query optimization, caching, and efficient pagination.
+
+**Steps:**
+1. Add database indexes
+   - Threads: category_id, created_at, author_id
+   - Posts: thread_id, created_at, author_id
+   - Users: email (unique index)
+2. Optimize database queries
+   - Use eager loading (include) for associations
+   - Limit SELECT fields to needed columns only
+   - Avoid N+1 query problems
+3. Implement efficient pagination
+   - Use LIMIT/OFFSET correctly
+   - Add page size limits (max 50 items)
+   - Optimize count queries
+4. Test with larger datasets
+   - Create 100+ threads
+   - Create 1000+ posts
+   - Test query performance
+5. Add query result caching (optional)
+   - Cache homepage thread list (5 min)
+   - Cache category counts
+   - Use Redis if needed
+6. Test resource limits in K3s
+   - Monitor CPU/memory under load
+   - Verify pod resource limits appropriate
+
+**Acceptance Criteria:**
+- [ ] Database indexes added on foreign keys and frequently queried columns
+- [ ] No N+1 query problems
+- [ ] Pagination works efficiently with large datasets
+- [ ] Page load times < 2 seconds (95th percentile)
+- [ ] Database queries < 100ms for simple queries
+- [ ] Database queries < 500ms for complex queries
+- [ ] Resource usage stays within pod limits
+- [ ] No performance degradation with 1000+ posts
+
+**Indexes to Add:**
+```sql
+-- Threads
+CREATE INDEX idx_threads_category_id ON threads(category_id);
+CREATE INDEX idx_threads_author_id ON threads(author_id);
+CREATE INDEX idx_threads_created_at ON threads(created_at DESC);
+
+-- Posts
+CREATE INDEX idx_posts_thread_id ON posts(thread_id);
+CREATE INDEX idx_posts_author_id ON posts(author_id);
+CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
+
+-- Users
+CREATE UNIQUE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_created_at ON users(created_at DESC);
+```
+
+**Query Optimization Examples:**
+```javascript
+// Before (N+1 problem)
+const threads = await Thread.findAll();
+for (let thread of threads) {
+  const author = await User.findByPk(thread.author_id);
+  const category = await Category.findByPk(thread.category_id);
+}
+
+// After (eager loading)
+const threads = await Thread.findAll({
+  include: [
+    { model: User, as: 'author', attributes: ['id', 'username'] },
+    { model: Category, attributes: ['id', 'name'] }
+  ]
+});
+```
+
+**Files to Update:**
+- `src/models/index.js` (add indexes)
+- Create migration: `migrations/YYYYMMDDHHMMSS-add-performance-indexes.js`
+- `src/controllers/forumController.js`
+- `src/controllers/threadController.js`
+
+**Validation:**
+```bash
+# Create test data
+npm run seed:large # (create script to seed 1000+ posts)
+
+# Test query performance
+# Time how long pages load with large dataset
+
+# Check database query plans
+# In PostgreSQL: EXPLAIN ANALYZE SELECT ...
+
+# Monitor in K3s
+kubectl top pods -n educard-prod
+```
+
+---
+
+### Task 6.5: Error Handling and Logging
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** Task 6.4  
+**Assigned To:** Developer
+
+**Description:**
+Implement comprehensive error handling with custom error pages, global error handler, and proper logging.
+
+**Steps:**
+1. Create custom error pages
+   - 404 Not Found page
+   - 500 Internal Server Error page
+   - 403 Forbidden page
+2. Implement global error handler
+   - Catch all unhandled errors
+   - Log errors with context
+   - Show user-friendly messages
+   - Don't expose stack traces
+3. Set up error logging
+   - Log to file in production
+   - Include timestamp, error type, stack trace
+   - Log user context (without sensitive data)
+4. Test error scenarios
+   - Navigate to non-existent routes
+   - Trigger database errors
+   - Trigger validation errors
+   - Test error handling in K3s
+
+**Acceptance Criteria:**
+- [ ] 404 page displays for invalid routes
+- [ ] 500 page displays for server errors
+- [ ] 403 page displays for unauthorized access
+- [ ] Global error handler catches all errors
+- [ ] Errors logged with sufficient context
+- [ ] No stack traces shown to users
+- [ ] Error logs rotated/managed properly
+- [ ] All error scenarios tested
+
+**Error Pages to Create:**
+- `views/errors/404.ejs` - Not Found
+- `views/errors/500.ejs` - Server Error
+- `views/errors/403.ejs` - Forbidden
+
+**Global Error Handler:**
+```javascript
+// src/middlewares/errorHandler.js
+app.use((err, req, res, next) => {
+  // Log error with context
+  logger.error({
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method,
+    userId: req.session?.userId,
+    timestamp: new Date()
+  });
+  
+  // Don't expose details in production
+  const isDev = process.env.NODE_ENV === 'development';
+  
+  res.status(err.status || 500);
+  res.render('errors/500', {
+    message: isDev ? err.message : 'Something went wrong',
+    error: isDev ? err : {}
+  });
+});
+```
+
+**Files to Update:**
+- `src/app.js` (add error handlers)
+- `src/middlewares/errorHandler.js`
+- `views/errors/404.ejs`
+- `views/errors/500.ejs`
+- `views/errors/403.ejs`
+
+**Validation:**
+```bash
+# Test 404
+curl http://localhost:3000/nonexistent
+
+# Test error handling
+# - Stop database and try to access app
+# - Trigger validation error
+# - Try unauthorized access
+```
+
+---
+
+### Task 6.6: Load Testing and Performance Validation
+
+**Status:** 🔴 Not Started  
+**Priority:** Critical  
+**Estimated Time:** 4-5 hours  
+**Dependencies:** Task 6.5  
+**Assigned To:** Developer
+
+**Description:**
+Conduct comprehensive load testing to validate application performance under various traffic conditions.
+
+**Steps:**
+1. Install load testing tools
+   - Install k6: `brew install k6`
+   - Or Apache Bench (ab)
+   - Or wrk
+2. Create load test scenarios
+   - Homepage load test
+   - User authentication test
+   - Thread viewing test
+   - Post creation test
+3. Run baseline test (no load)
+   - Measure single request response time
+   - Capture baseline metrics
+4. Run light load test (10-25 concurrent users)
+5. Run normal load test (50-100 concurrent users)
+6. Run peak load test (200-300 concurrent users)
+7. Run stress test (find breaking point)
+8. Run soak test (sustained load, detect memory leaks)
+9. Monitor system during tests
+   - CPU/memory usage
+   - Database connections
+   - Response times
+   - Error rates
+10. Analyze results and optimize if needed
+11. Document findings
+
+**Acceptance Criteria:**
+- [ ] Load testing tools installed
+- [ ] Test scenarios created for major user flows
+- [ ] Can handle 100 concurrent users with <2s response time (95th percentile)
+- [ ] Can handle 300 concurrent users during peak
+- [ ] Breaking point identified
+- [ ] No memory leaks during soak test
+- [ ] Error rate < 1% under normal load
+- [ ] Error rate < 5% under peak load
+- [ ] System recovers gracefully after stress
+- [ ] Results documented with recommendations
+
+**Load Test Commands:**
+```bash
+# Install k6
+brew install k6
+
+# Run light load test
+k6 run --vus 25 --duration 5m tests/load/light-load.js
+
+# Run normal load test
+k6 run --vus 100 --duration 10m tests/load/normal-load.js
+
+# Run stress test
+k6 run tests/load/stress-test.js
+
+# Monitor during tests
+watch -n 2 'kubectl top pods -n educard-prod'
+```
+
+**Performance Targets:**
+- Response time (median): < 500ms
+- Response time (95th percentile): < 2s
+- Throughput: > 100 requests/second
+- Error rate: < 1% under normal load
+- CPU usage: < 80% under normal load
+- Memory: No growth over time (no leaks)
+
+**Files to Create:**
+- `tests/load/light-load.js`
+- `tests/load/normal-load.js`
+- `tests/load/peak-load.js`
+- `tests/load/stress-test.js`
+- `tests/load/soak-test.js`
+
+**Validation:**
+- [ ] All test scenarios executed
+- [ ] Performance targets met
+- [ ] No critical issues found
+- [ ] System stable after tests
+
+---
+
+### Task 6.7: Automated Testing
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 5-6 hours  
+**Dependencies:** Task 6.6  
+**Assigned To:** Developer
+
+**Description:**
+Write automated unit and integration tests for critical application functionality.
+
+**Steps:**
+1. Set up testing framework
+   - Install Jest or Mocha
+   - Configure test environment
+   - Set up test database
+2. Write unit tests for critical functions
+   - Password hashing
+   - Authentication logic
+   - Authorization checks
+   - Slug generation
+   - Input validation
+3. Write integration tests
+   - User registration flow
+   - Login/logout flow
+   - Thread creation
+   - Post creation
+   - Permission checks
+4. Set up test coverage reporting
+5. Run all tests and fix failures
+6. Add tests to CI/CD (optional)
+
+**Acceptance Criteria:**
+- [ ] Testing framework set up
+- [ ] Unit tests written for critical functions
+- [ ] Integration tests for major user flows
+- [ ] All tests passing
+- [ ] Test coverage > 70% for critical code
+- [ ] Tests run quickly (< 30 seconds)
+- [ ] Tests documented and maintainable
+
+**Tests to Write:**
+
+**Unit Tests:**
+```javascript
+// Password hashing
+describe('Password Hashing', () => {
+  test('should hash password with bcrypt', async () => {
+    const password = 'TestPass123!';
+    const hash = await hashPassword(password);
+    expect(hash).not.toBe(password);
+    expect(await bcrypt.compare(password, hash)).toBe(true);
+  });
+});
+
+// Authentication
+describe('Authentication Middleware', () => {
+  test('should allow authenticated users', () => {
+    const req = { session: { userId: 1 } };
+    const res = {};
+    const next = jest.fn();
+    requireAuth(req, res, next);
+    expect(next).toHaveBeenCalled();
+  });
+  
+  test('should redirect unauthenticated users', () => {
+    const req = { session: {} };
+    const res = { redirect: jest.fn() };
+    const next = jest.fn();
+    requireAuth(req, res, next);
+    expect(res.redirect).toHaveBeenCalledWith('/login');
+  });
+});
+```
+
+**Integration Tests:**
+```javascript
+// User registration
+describe('POST /register', () => {
+  test('should create new user', async () => {
+    const response = await request(app)
+      .post('/register')
+      .send({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'TestPass123!'
+      });
+    expect(response.status).toBe(302);
+    expect(response.header.location).toBe('/');
+  });
+});
+```
+
+**Files to Create:**
+- `package.json` (add test scripts)
+- `tests/unit/auth.test.js`
+- `tests/unit/validation.test.js`
+- `tests/integration/user.test.js`
+- `tests/integration/thread.test.js`
+- `tests/integration/post.test.js`
+- `jest.config.js` or `mocha.opts`
+
+**Validation:**
+```bash
+# Run tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test tests/unit/auth.test.js
+```
+
+---
+
+### Task 6.8: Cross-Browser and Device Testing
+
+**Status:** 🔴 Not Started  
+**Priority:** Medium  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** Task 6.1  
+**Assigned To:** Developer
+
+**Description:**
+Test application across different browsers and devices to ensure compatibility and responsive design.
+
+**Steps:**
+1. Test on desktop browsers
+   - Chrome (latest)
+   - Firefox (latest)
+   - Safari (latest)
+   - Edge (latest)
+2. Test on mobile devices
+   - iOS Safari
+   - Android Chrome
+   - Various screen sizes
+3. Test responsive breakpoints
+   - 320px (small mobile)
+   - 375px (medium mobile)
+   - 414px (large mobile)
+   - 768px (tablet)
+   - 1024px (small desktop)
+   - 1280px (desktop)
+   - 1920px (large desktop)
+4. Test all major user flows on each
+   - Registration/login
+   - Browse threads
+   - Create thread
+   - Reply to thread
+   - Edit/delete content
+5. Document any browser-specific issues
+6. Fix compatibility issues
+
+**Acceptance Criteria:**
+- [ ] Works on Chrome, Firefox, Safari, Edge
+- [ ] Works on iOS Safari and Android Chrome
+- [ ] Responsive design works on all screen sizes
+- [ ] No layout breaking on any browser
+- [ ] All features functional on all browsers
+- [ ] Touch interactions work on mobile
+- [ ] Forms usable on mobile keyboards
+- [ ] Images and assets load correctly
+
+**Testing Checklist:**
+
+**Desktop Browsers:**
+- [ ] Chrome: All features work
+- [ ] Firefox: All features work
+- [ ] Safari: All features work
+- [ ] Edge: All features work
+
+**Mobile Devices:**
+- [ ] iOS Safari: All features work
+- [ ] Android Chrome: All features work
+- [ ] Touch targets large enough (44x44px minimum)
+- [ ] Forms work with mobile keyboards
+- [ ] Navigation accessible on mobile
+
+**Screen Sizes:**
+- [ ] 320px: Layout doesn't break
+- [ ] 375px: Layout doesn't break
+- [ ] 768px: Layout adapts well
+- [ ] 1024px: Layout adapts well
+- [ ] 1920px: Content not stretched
+
+**Validation:**
+```bash
+# Use browser dev tools
+# - Chrome DevTools Device Mode
+# - Firefox Responsive Design Mode
+# - Safari Responsive Design Mode
+
+# Test with real devices if possible
+```
+
+---
+
+### Task 6.9: Manual End-to-End Testing
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** Tasks 6.1-6.8  
+**Assigned To:** Developer
+
+**Description:**
+Conduct comprehensive manual testing of all user flows to ensure everything works correctly from a user's perspective.
+
+**Steps:**
+1. Test complete user registration flow
+2. Test complete login/logout flow
+3. Test thread browsing and filtering
+4. Test thread creation
+5. Test post creation and replies
+6. Test edit functionality
+7. Test delete functionality
+8. Test search functionality (if implemented)
+9. Test profile viewing
+10. Test authorization (try accessing other users' content)
+11. Test error scenarios
+12. Document all bugs found
+13. Fix critical bugs
+14. Retest fixed bugs
+
+**Acceptance Criteria:**
+- [ ] All user flows tested end-to-end
+- [ ] Registration and login work smoothly
+- [ ] Thread creation and viewing work
+- [ ] Posting and replying work
+- [ ] Edit and delete work correctly
+- [ ] Authorization prevents unauthorized actions
+- [ ] Error messages are helpful
+- [ ] No broken links
+- [ ] All critical bugs fixed
+- [ ] Testing checklist 100% complete
+
+**Manual Testing Checklist:**
+
+**User Registration:**
+- [ ] Can access registration page
+- [ ] Form validation works
+- [ ] Can create account with valid data
+- [ ] Cannot create duplicate username/email
+- [ ] Redirected to appropriate page after registration
+- [ ] Can log in with new account
+
+**User Login:**
+- [ ] Can access login page
+- [ ] Form validation works
+- [ ] Can login with valid credentials
+- [ ] Cannot login with invalid credentials
+- [ ] Error messages are clear
+- [ ] Session persists across page reloads
+- [ ] Can logout successfully
+
+**Thread Browsing:**
+- [ ] Homepage shows thread list
+- [ ] Threads show correct information (title, author, date)
+- [ ] Pagination works (if implemented)
+- [ ] Can filter by category
+- [ ] Empty states show helpful messages
+- [ ] Loading states work
+
+**Thread Creation:**
+- [ ] Can access create thread page (when logged in)
+- [ ] Cannot access when logged out
+- [ ] Form validation works
+- [ ] Can create thread with valid data
+- [ ] Redirected to new thread after creation
+- [ ] Thread appears in thread list
+
+**Post Creation:**
+- [ ] Can reply to thread when logged in
+- [ ] Cannot reply when logged out
+- [ ] Form validation works
+- [ ] Reply appears immediately
+- [ ] Author information correct
+
+**Edit/Delete:**
+- [ ] Can edit own threads/posts
+- [ ] Cannot edit others' content
+- [ ] Can delete own threads/posts
+- [ ] Cannot delete others' content
+- [ ] Confirmation dialog for delete
+- [ ] Content updates/removes correctly
+
+**Files to Create:**
+- `docs/TESTING_CHECKLIST.md`
+- `docs/BUGS_FOUND.md` (if needed)
+
+**Validation:**
+- Complete entire checklist
+- Document any issues found
+- Fix critical and high-priority bugs
+- Retest after fixes
+
+---
+
+### Task 6.10: Documentation Updates and Finalization
+
+**Status:** 🔴 Not Started  
+**Priority:** High  
+**Estimated Time:** 3-4 hours  
+**Dependencies:** All Phase 6 tasks  
+**Assigned To:** Developer
+
+**Description:**
+Update all documentation with production information, troubleshooting guides, and user instructions.
+
+**Steps:**
+1. Update README.md
+   - Add production deployment info
+   - Update setup instructions
+   - Add troubleshooting section
+   - Update feature list
+2. Document environment variables
+   - List all required variables
+   - Explain each variable's purpose
+   - Provide example values
+3. Create user guide
+   - How to register
+   - How to create threads
+   - How to post replies
+   - How to edit/delete content
+4. Create admin guide (if applicable)
+   - How to manage users
+   - How to moderate content
+   - How to monitor system
+5. Update deployment documentation
+   - Production deployment steps
+   - Backup procedures
+   - Monitoring setup
+   - Troubleshooting common issues
+6. Create API documentation (if API exists)
+7. Review and update all existing docs
+
+**Acceptance Criteria:**
+- [ ] README.md updated with production info
+- [ ] All environment variables documented
+- [ ] User guide created
+- [ ] Admin guide created (if needed)
+- [ ] Deployment docs updated
+- [ ] Troubleshooting guide complete
+- [ ] All documentation reviewed and accurate
+- [ ] Documentation well-organized and easy to find
+
+**Documents to Update/Create:**
+- `README.md` - Main project documentation
+- `docs/ENVIRONMENT_VARIABLES.md` - Environment configuration
+- `docs/USER_GUIDE.md` - End-user instructions
+- `docs/ADMIN_GUIDE.md` - Administrator instructions
+- `docs/DEPLOYMENT.md` - Deployment procedures
+- `docs/TROUBLESHOOTING.md` - Common issues and solutions
+- `docs/API.md` - API documentation (if applicable)
+
+**README.md Updates:**
+```markdown
+## Production Deployment
+
+The application is deployed on K3s with the following setup:
+- 2 application replicas for high availability
+- PostgreSQL database with persistent storage
+- Automated backups every 6 hours
+- SSL/TLS certificates via cert-manager
+- Resource limits: 500m CPU, 512Mi memory per pod
+
+## Environment Variables
+
+See [docs/ENVIRONMENT_VARIABLES.md](docs/ENVIRONMENT_VARIABLES.md) for complete list.
+
+## Troubleshooting
+
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions.
+
+## User Guide
+
+For end-user instructions, see [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+```
+
+**Validation:**
+- [ ] All documentation reviewed
+- [ ] Links work correctly
+- [ ] Code examples are accurate
+- [ ] Instructions are clear and complete
+- [ ] Documentation is up to date
+
+---
+
+## 14. Phase 6 Summary
+
+**Total Tasks:** 10 tasks  
+**Estimated Total Time:** 38-47 hours  
+**Priority:** Critical (Production Readiness)
+
+**Task Breakdown:**
+- **Task 6.1:** UI/UX Improvements (4-5 hours)
+- **Task 6.2:** Input Validation Refinement (3-4 hours)
+- **Task 6.3:** Security Hardening (4-5 hours)
+- **Task 6.4:** Performance Optimization (4-5 hours)
+- **Task 6.5:** Error Handling (3-4 hours)
+- **Task 6.6:** Load Testing (4-5 hours)
+- **Task 6.7:** Automated Testing (5-6 hours)
+- **Task 6.8:** Cross-Browser Testing (3-4 hours)
+- **Task 6.9:** Manual Testing (3-4 hours)
+- **Task 6.10:** Documentation (3-4 hours)
+
+**Completion Criteria:**
+- All 10 tasks completed
+- UI polished and responsive
+- All validation working correctly
+- Security measures verified
+- Performance optimized
+- Load testing completed successfully
+- Automated tests passing
+- Cross-browser compatibility verified
+- Manual testing checklist complete
+- Documentation updated and complete
+
+**Phase 6 Deliverables:**
+1. ✨ Polished UI/UX with responsive design
+2. ✅ Comprehensive input validation (client and server)
+3. 🔒 Security hardened and audited
+4. ⚡ Performance optimized with database indexes
+5. 🚨 Error handling and logging implemented
+6. 📊 Load testing completed with acceptable results
+7. 🧪 Automated test suite with >70% coverage
+8. 🌐 Cross-browser and device compatibility verified
+9. ✔️ Complete manual testing checklist
+10. 📚 Comprehensive documentation
+
+**Production Ready Checklist:**
+- [ ] UI/UX polished and professional
+- [ ] Responsive design works on all devices
+- [ ] Input validation comprehensive
+- [ ] Security audit passed
+- [ ] Performance targets met
+- [ ] Load testing shows acceptable performance
+- [ ] Automated tests passing
+- [ ] Cross-browser compatible
+- [ ] Manual testing complete
+- [ ] All critical bugs fixed
+- [ ] Documentation complete and accurate
+- [ ] Ready for production users
+
+**Success Metrics:**
+- **Performance:** < 2s page load (95th percentile)
+- **Reliability:** < 1% error rate under normal load
+- **Security:** All OWASP Top 10 vulnerabilities addressed
+- **Quality:** > 70% test coverage
+- **Usability:** Works on all major browsers and devices
+- **Documentation:** Complete and up-to-date
+
+---
+
+## 15. Notes for Production Launch
+
+**Pre-Launch Checklist:**
+- [ ] All Phase 6 tasks completed
+- [ ] Load testing passed
+- [ ] Security audit passed
+- [ ] Backups tested and verified
+- [ ] Monitoring configured
+- [ ] Documentation complete
+- [ ] Rollback plan documented
+- [ ] Support plan in place
+
+**Launch Day:**
+1. Verify all systems operational
+2. Monitor error rates and performance
+3. Be ready to rollback if issues
+4. Monitor user feedback
+5. Document any issues for immediate fix
+
+**Post-Launch:**
+1. Continue monitoring for 48 hours
+2. Address any user-reported issues
+3. Collect user feedback
+4. Plan iteration improvements
+5. Celebrate successful launch! 🎉
+
+---
+
+## 16. Task Management Tips
 
 ## 14. Task Management Tips
 
