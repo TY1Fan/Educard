@@ -5,6 +5,16 @@
     <p class="error-message">
       <%= message || 'Something went wrong on our end. Please try again later.' %>
     </p>
+    
+    <% if (typeof stack !== 'undefined' && stack) { %>
+      <div class="error-stack">
+        <details>
+          <summary>Stack Trace (Development Only)</summary>
+          <pre><%= stack %></pre>
+        </details>
+      </div>
+    <% } %>
+    
     <div class="error-actions">
       <a href="/" class="btn btn-primary">Go to Homepage</a>
       <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
@@ -51,6 +61,33 @@
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.error-stack {
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.error-stack details {
+  background: #1f2937;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.error-stack summary {
+  font-weight: 600;
+  color: #fbbf24;
+  user-select: none;
+}
+
+.error-stack pre {
+  margin-top: 1rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #f9fafb;
 }
 
 @media (max-width: 480px) {

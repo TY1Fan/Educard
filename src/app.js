@@ -88,6 +88,21 @@ app.use(csrfProtection); // Validate token on state-changing requests
 const { securityLogging, logCsrfViolations } = require("./middlewares/securityLogging");
 app.use(securityLogging());
 
+// Error handling middleware
+const {
+  notFoundHandler,
+  csrfErrorHandler,
+  validationErrorHandler,
+  databaseErrorHandler,
+  globalErrorHandler,
+  setupUnhandledRejectionHandler,
+  setupUncaughtExceptionHandler,
+} = require("./middlewares/errorHandler");
+
+// Setup process-level error handlers
+setupUnhandledRejectionHandler();
+setupUncaughtExceptionHandler();
+
 // SEO middleware - makes SEO utilities available to all views
 const seoMiddleware = require("./middleware/seo");
 app.use(seoMiddleware);
@@ -203,139 +218,16 @@ app.get("/test-nav", requireAuth, (req, res) => {
 });
 
 // 404 handler - must be after all other routes
-app.use((req, res, next) => {
-  res.status(404).send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>404 - Page Not Found</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-          background-color: #f5f5f5;
-        }
-        .container {
-          text-align: center;
-        }
-        h1 {
-          font-size: 6rem;
-          margin: 0;
-          color: #667eea;
-        }
-        h2 {
-          font-size: 2rem;
-          margin: 1rem 0;
-          color: #333;
-        }
-        p {
-          color: #666;
-        }
-        a {
-          color: #667eea;
-          text-decoration: none;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>404</h1>
-        <h2>Page Not Found</h2>
-        <p>The page you're looking for doesn't exist.</p>
-        <p><a href="/">Go back home</a></p>
-      </div>
-    </body>
-    </html>
-  `);
-});
+app.use(notFoundHandler);
 
 // CSRF error handler (with logging)
 app.use(logCsrfViolations);
-app.use((err, req, res, next) => {
-  if (err.code === "EBADCSRFTOKEN" || err.message?.toLowerCase().includes("csrf")) {
-    // Render without layout by setting layout to false
-    return res.status(403).render("errors/403", {
-      layout: false,
-      message: "Invalid security token. Please refresh the page and try again.",
-    });
-  }
-  next(err);
-});
+app.use(csrfErrorHandler);
 
-// Error handler - must be last
-app.use((err, req, res, next) => {
-  // Log error for debugging
-  console.error("Error occurred:");
-  console.error(err.stack);
-
-  // Send error response
-  const statusCode = err.statusCode || 500;
-  const message =
-    process.env.NODE_ENV === "production"
-      ? "Something went wrong!"
-      : err.message;
-
-  res.status(statusCode).send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Error - Educard Forum</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-          background-color: #f5f5f5;
-        }
-        .container {
-          text-align: center;
-          padding: 2rem;
-        }
-        h1 {
-          font-size: 4rem;
-          margin: 0;
-          color: #e53e3e;
-        }
-        h2 {
-          font-size: 1.5rem;
-          margin: 1rem 0;
-          color: #333;
-        }
-        p {
-          color: #666;
-        }
-        pre {
-          background: #f9f9f9;
-          padding: 1rem;
-          border-radius: 4px;
-          text-align: left;
-          overflow-x: auto;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>⚠️ Error</h1>
-        <h2>Something went wrong</h2>
-        <p>${message}</p>
-        ${process.env.NODE_ENV !== "production" ? `<pre>${err.stack}</pre>` : ""}
-        <p><a href="/">Go back home</a></p>
-      </div>
-    </body>
-    </html>
-  `);
-});
+// Error handlers - must be last
+app.use(validationErrorHandler);
+app.use(databaseErrorHandler);
+app.use(globalErrorHandler);
 
 // Export app for use in server.js
 module.exports = app;

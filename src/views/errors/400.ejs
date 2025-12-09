@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'Bad Request' %> - Educard Forum</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #3b82f6;
+      --error-color: #ef4444;
+      --text-color: #1f2937;
+      --secondary-color: #6b7280;
+      --bg-color: #f9fafb;
+      --border-color: #e5e7eb;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+
+    .error-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .error-content {
+      text-align: center;
+      max-width: 600px;
+      background: white;
+      padding: 3rem 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-code {
+      font-size: 6rem;
+      font-weight: 700;
+      color: var(--error-color);
+      margin: 0;
+      line-height: 1;
+    }
+
+    .error-title {
+      font-size: 1.75rem;
+      margin: 1rem 0;
+      color: var(--text-color);
+    }
+
+    .error-message {
+      color: var(--secondary-color);
+      margin: 1rem 0 2rem;
+      font-size: 1.125rem;
+    }
+
+    .error-details {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .error-details h3 {
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      color: var(--text-color);
+    }
+
+    .error-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .error-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.875rem;
+      color: var(--secondary-color);
+    }
+
+    .error-list li:last-child {
+      border-bottom: none;
+    }
+
+    .error-list strong {
+      color: var(--text-color);
+      font-weight: 600;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 480px) {
+      .error-code {
+        font-size: 4rem;
+      }
+      
+      .error-title {
+        font-size: 1.5rem;
+      }
+      
+      .error-message {
+        font-size: 1rem;
+      }
+      
+      .error-actions {
+        flex-direction: column;
+      }
+      
+      .error-actions .btn {
+        width: 100%;
+      }
+
+      .error-content {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="error-page">
+    <div class="error-content">
+      <h1 class="error-code">400</h1>
+      <h2 class="error-title"><%= title || 'Bad Request' %></h2>
+      <p class="error-message">
+        <%= message || 'The request contains invalid data.' %>
+      </p>
+      
+      <% if (typeof errors !== 'undefined' && errors && errors.length > 0) { %>
+        <div class="error-details">
+          <h3>Validation Errors:</h3>
+          <ul class="error-list">
+            <% errors.forEach(function(error) { %>
+              <li>
+                <strong><%= error.param || error.field %>:</strong> 
+                <%= error.msg || error.message %>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+      
+      <div class="error-actions">
+        <a href="javascript:history.back()" class="btn btn-primary">Go Back</a>
+        <a href="/" class="btn btn-secondary">Homepage</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
