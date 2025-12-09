@@ -1,0 +1,211 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-restore
+  namespace: educard-prod
+  labels:
+    app: postgres-restore
+    component: restore
+spec:
+  # Don't retry on failure - restore should be manual
+  backoffLimit: 0
+  
+  # Keep job for 24 hours for log inspection
+  ttlSecondsAfterFinished: 86400
+  
+  template:
+    metadata:
+      labels:
+        app: postgres-restore
+        component: restore-pod
+    spec:
+      restartPolicy: Never
+      
+      containers:
+      - name: restore
+        image: postgres:15-alpine
+        
+        command:
+        - /bin/sh
+        - -c
+        - |
+          set -e
+          
+          echo "=========================================="
+          echo "PostgreSQL Restore Script"
+          echo "=========================================="
+          echo "Start time: $(date)"
+          echo
+          
+          # Configuration
+          BACKUP_DIR="/backups"
+          BACKUP_FILE="${BACKUP_FILE:-}"  # Must be set via env var or edit this file
+          
+          # Validation
+          if [ -z "${BACKUP_FILE}" ]; then
+            echo "ERROR: BACKUP_FILE environment variable not set"
+            echo
+            echo "Usage:"
+            echo "  1. List available backups:"
+            echo "     kubectl exec -it -n educard-prod postgres-0 -- ls -lh /backups"
+            echo
+            echo "  2. Edit this Job and set BACKUP_FILE:"
+            echo "     kubectl edit job postgres-restore -n educard-prod"
+            echo
+            echo "  3. Or create a new job with the backup file:"
+            echo "     kubectl create job postgres-restore-manual --from=job/postgres-restore -n educard-prod"
+            echo "     kubectl set env job/postgres-restore-manual BACKUP_FILE=/backups/backup-20251128-020000.sql.gz -n educard-prod"
+            echo
+            exit 1
+          fi
+          
+          if [ ! -f "${BACKUP_FILE}" ]; then
+            echo "ERROR: Backup file not found: ${BACKUP_FILE}"
+            echo
+            echo "Available backups:"
+            ls -lh "${BACKUP_DIR}"/backup-*.sql.gz 2>/dev/null || echo "  (none)"
+            exit 1
+          fi
+          
+          echo "Configuration:"
+          echo "  Database: ${DB_NAME}"
+          echo "  User: ${DB_USER}"
+          echo "  Host: postgres-service"
+          echo "  Backup file: ${BACKUP_FILE}"
+          echo
+          
+          # Get backup info
+          BACKUP_SIZE=$(du -h "${BACKUP_FILE}" | cut -f1)
+          BACKUP_DATE=$(stat -c %y "${BACKUP_FILE}" 2>/dev/null || stat -f %Sm "${BACKUP_FILE}")
+          
+          echo "Backup information:"
+          echo "  Size: ${BACKUP_SIZE}"
+          echo "  Date: ${BACKUP_DATE}"
+          echo
+          
+          # Test database connection
+          echo "Testing database connection..."
+          if ! pg_isready -h postgres-service -U "${DB_USER}" -d "${DB_NAME}" -t 5; then
+            echo "ERROR: Database is not ready"
+            exit 1
+          fi
+          echo "✓ Database connection OK"
+          echo
+          
+          # Verify backup integrity
+          echo "Verifying backup integrity..."
+          if ! gunzip -t "${BACKUP_FILE}" 2>/dev/null; then
+            echo "ERROR: Backup file is corrupted"
+            exit 1
+          fi
+          echo "✓ Backup file is valid"
+          echo
+          
+          # WARNING
+          echo "=========================================="
+          echo "WARNING: DESTRUCTIVE OPERATION"
+          echo "=========================================="
+          echo "This will:"
+          echo "  1. Drop all existing tables"
+          echo "  2. Restore database from backup"
+          echo "  3. All current data will be LOST"
+          echo
+          echo "Press Ctrl+C now to cancel (5 second delay)"
+          echo "=========================================="
+          sleep 5
+          
+          # Drop existing schema (be very careful!)
+          echo
+          echo "Dropping existing schema..."
+          gunzip -c "${BACKUP_FILE}" | psql -h postgres-service -U "${DB_USER}" -d "${DB_NAME}" -c "
+            DO \$\$ DECLARE
+              r RECORD;
+            BEGIN
+              FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
+                EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+              END LOOP;
+            END \$\$;
+          " 2>&1 || true
+          echo "✓ Existing schema dropped"
+          
+          # Restore backup
+          echo
+          echo "Restoring database from backup..."
+          echo "This may take several minutes..."
+          
+          if gunzip -c "${BACKUP_FILE}" | psql -h postgres-service -U "${DB_USER}" -d "${DB_NAME}" 2>&1; then
+            echo
+            echo "✓ Database restored successfully"
+            
+            # Verify restoration
+            echo
+            echo "Verifying restoration..."
+            TABLE_COUNT=$(psql -h postgres-service -U "${DB_USER}" -d "${DB_NAME}" -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
+            echo "Tables restored: ${TABLE_COUNT}"
+            
+            if [ "${TABLE_COUNT}" -eq "0" ]; then
+              echo "WARNING: No tables found after restore!"
+            else
+              echo "✓ Restoration verified"
+            fi
+          else
+            echo
+            echo "ERROR: Database restore failed"
+            exit 1
+          fi
+          
+          # Show summary
+          echo
+          echo "=========================================="
+          echo "Restore Summary"
+          echo "=========================================="
+          echo "Backup file: ${BACKUP_FILE}"
+          echo "Backup size: ${BACKUP_SIZE}"
+          echo "Backup date: ${BACKUP_DATE}"
+          echo "Tables restored: ${TABLE_COUNT}"
+          echo
+          echo "End time: $(date)"
+          echo "=========================================="
+          echo "✓ Restore completed successfully"
+        
+        env:
+        # Database connection details
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: educard-config
+              key: DB_NAME
+        
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_USER
+        
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: educard-secrets
+              key: DB_PASSWORD
+        
+        # IMPORTANT: Set this to the backup file you want to restore
+        # Example: /backups/backup-20251128-020000.sql.gz
+        - name: BACKUP_FILE
+          value: ""  # MUST BE SET BEFORE RUNNING
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        
+        volumeMounts:
+        - name: backup-storage
+          mountPath: /backups
+      
+      volumes:
+      - name: backup-storage
+        persistentVolumeClaim:
+          claimName: backup-pvc

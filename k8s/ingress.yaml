@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: educard-ingress
+  namespace: educard-prod
+  annotations:
+    # Use cert-manager to automatically issue SSL/TLS certificate
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # Force HTTPS redirect
+    traefik.ingress.kubernetes.io/redirect-entry-point: https
+    traefik.ingress.kubernetes.io/redirect-permanent: "true"
+    
+    # Optional: Custom middleware for additional security headers
+    # traefik.ingress.kubernetes.io/custom-response-headers: "X-Frame-Options:DENY||X-Content-Type-Options:nosniff||X-XSS-Protection:1; mode=block"
+spec:
+  ingressClassName: traefik
+  
+  # TLS configuration - cert-manager will populate this automatically
+  tls:
+  - hosts:
+    - yourdomain.com
+    - www.yourdomain.com
+    secretName: educard-tls  # cert-manager creates this secret
+  
+  # Routing rules
+  rules:
+  # Root domain
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: educard-service
+            port:
+              number: 80
+  
+  # WWW subdomain
+  - host: www.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: educard-service
+            port:
+              number: 80

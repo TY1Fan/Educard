@@ -1,17 +1,35 @@
 # Troubleshooting Guide
 
-This guide helps you diagnose and resolve common issues with Educard.
+This guide helps you diagnose and resolve common issues with Educard in both development and Kubernetes deployment environments.
 
 ## Table of Contents
 
+### Development Environment
 1. [Installation Issues](#installation-issues)
-2. [Database Issues](#database-issues)
+2. [Database Issues (Development)](#database-issues-development)
 3. [Authentication Issues](#authentication-issues)
 4. [Application Errors](#application-errors)
-5. [Performance Issues](#performance-issues)
+5. [Performance Issues (Development)](#performance-issues-development)
 6. [Docker Issues](#docker-issues)
-7. [Production Issues](#production-issues)
-8. [Debugging Tips](#debugging-tips)
+
+### Kubernetes Deployment
+7. [Pod Issues](#pod-issues)
+8. [Application Issues (K8s)](#application-issues-k8s)
+9. [Database Issues (K8s)](#database-issues-k8s)
+10. [Network Issues](#network-issues)
+11. [Storage Issues](#storage-issues)
+12. [Performance Issues (K8s)](#performance-issues-k8s)
+13. [Resource Issues](#resource-issues)
+14. [Backup Issues](#backup-issues)
+
+### General
+15. [Production Issues](#production-issues)
+16. [Debugging Tips](#debugging-tips)
+17. [Getting Help](#getting-help)
+
+---
+
+# Development Environment Troubleshooting
 
 ---
 
@@ -73,7 +91,7 @@ npm install bcrypt --build-from-source=false
 
 ---
 
-## Database Issues
+## Database Issues (Development)
 
 ### Cannot connect to database
 
@@ -409,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ---
 
-## Performance Issues
+## Performance Issues (Development)
 
 ### Slow page load times
 
@@ -602,6 +620,135 @@ docker-compose exec app npm run db:migrate
 
 ---
 
+# Kubernetes Deployment Troubleshooting
+
+> For comprehensive Kubernetes troubleshooting, see:
+> - [OPERATIONS_RUNBOOK.md](./OPERATIONS_RUNBOOK.md) - Daily operations and common tasks
+> - [K3S_DEPLOYMENT.md](./K3S_DEPLOYMENT.md) - Deployment procedures
+
+## Quick Kubernetes Diagnostics
+
+```bash
+# Set kubeconfig
+export KUBECONFIG=/Users/tohyifan/Desktop/Educard/k8s/kubeconfig-vagrant-local
+
+# Quick health check
+./k8s/check-metrics.sh
+
+# Check all pods
+kubectl get pods -n educard-prod
+
+# View logs
+kubectl logs -n educard-prod -l app=educard --tail=100
+
+# Check events
+kubectl get events -n educard-prod --sort-by='.lastTimestamp' | tail -20
+
+# Test deployment
+./k8s/test-deployment.sh
+```
+
+## Pod Issues
+
+### Pod Not Starting
+- **Image Pull Error**: Rebuild and push image to registry
+- **Insufficient Resources**: Check `kubectl top nodes`
+- **ConfigMap/Secret Missing**: Apply with `kubectl apply -f k8s/`
+- **Database Connection**: Test with `kubectl exec -it postgres-0 -- pg_isready -U educard`
+
+### Pod Crashing
+```bash
+# Check logs
+kubectl logs <pod-name> -n educard-prod --previous
+
+# Describe pod for events
+kubectl describe pod <pod-name> -n educard-prod
+
+# Restart deployment
+kubectl rollout restart deployment/educard-app -n educard-prod
+```
+
+## Database Issues (K8s)
+
+### Database Not Ready
+```bash
+# Restart database
+kubectl delete pod postgres-0 -n educard-prod
+kubectl wait --for=condition=ready pod postgres-0 -n educard-prod --timeout=120s
+```
+
+### Authentication Failed
+```bash
+# Check credentials
+kubectl get secret educard-secrets -n educard-prod -o jsonpath='{.data.DB_USER}' | base64 -d
+
+# Test connection
+kubectl exec -it postgres-0 -n educard-prod -- psql -U educard -d educard_prod -c "SELECT 1;"
+```
+
+## Network Issues
+
+### Cannot Access Application
+```bash
+# Port forward for testing
+kubectl port-forward -n educard-prod svc/educard-service 8080:80
+
+# Check service endpoints
+kubectl get endpoints educard-service -n educard-prod
+```
+
+## Performance Issues (K8s)
+
+### High Resource Usage
+```bash
+# Check usage
+kubectl top pods -n educard-prod
+
+# Scale up
+kubectl scale deployment/educard-app -n educard-prod --replicas=3
+
+# Enable autoscaling
+kubectl autoscale deployment educard-app -n educard-prod --cpu-percent=70 --min=2 --max=10
+```
+
+## Emergency Procedures
+
+### Complete Restart
+```bash
+# Restart all components
+kubectl delete pods -n educard-prod -l app=educard
+kubectl delete pod postgres-0 -n educard-prod
+
+# Wait for recovery
+kubectl wait --for=condition=ready pod -l app=educard -n educard-prod --timeout=120s
+kubectl wait --for=condition=ready pod postgres-0 -n educard-prod --timeout=120s
+
+# Verify
+./k8s/check-metrics.sh
+```
+
+### Rollback Deployment
+```bash
+# Rollback to previous version
+kubectl rollout undo deployment/educard-app -n educard-prod
+
+# Watch rollback
+kubectl rollout status deployment/educard-app -n educard-prod
+```
+
+### Restore Database
+```bash
+# List available backups
+./k8s/list-backups.sh
+
+# Run restore (interactive)
+./k8s/run-restore.sh
+```
+
+For detailed Kubernetes troubleshooting procedures, see [OPERATIONS_RUNBOOK.md](./OPERATIONS_RUNBOOK.md#emergency-procedures).
+
+---
+
 ## Production Issues
 
 ### Application crashes in production
@@ -783,5 +930,21 @@ If you've tried the solutions above and still have issues:
 
 ---
 
-**Last Updated:** November 2025  
-**Version:** 1.0.0
+## Additional Resources
+
+### Development
+- [README.md](../README.md) - Project overview and setup
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Development deployment guide
+
+### Kubernetes
+- [K3S_DEPLOYMENT.md](./K3S_DEPLOYMENT.md) - Complete K8s deployment guide
+- [OPERATIONS_RUNBOOK.md](./OPERATIONS_RUNBOOK.md) - Daily operations and procedures
+- [MONITORING.md](./MONITORING.md) - Monitoring and metrics
+- [BACKUP_RESTORE.md](./BACKUP_RESTORE.md) - Backup and restore procedures
+- [DEPLOYMENT_TESTING.md](./DEPLOYMENT_TESTING.md) - Testing procedures
+
+---
+
+**Last Updated:** November 28, 2025  
+**Version:** 2.0.0 (includes Kubernetes troubleshooting)  
+**Status:** Production Ready ✅

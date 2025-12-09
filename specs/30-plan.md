@@ -18,14 +18,15 @@ This plan outlines a simple, phased approach to building the Educard educational
 
 **Implementation Strategy:** Build incrementally, test continuously, keep it simple.
 
-**Estimated Timeline:** 4-6 weeks for a single developer working part-time
+**Estimated Timeline:** 6-7 weeks for a single developer working part-time
 
 **Phases:**
 1. **Setup & Foundation** (Week 1)
 2. **Authentication System** (Week 1-2)
 3. **Core Forum Features** (Week 2-4)
-4. **Polish & Testing** (Week 5)
-5. **Deployment** (Week 6)
+4. **Polish & Enhancements** (Week 5)
+5. **K3s Deployment** (Week 6)
+6. **Testing & QA** (Week 7)
 
 ## 2. Technology Stack Selection
 
@@ -548,64 +549,181 @@ This phase is broken into sub-phases for better organization.
 
 ---
 
-### Phase 5: Deployment (Week 6)
+### Phase 5: K3s Deployment (Week 6)
 
-**Goal:** Deploy application to production
+**Goal:** Deploy application to production using k3s (lightweight Kubernetes)
 
 **Tasks:**
-1. Prepare for production
-   - Set up production environment variables
-   - Configure production database
-   - Set up process manager (PM2)
-   - Configure web server (Nginx reverse proxy)
-   - Obtain SSL certificate
+1. K3s cluster setup
+   - Install k3s on target server/VPS
+   - Configure kubectl access
+   - Set up persistent storage (local-path provisioner)
+   - Configure cluster networking
+   - Install Helm (package manager for Kubernetes)
 
-2. Database setup
-   - Create production database
-   - Run migrations
-   - Seed initial categories
-   - Set up automated backups
+2. Container preparation
+   - Create production Dockerfile (multi-stage build)
+   - Optimize image size
+   - Build and tag Docker images
+   - Push images to container registry (Docker Hub or private registry)
+   - Create image pull secrets if using private registry
 
-3. Deploy application
-   - Choose hosting (VPS, Heroku, DigitalOcean, etc.)
-   - Deploy code to server
-   - Install dependencies
-   - Configure environment
-   - Start application with PM2
+3. Kubernetes manifests
+   - Create namespace for application
+   - Create ConfigMap for environment variables
+   - Create Secret for sensitive data (DB credentials, session secret)
+   - Create PostgreSQL StatefulSet and Service
+   - Create persistent volume claims for database
+   - Create application Deployment with replicas
+   - Create application Service (ClusterIP)
+   - Configure resource limits and requests
+   - Set up liveness and readiness probes
 
-4. Configure web server
-   - Set up Nginx as reverse proxy
-   - Configure SSL/HTTPS
-   - Set up domain name
-   - Enable HTTPS redirect
-   - Configure security headers
+4. Ingress and SSL/TLS
+   - Install Traefik ingress controller (comes with k3s)
+   - Create Ingress resource for application
+   - Install cert-manager for SSL certificates
+   - Configure Let's Encrypt certificate issuer
+   - Set up automatic certificate renewal
+   - Configure HTTPS redirect
 
-5. Post-deployment
-   - Test production deployment
-   - Monitor logs for errors
-   - Set up basic monitoring
+5. Database initialization
+   - Run database migrations as Kubernetes Job
+   - Seed initial categories as Kubernetes Job
+   - Configure automated database backups (CronJob)
+   - Test backup and restore procedures
+
+6. Deployment and monitoring
+   - Deploy all Kubernetes resources
+   - Verify pod status and logs
+   - Set up basic monitoring (metrics-server)
+   - Configure log aggregation (optional: Loki)
+   - Test auto-scaling (if configured)
+   - Test rolling updates
+
+7. Post-deployment
+   - Verify application accessibility via domain
+   - Test all features in production
    - Create admin account
-   - Create initial forum categories
+   - Monitor resource usage
+   - Document kubectl commands for management
 
-6. Documentation
-   - Document deployment process
-   - Create deployment checklist
-   - Document server configuration
-   - Create backup/restore procedures
+8. Documentation
+   - Document k3s setup process
+   - Document Kubernetes manifests
+   - Create deployment runbook
+   - Document rollback procedures
+   - Document scaling procedures
+   - Create troubleshooting guide
 
 **Deliverables:**
-- ✅ Application deployed and accessible
-- ✅ HTTPS enabled
-- ✅ Database configured with backups
-- ✅ Monitoring in place
-- ✅ Deployment documented
+- ✅ K3s cluster running and accessible
+- ✅ Application deployed as containerized workload
+- ✅ PostgreSQL running in StatefulSet with persistence
+- ✅ HTTPS enabled with automatic certificate renewal
+- ✅ Database migrations and seeds completed
+- ✅ Monitoring and logging configured
+- ✅ Automated backups scheduled
+- ✅ Deployment fully documented
 
 **Validation:**
-- Application accessible via domain
-- HTTPS working
+- Application accessible via domain with HTTPS
 - All features working in production
-- No console errors
-- Initial categories created
+- Database persists across pod restarts
+- Pods restart automatically on failure
+- Rolling updates work without downtime
+- Backups are being created successfully
+- Resource usage is within limits
+
+---
+
+### Phase 6: Testing & Quality Assurance (Week 7)
+
+**Goal:** Comprehensive testing and quality assurance
+
+**Tasks:**
+1. UI/UX improvements
+   - Improve CSS styling
+   - Ensure responsive design works
+   - Test on mobile devices
+   - Add loading states for forms
+   - Improve error message display
+   - Add success flash messages
+
+2. Input validation refinement
+   - Add client-side validation for better UX
+   - Ensure all server-side validation works
+   - Test edge cases (empty fields, special characters)
+   - Implement proper error messages
+
+3. Security hardening
+   - Verify all routes have proper authorization
+   - Test CSRF protection
+   - Test XSS prevention (try script injection)
+   - Test SQL injection prevention
+   - Review password hashing
+   - Ensure HTTPS-ready (secure cookies)
+   - Security headers verification
+
+4. Performance optimization
+   - Add database indexes
+   - Optimize database queries
+   - Implement proper pagination
+   - Test with larger datasets
+   - Add query result caching (if needed)
+   - Test k3s resource limits
+
+5. Error handling
+   - Verify 404 page works
+   - Verify 500 error page works
+   - Test global error handler
+   - Verify error logging
+   - Test error scenarios in Kubernetes
+
+6. Load testing
+   - Test with concurrent users
+   - Verify database connection pooling
+   - Test pod auto-scaling (if configured)
+   - Monitor resource usage under load
+   - Identify bottlenecks
+
+7. Testing
+   - Write unit tests for critical functions
+     - Password hashing
+     - Authentication logic
+     - Authorization checks
+     - Slug generation
+   - Manual testing checklist
+   - Test all user flows end-to-end
+   - Fix discovered bugs
+   - Test in multiple browsers
+   - Test on multiple devices
+
+8. Documentation updates
+   - Update README with production info
+   - Document environment variables
+   - Add troubleshooting section
+   - Create user guide
+   - Update deployment documentation
+
+**Deliverables:**
+- ✅ Polished UI/UX
+- ✅ All validation working
+- ✅ Security measures verified
+- ✅ Tests passing
+- ✅ Performance acceptable
+- ✅ Load testing completed
+- ✅ Documentation complete
+- ✅ Known bugs fixed
+
+**Validation:**
+- Manual testing checklist 100% complete
+- Security tests pass
+- Performance acceptable (<2s page loads)
+- Mobile responsive
+- No critical bugs
+- Load testing shows acceptable performance
+- All documentation up to date
 
 ## 4. Database Migration Strategy
 

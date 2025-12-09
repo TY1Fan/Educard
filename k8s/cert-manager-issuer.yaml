@@ -1,0 +1,57 @@
+---
+# Let's Encrypt Staging Issuer (for testing)
+# Use this issuer first to test certificate issuance without hitting rate limits
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  annotations:
+    description: "Let's Encrypt staging environment for testing certificate issuance"
+spec:
+  acme:
+    # Let's Encrypt staging server (higher rate limits, not trusted by browsers)
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    
+    # Email address for certificate expiry notifications
+    # IMPORTANT: Replace with your actual email
+    email: e1121799@u.nus.edu
+    
+    # Secret to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    
+    # HTTP-01 challenge solver
+    # This will create temporary ingress rules to prove domain ownership
+    solvers:
+    - http01:
+        ingress:
+          # Use traefik ingress class (K3s default)
+          class: traefik
+
+---
+# Let's Encrypt Production Issuer
+# Use this issuer after testing with staging issuer
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+  annotations:
+    description: "Let's Encrypt production environment for trusted certificates"
+spec:
+  acme:
+    # Let's Encrypt production server (rate limited, trusted by browsers)
+    server: https://acme-v02.api.letsencrypt.org/directory
+    
+    # Email address for certificate expiry notifications
+    # IMPORTANT: Replace with your actual email
+    email: e1121799@u.nus.edu
+    
+    # Secret to store the ACME account private key
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    
+    # HTTP-01 challenge solver
+    solvers:
+    - http01:
+        ingress:
+          class: traefik

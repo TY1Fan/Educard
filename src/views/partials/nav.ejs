@@ -1,6 +1,6 @@
 <nav class="main-nav" role="navigation" aria-label="Main navigation">
   <ul class="nav-list">
-    <li><a href="/">Home</a></li>
+    <li><a href="/" class="<%= currentPath === '/' ? 'active' : '' %>">Home</a></li>
     <li class="nav-search">
       <%- include('../partials/search-form') %>
     </li>
@@ -8,7 +8,7 @@
     <% if (isAuthenticated) { %>
       <!-- Logged in navigation -->
       <li class="nav-notifications">
-        <a href="/notifications" class="notification-bell" aria-label="Notifications">
+        <a href="/notifications" class="notification-bell <%= currentPath === '/notifications' ? 'active' : '' %>" aria-label="Notifications">
           <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" focusable="false">
             <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
           </svg>
@@ -30,7 +30,7 @@
         Welcome, <strong><%= user.username %></strong>
       </li>
       <li>
-        <a href="/profile/<%= user.username %>">Profile</a>
+        <a href="/profile/<%= user.username %>" class="<%= currentPath.includes('/profile/') ? 'active' : '' %>">Profile</a>
       </li>
       <li>
         <form action="/auth/logout" method="POST" class="logout-form">

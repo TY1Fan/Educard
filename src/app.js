@@ -4,9 +4,24 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const expressLayouts = require("express-ejs-layouts");
+const compression = require("compression");
 
 // Create Express application
 const app = express();
+
+// Compression middleware (gzip) - MUST be early
+app.use(compression({
+  level: 6, // Compression level (0-9, 6 is default)
+  threshold: 1024, // Only compress if response is larger than 1KB
+  filter: (req, res) => {
+    // Don't compress if client doesn't support it
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Use compression filter function
+    return compression.filter(req, res);
+  }
+}));
 
 // Security middleware (MUST be early in middleware chain)
 const { securityHeaders, additionalSecurityHeaders } = require("./middleware/securityHeaders");
@@ -69,6 +84,25 @@ const { csrfToken, csrfProtection } = require("./middlewares/csrf");
 app.use(csrfToken); // Generate token for all requests
 app.use(csrfProtection); // Validate token on state-changing requests
 
+// Security logging middleware
+const { securityLogging, logCsrfViolations } = require("./middlewares/securityLogging");
+app.use(securityLogging());
+
+// Error handling middleware
+const {
+  notFoundHandler,
+  csrfErrorHandler,
+  validationErrorHandler,
+  databaseErrorHandler,
+  globalErrorHandler,
+  setupUnhandledRejectionHandler,
+  setupUncaughtExceptionHandler,
+} = require("./middlewares/errorHandler");
+
+// Setup process-level error handlers
+setupUnhandledRejectionHandler();
+setupUncaughtExceptionHandler();
+
 // SEO middleware - makes SEO utilities available to all views
 const seoMiddleware = require("./middleware/seo");
 app.use(seoMiddleware);
@@ -80,6 +114,9 @@ app.use((req, res, next) => {
   res.locals.successMessage = req.flash("success");
   res.locals.errorMessage = req.flash("error");
   res.locals.infoMessage = req.flash("info");
+  
+  // Add current path for active navigation highlighting
+  res.locals.currentPath = req.path;
   
   // Add role helper functions for templates
   res.locals.isAdmin = req.session.user && req.session.user.role === 'admin';
@@ -95,11 +132,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Request logging middleware (simple for now)
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
+// Performance monitoring middleware
+const { performanceMonitor } = require("./middlewares/performanceMonitor");
+app.use(performanceMonitor);
 
 // Controllers
 const forumController = require("./controllers/forumController");
@@ -117,6 +152,18 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
   });
+});
+
+// Performance stats endpoint (admin only in production)
+const { performanceStatsHandler } = require("./middlewares/performanceMonitor");
+app.get("/performance-stats", (req, res, next) => {
+  // In production, require admin access
+  if (process.env.NODE_ENV === 'production') {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  }
+  performanceStatsHandler(req, res);
 });
 
 // Session test endpoint (temporary - for testing)
@@ -171,138 +218,16 @@ app.get("/test-nav", requireAuth, (req, res) => {
 });
 
 // 404 handler - must be after all other routes
-app.use((req, res, next) => {
-  res.status(404).send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>404 - Page Not Found</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-          background-color: #f5f5f5;
-        }
-        .container {
-          text-align: center;
-        }
-        h1 {
-          font-size: 6rem;
-          margin: 0;
-          color: #667eea;
-        }
-        h2 {
-          font-size: 2rem;
-          margin: 1rem 0;
-          color: #333;
-        }
-        p {
-          color: #666;
-        }
-        a {
-          color: #667eea;
-          text-decoration: none;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>404</h1>
-        <h2>Page Not Found</h2>
-        <p>The page you're looking for doesn't exist.</p>
-        <p><a href="/">Go back home</a></p>
-      </div>
-    </body>
-    </html>
-  `);
-});
+app.use(notFoundHandler);
 
-// CSRF error handler
-app.use((err, req, res, next) => {
-  if (err.code === "EBADCSRFTOKEN" || err.message?.toLowerCase().includes("csrf")) {
-    // Render without layout by setting layout to false
-    return res.status(403).render("errors/403", {
-      layout: false,
-      message: "Invalid security token. Please refresh the page and try again.",
-    });
-  }
-  next(err);
-});
+// CSRF error handler (with logging)
+app.use(logCsrfViolations);
+app.use(csrfErrorHandler);
 
-// Error handler - must be last
-app.use((err, req, res, next) => {
-  // Log error for debugging
-  console.error("Error occurred:");
-  console.error(err.stack);
-
-  // Send error response
-  const statusCode = err.statusCode || 500;
-  const message =
-    process.env.NODE_ENV === "production"
-      ? "Something went wrong!"
-      : err.message;
-
-  res.status(statusCode).send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Error - Educard Forum</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-          background-color: #f5f5f5;
-        }
-        .container {
-          text-align: center;
-          padding: 2rem;
-        }
-        h1 {
-          font-size: 4rem;
-          margin: 0;
-          color: #e53e3e;
-        }
-        h2 {
-          font-size: 1.5rem;
-          margin: 1rem 0;
-          color: #333;
-        }
-        p {
-          color: #666;
-        }
-        pre {
-          background: #f9f9f9;
-          padding: 1rem;
-          border-radius: 4px;
-          text-align: left;
-          overflow-x: auto;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>⚠️ Error</h1>
-        <h2>Something went wrong</h2>
-        <p>${message}</p>
-        ${process.env.NODE_ENV !== "production" ? `<pre>${err.stack}</pre>` : ""}
-        <p><a href="/">Go back home</a></p>
-      </div>
-    </body>
-    </html>
-  `);
-});
+// Error handlers - must be last
+app.use(validationErrorHandler);
+app.use(databaseErrorHandler);
+app.use(globalErrorHandler);
 
 // Export app for use in server.js
 module.exports = app;

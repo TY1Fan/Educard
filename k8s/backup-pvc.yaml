@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+  namespace: educard-prod
+  labels:
+    app: postgres-backup
+    component: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 20Gi
+---
+# Note: This PVC will store compressed database backups
+# Retention: 30 days of daily backups
+# Estimated size per backup: ~100MB-500MB (compressed)
+# Total capacity: 20GB (40-200 backups depending on DB size)
