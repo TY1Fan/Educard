@@ -40,6 +40,21 @@ const config = {
       statement_timeout: 10000 // 10 seconds
     }
   },
+  test: {
+    username: process.env.DB_USER || 'educard_user',
+    password: process.env.DB_PASSWORD || 'securepassword',
+    database: process.env.DB_NAME || 'educard_db',
+    host: process.env.DB_HOST || 'db',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false, // Disable logging in tests
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    }
+  },
   production: {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -76,4 +91,5 @@ async function testConnection() {
 module.exports = { sequelize, testConnection };
 // Export config for Sequelize CLI
 module.exports.development = config.development;
+module.exports.test = config.test;
 module.exports.production = config.production;

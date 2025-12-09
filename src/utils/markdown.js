@@ -81,6 +81,8 @@ function processMarkdown(content) {
  * @returns {string} - Escaped text
  */
 function escapeHtml(text) {
+  if (!text) return '';
+  
   const map = {
     '&': '&amp;',
     '<': '&lt;',
@@ -114,8 +116,21 @@ function stripMarkdown(content) {
     .trim();
 }
 
+/**
+ * Truncate text to specified length and add ellipsis
+ * @param {string} text - Text to truncate
+ * @param {number} maxLength - Maximum length
+ * @returns {string} - Truncated text
+ */
+function truncateText(text, maxLength) {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
 module.exports = {
   processMarkdown,
   stripMarkdown,
-  escapeHtml
+  escapeHtml,
+  truncateText
 };
