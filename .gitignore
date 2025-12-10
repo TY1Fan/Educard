@@ -13,7 +13,7 @@ package-lock.json
 # Logs
 logs/
 *.log
-ai-log/
+
 
 # OS files
 .DS_Store
