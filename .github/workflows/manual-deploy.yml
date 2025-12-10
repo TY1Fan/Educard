@@ -1,0 +1,62 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to deploy (default: latest)'
+        required: false
+        default: 'latest'
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_PRODUCTION }}" | base64 -d > kubeconfig
+          export KUBECONFIG=./kubeconfig
+
+      - name: Deploy application
+        run: |
+          export KUBECONFIG=./kubeconfig
+          kubectl set image deployment/educard-app \
+            educard=tyifan/educard:${{ github.event.inputs.image_tag }} \
+            -n educard-prod
+          
+          echo "Waiting for rollout to complete..."
+          kubectl rollout status deployment/educard-app -n educard-prod --timeout=10m
+
+      - name: Verify deployment
+        run: |
+          sleep 30
+          echo "Testing health endpoint..."
+          curl -f https://educard.example.com/health || exit 1
+          echo "✅ Deployment verified successfully!"
+
+      - name: Get deployment info
+        run: |
+          export KUBECONFIG=./kubeconfig
+          echo "Current deployment status:"
+          kubectl get deployment educard-app -n educard-prod
+          echo ""
+          echo "Running pods:"
+          kubectl get pods -n educard-prod -l app=educard
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          export KUBECONFIG=./kubeconfig
+          echo "❌ Deployment failed, rolling back..."
+          kubectl rollout undo deployment/educard-app -n educard-prod
+          kubectl rollout status deployment/educard-app -n educard-prod
