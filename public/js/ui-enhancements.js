@@ -290,7 +290,8 @@
     initLazyLoading();
     initCopyButtons();
     initBackToTop();
-    enhanceFormValidation();
+    // Temporarily disabled for testing
+    // enhanceFormValidation();
     initTooltips();
   }
 

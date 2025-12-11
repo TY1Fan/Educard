@@ -68,10 +68,10 @@
                         form.querySelector('input[type="submit"]');
     
     if (submitButton) {
-      // Validate form before showing loading state
-      if (!form.checkValidity()) {
-        return; // Let browser handle validation
-      }
+      // Validation disabled - using server-side only
+      // if (!form.checkValidity()) {
+      //   return; // Let browser handle validation
+      // }
       
       // Set loading state
       setButtonLoading(submitButton, true);

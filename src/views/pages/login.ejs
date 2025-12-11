@@ -9,7 +9,7 @@
       </div>
     <% } %>
 
-    <form action="/auth/login" method="POST" class="auth-form">
+    <form action="/auth/login" method="POST" class="auth-form" novalidate>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       
       <div class="form-group">
@@ -19,7 +19,6 @@
           id="usernameOrEmail" 
           name="usernameOrEmail" 
           value="<%= locals.usernameOrEmail || '' %>"
-          required
           placeholder="Enter your username or email">
       </div>
 
@@ -29,7 +28,6 @@
           type="password" 
           id="password" 
           name="password" 
-          required
           placeholder="Enter your password">
       </div>
 
