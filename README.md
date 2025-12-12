@@ -178,6 +178,64 @@ Where everything is stored:
 └─────────────────────────────────────────┘
 ```
 
+#### Kubernetes Architecture
+
+When deployed to K3s, Educard runs with high availability:
+
+```
+┌─────────────────────────────────────────────┐
+│           Vagrant Ubuntu VM                  │
+│                                              │
+│  ┌────────────────────────────────────────┐ │
+│  │         K3s Cluster                     │ │
+│  │                                         │ │
+│  │  ┌──────────────────────────────────┐  │ │
+│  │  │   Namespace: educard-prod        │  │ │
+│  │  │                                  │  │ │
+│  │  │  ┌──────────┐  ┌──────────┐    │  │ │
+│  │  │  │ App Pod  │  │ App Pod  │    │  │ │
+│  │  │  │ Replica 1│  │ Replica 2│    │  │ │
+│  │  │  └────┬─────┘  └────┬─────┘    │  │ │
+│  │  │       └──────┬───────┘          │  │ │
+│  │  │              ▼                  │  │ │
+│  │  │     ┌─────────────────┐        │  │ │
+│  │  │     │ Service (LB)    │        │  │ │
+│  │  │     │ Port: 80        │        │  │ │
+│  │  │     └────────┬────────┘        │  │ │
+│  │  │              │                 │  │ │
+│  │  │  ┌───────────▼───────────┐    │  │ │
+│  │  │  │ PostgreSQL StatefulSet│    │  │ │
+│  │  │  │ Persistent Storage    │    │  │ │
+│  │  │  └───────────────────────┘    │  │ │
+│  │  └──────────────────────────────┘  │ │
+│  └────────────────────────────────────┘ │
+│                                          │
+│  Port Forwarding:                        │
+│  - 6443 → K3s API                        │
+│  - 8080 → HTTP (80)                      │
+│  - 8443 → HTTPS (443)                    │
+└─────────────────────────────────────────┘
+            ▲
+            │ kubectl / browser
+            │
+    ┌───────┴────────┐
+    │   Your Mac     │
+    └────────────────┘
+```
+
+#### Production Features
+
+The K3s deployment includes:
+
+- ✅ **High Availability:** 2 application replicas with load balancing
+- ✅ **Persistent Storage:** Database data survives pod restarts
+- ✅ **Health Checks:** Automatic pod restart on failures
+- ✅ **Resource Limits:** CPU and memory constraints
+- ✅ **Secrets Management:** Secure credential storage
+- ✅ **Database Backups:** Automated CronJob backups
+- ✅ **Zero-Downtime Updates:** Rolling deployments
+- ✅ **Session Persistence:** ClientIP-based session affinity
+
 ### Performance Optimization
 
 - **Caching:** Frequently accessed data stored in memory (node-cache)
@@ -372,64 +430,6 @@ vagrant up
 # Destroy the VM completely
 vagrant destroy
 ```
-
-#### Kubernetes Architecture
-
-When deployed to K3s, Educard runs with high availability:
-
-```
-┌─────────────────────────────────────────────┐
-│           Vagrant Ubuntu VM                  │
-│                                              │
-│  ┌────────────────────────────────────────┐ │
-│  │         K3s Cluster                     │ │
-│  │                                         │ │
-│  │  ┌──────────────────────────────────┐  │ │
-│  │  │   Namespace: educard-prod        │  │ │
-│  │  │                                  │  │ │
-│  │  │  ┌──────────┐  ┌──────────┐    │  │ │
-│  │  │  │ App Pod  │  │ App Pod  │    │  │ │
-│  │  │  │ Replica 1│  │ Replica 2│    │  │ │
-│  │  │  └────┬─────┘  └────┬─────┘    │  │ │
-│  │  │       └──────┬───────┘          │  │ │
-│  │  │              ▼                  │  │ │
-│  │  │     ┌─────────────────┐        │  │ │
-│  │  │     │ Service (LB)    │        │  │ │
-│  │  │     │ Port: 80        │        │  │ │
-│  │  │     └────────┬────────┘        │  │ │
-│  │  │              │                 │  │ │
-│  │  │  ┌───────────▼───────────┐    │  │ │
-│  │  │  │ PostgreSQL StatefulSet│    │  │ │
-│  │  │  │ Persistent Storage    │    │  │ │
-│  │  │  └───────────────────────┘    │  │ │
-│  │  └──────────────────────────────┘  │ │
-│  └────────────────────────────────────┘ │
-│                                          │
-│  Port Forwarding:                        │
-│  - 6443 → K3s API                        │
-│  - 8080 → HTTP (80)                      │
-│  - 8443 → HTTPS (443)                    │
-└─────────────────────────────────────────┘
-            ▲
-            │ kubectl / browser
-            │
-    ┌───────┴────────┐
-    │   Your Mac     │
-    └────────────────┘
-```
-
-#### Production Features
-
-The K3s deployment includes:
-
-- ✅ **High Availability:** 2 application replicas with load balancing
-- ✅ **Persistent Storage:** Database data survives pod restarts
-- ✅ **Health Checks:** Automatic pod restart on failures
-- ✅ **Resource Limits:** CPU and memory constraints
-- ✅ **Secrets Management:** Secure credential storage
-- ✅ **Database Backups:** Automated CronJob backups
-- ✅ **Zero-Downtime Updates:** Rolling deployments
-- ✅ **Session Persistence:** ClientIP-based session affinity
 
 #### Troubleshooting Vagrant/K3s
 
@@ -751,7 +751,6 @@ This opens a menu with options:
 - [ ] Verify password strength requirements
 - [ ] Login with new account
 - [ ] Logout successfully
-- [ ] Test "forgot password" (if implemented)
 
 **Phase 2: Forum Navigation**
 - [ ] View homepage with categories
@@ -763,8 +762,6 @@ This opens a menu with options:
 
 **Phase 3: Content Creation**
 - [ ] Create a new thread
-- [ ] Add Markdown formatting (bold, italic, lists)
-- [ ] Add code blocks with syntax highlighting
 - [ ] Upload an image
 - [ ] Preview before posting
 - [ ] Submit thread
@@ -774,8 +771,6 @@ This opens a menu with options:
 - [ ] Edit your own post
 - [ ] Delete your own post
 - [ ] Upvote/downvote posts
-- [ ] React to posts (if implemented)
-- [ ] Quote other users
 
 **Phase 5: User Features**
 - [ ] View your profile
@@ -784,16 +779,6 @@ This opens a menu with options:
 - [ ] View notifications
 - [ ] Mark notifications as read
 - [ ] Search for threads/posts/users
-
-**Phase 6: Admin Features** (requires admin account)
-- [ ] Access admin dashboard at `/admin`
-- [ ] View user list
-- [ ] Ban/unban a user
-- [ ] Change user role
-- [ ] Delete inappropriate content
-- [ ] Pin/unpin threads
-- [ ] Lock/unlock threads
-- [ ] View system statistics
 
 **Phase 7: Edge Cases**
 - [ ] Try SQL injection in search: `' OR '1'='1`
