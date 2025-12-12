@@ -44,7 +44,7 @@
   </div>
 <% } %>
 
-<form action="/category/<%= category.slug %>/new-thread" method="POST" class="thread-form">
+<form action="/category/<%= category.slug %>/new-thread" method="POST" class="thread-form" novalidate>
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   
   <div class="form-group">
@@ -52,12 +52,9 @@
     <input 
       type="text" 
       id="title" 
-      name="threadTitle" 
+      name="title" 
       class="form-control"
       value="<%= locals.formData?.title || '' %>"
-      required 
-      minlength="5"
-      maxlength="200"
       placeholder="What's your thread about?"
       autofocus>
     <small class="form-help">5-200 characters - Be clear and descriptive</small>
@@ -67,12 +64,9 @@
     <label for="content">First Post <span class="required">*</span></label>
     <textarea 
       id="content" 
-      name="postContent" 
+      name="content" 
       class="form-control"
       rows="12"
-      required
-      minlength="10"
-      maxlength="10000"
       placeholder="Start the discussion...
 
 Tip: Be clear and provide context for your discussion. The more details you provide, the better responses you'll get!"><%= locals.formData?.content || '' %></textarea>
