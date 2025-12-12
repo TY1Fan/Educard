@@ -8,6 +8,9 @@ A comprehensive guide to understanding, starting, and testing the Educard Educat
 
 1. [How the System Works](#how-the-system-works)
 2. [How to Start the System](#how-to-start-the-system)
+   - [Quick Start with Docker](#quick-start-with-docker-recommended)
+   - [Production Deployment with Vagrant + K3s](#production-deployment-with-vagrant--k3s)
+   - [Local Development](#alternative-local-development-without-docker)
 3. [How to Test the System](#how-to-test-the-system)
 4. [Troubleshooting](#troubleshooting)
 
@@ -195,7 +198,12 @@ Before starting, ensure you have:
 - ✅ Docker Desktop installed ([Download here](https://www.docker.com/products/docker-desktop))
 - ✅ Docker Compose installed (included with Docker Desktop)
 
-**Option 2: Local Development**
+**Option 2: Using Vagrant + K3s (Production-like Environment)**
+- ✅ Vagrant installed ([Download here](https://www.vagrantup.com/downloads))
+- ✅ VirtualBox installed ([Download here](https://www.virtualbox.org/wiki/Downloads))
+- ✅ kubectl installed ([Install guide](https://kubernetes.io/docs/tasks/tools/))
+
+**Option 3: Local Development**
 - ✅ Node.js 18.x or higher ([Download here](https://nodejs.org/))
 - ✅ PostgreSQL 12.x or higher ([Download here](https://www.postgresql.org/download/))
 - ✅ npm (comes with Node.js)
@@ -259,6 +267,226 @@ docker-compose exec app npm run migrate
 
 # Run tests inside container
 docker-compose exec app npm test
+```
+
+### Production Deployment with Vagrant + K3s
+
+This option creates a production-like Kubernetes environment on your local machine using Vagrant and K3s. Perfect for testing production deployments before going live.
+
+**Step 1: Clone the Repository**
+```bash
+git clone https://github.com/TY1Fan/Educard.git
+cd Educard
+```
+
+**Step 2: Start the Vagrant VM**
+```bash
+# Start the Ubuntu VM with K3s
+vagrant up
+
+# This will:
+# - Create an Ubuntu 22.04 VM (4GB RAM, 2 CPUs)
+# - Install K3s (lightweight Kubernetes)
+# - Configure networking and port forwarding
+# - Take 5-10 minutes on first run
+```
+
+**Step 3: Configure kubectl on Your Mac**
+```bash
+# Set kubeconfig to connect to the VM
+export KUBECONFIG=$PWD/k8s/kubeconfig-local
+
+# Verify connection
+kubectl get nodes
+
+# You should see:
+# NAME          STATUS   ROLES                  AGE   VERSION
+# educard-k3s   Ready    control-plane,master   1m    v1.33.6+k3s1
+```
+
+**Step 4: Deploy to Kubernetes**
+```bash
+# Run the automated deployment script
+./deploy-to-k3s.sh
+
+# This will:
+# 1. Create namespace (educard-prod)
+# 2. Deploy PostgreSQL StatefulSet
+# 3. Run database migrations
+# 4. Seed the database with categories
+# 5. Deploy the application (2 replicas)
+# 6. Create services and load balancer
+```
+
+**Step 5: Access the Application**
+```bash
+# Forward the service port to your local machine
+kubectl port-forward -n educard-prod svc/educard-app 3000:80
+
+# Keep this terminal open, then open browser to:
+# http://localhost:3000
+```
+
+#### Kubernetes Commands Reference
+
+```bash
+# View all pods
+kubectl get pods -n educard-prod
+
+# View pod logs
+kubectl logs -f -n educard-prod deployment/educard
+
+# View services
+kubectl get svc -n educard-prod
+
+# Access the database
+kubectl exec -it -n educard-prod educard-postgres-0 -- psql -U educard -d educard_prod
+
+# Restart application
+kubectl rollout restart deployment/educard -n educard-prod
+
+# Scale application (add more replicas)
+kubectl scale deployment/educard -n educard-prod --replicas=3
+
+# Check deployment status
+kubectl get all -n educard-prod
+
+# View application environment
+kubectl describe deployment/educard -n educard-prod
+
+# Delete everything (clean slate)
+kubectl delete namespace educard-prod
+
+# SSH into the VM
+vagrant ssh
+
+# Inside VM, use kubectl:
+sudo k3s kubectl get pods -A
+
+# Stop the VM
+vagrant halt
+
+# Restart the VM
+vagrant up
+
+# Destroy the VM completely
+vagrant destroy
+```
+
+#### Kubernetes Architecture
+
+When deployed to K3s, Educard runs with high availability:
+
+```
+┌─────────────────────────────────────────────┐
+│           Vagrant Ubuntu VM                  │
+│                                              │
+│  ┌────────────────────────────────────────┐ │
+│  │         K3s Cluster                     │ │
+│  │                                         │ │
+│  │  ┌──────────────────────────────────┐  │ │
+│  │  │   Namespace: educard-prod        │  │ │
+│  │  │                                  │  │ │
+│  │  │  ┌──────────┐  ┌──────────┐    │  │ │
+│  │  │  │ App Pod  │  │ App Pod  │    │  │ │
+│  │  │  │ Replica 1│  │ Replica 2│    │  │ │
+│  │  │  └────┬─────┘  └────┬─────┘    │  │ │
+│  │  │       └──────┬───────┘          │  │ │
+│  │  │              ▼                  │  │ │
+│  │  │     ┌─────────────────┐        │  │ │
+│  │  │     │ Service (LB)    │        │  │ │
+│  │  │     │ Port: 80        │        │  │ │
+│  │  │     └────────┬────────┘        │  │ │
+│  │  │              │                 │  │ │
+│  │  │  ┌───────────▼───────────┐    │  │ │
+│  │  │  │ PostgreSQL StatefulSet│    │  │ │
+│  │  │  │ Persistent Storage    │    │  │ │
+│  │  │  └───────────────────────┘    │  │ │
+│  │  └──────────────────────────────┘  │ │
+│  └────────────────────────────────────┘ │
+│                                          │
+│  Port Forwarding:                        │
+│  - 6443 → K3s API                        │
+│  - 8080 → HTTP (80)                      │
+│  - 8443 → HTTPS (443)                    │
+└─────────────────────────────────────────┘
+            ▲
+            │ kubectl / browser
+            │
+    ┌───────┴────────┐
+    │   Your Mac     │
+    └────────────────┘
+```
+
+#### Production Features
+
+The K3s deployment includes:
+
+- ✅ **High Availability:** 2 application replicas with load balancing
+- ✅ **Persistent Storage:** Database data survives pod restarts
+- ✅ **Health Checks:** Automatic pod restart on failures
+- ✅ **Resource Limits:** CPU and memory constraints
+- ✅ **Secrets Management:** Secure credential storage
+- ✅ **Database Backups:** Automated CronJob backups
+- ✅ **Zero-Downtime Updates:** Rolling deployments
+- ✅ **Session Persistence:** ClientIP-based session affinity
+
+#### Troubleshooting Vagrant/K3s
+
+**VM won't start:**
+```bash
+# Check VirtualBox is installed
+VBoxManage --version
+
+# Check Vagrant version
+vagrant version
+
+# Destroy and recreate
+vagrant destroy -f
+vagrant up
+```
+
+**kubectl can't connect:**
+```bash
+# Make sure kubeconfig is set
+export KUBECONFIG=$PWD/k8s/kubeconfig-local
+
+# Verify kubeconfig file exists
+ls -la k8s/kubeconfig-local
+
+# Test connection
+kubectl cluster-info
+```
+
+**Pods won't start:**
+```bash
+# Check pod status
+kubectl get pods -n educard-prod
+
+# View pod details
+kubectl describe pod <pod-name> -n educard-prod
+
+# Check logs
+kubectl logs <pod-name> -n educard-prod
+
+# Common issue: Image not available
+# Solution: Build and load image into VM
+docker build -t educard:latest .
+docker save educard:latest | gzip > educard.tar.gz
+vagrant ssh -c "sudo k3s ctr images import /vagrant/educard.tar.gz"
+```
+
+**Database connection issues:**
+```bash
+# Check if PostgreSQL is running
+kubectl get pods -n educard-prod -l app=educard-postgres
+
+# Verify service exists
+kubectl get svc -n educard-prod educard-postgres
+
+# Test connection from app pod
+kubectl exec -it -n educard-prod deployment/educard -- sh
+nc -zv educard-postgres 5432
 ```
 
 ### Alternative: Local Development (Without Docker)
